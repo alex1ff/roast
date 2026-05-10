@@ -1,0 +1,63 @@
+{
+  "project_info": {
+    "project_number": "705916310047",
+    "project_id": "roast-nutri-tracker-7c67ct",
+    "storage_bucket": "roast-nutri-tracker-7c67ct.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:705916310047:android:646b1109740be681277b2a",
+        "android_client_info": {
+          "package_name": "com.mycompany.roastai"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "705916310047-86afsu6r5n74iam8ba52imk4dth8l977.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mycompany.roastai",
+            "certificate_hash": "6d3af1e27e6b11623ab187a6cce73bddd1a2ba37"
+          }
+        },
+        {
+          "client_id": "705916310047-vd75720isifqp2mgnnl732qsp1k3vujn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mycompany.roastai",
+            "certificate_hash": "9bbb3186b2189ef16d8f272bdab59362c395cbb4"
+          }
+        },
+        {
+          "client_id": "705916310047-uo4nmmpfhcfql9s63hekf3mijm4l357r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDO0QalFDD0vx_bkwbO8Hb9rhGM-LLVa_k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "705916310047-uo4nmmpfhcfql9s63hekf3mijm4l357r.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "705916310047-3mnrffkk3o95eqdchc4cf52pg8ga8dv9.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.mycompany.roastai",
+                "app_store_id": "6754046515"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
