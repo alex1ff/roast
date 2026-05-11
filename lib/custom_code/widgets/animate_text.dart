@@ -31,6 +31,7 @@ class AnimateText extends StatefulWidget {
 class _AnimateTextState extends State<AnimateText> {
   static const String _doneKeysStorage = 'animated_done_keys_v2';
   static final Set<String> _doneInMemory = <String>{};
+  static Future<SharedPreferences>? _prefsFuture;
 
   String _animatedText = '';
   int _runId = 0;
@@ -51,6 +52,9 @@ class _AnimateTextState extends State<AnimateText> {
   }
 
   String _normalizeText(String s) => s.replaceAll(RegExp(r'\s+'), ' ').trim();
+
+  Future<SharedPreferences> _prefs() =>
+      _prefsFuture ??= SharedPreferences.getInstance();
 
   String _hashFNV1a(String input) {
     int hash = 0x811C9DC5;
@@ -125,7 +129,7 @@ class _AnimateTextState extends State<AnimateText> {
       return;
     }
 
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _prefs();
     if (!mounted || currentRun != _runId) return;
 
     final id = _effectiveMessageId();
@@ -140,10 +144,13 @@ class _AnimateTextState extends State<AnimateText> {
     setState(() => _animatedText = '');
 
     final delayMs = widget.charDelayMs.clamp(10, 250);
+    final updateStride = text.length > 120 ? 3 : 1;
     for (int i = 1; i <= text.length; i++) {
       await Future.delayed(Duration(milliseconds: delayMs));
       if (!mounted || currentRun != _runId) return;
-      setState(() => _animatedText = text.substring(0, i));
+      if (i == text.length || i % updateStride == 0) {
+        setState(() => _animatedText = text.substring(0, i));
+      }
     }
 
     await _markAnimated(prefs, id);
