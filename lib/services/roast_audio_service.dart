@@ -3,6 +3,7 @@ import 'dart:async';
 import '/backend/api_requests/api_calls.dart';
 import '/backend/backend.dart';
 import '/services/error_reporter.dart';
+import '/services/performance_monitor.dart';
 
 typedef TextToSpeechRequest = Future<ApiCallResponse> Function({
   String? text,
@@ -22,22 +23,34 @@ class RoastAudioService {
     RoastAudioUpdater? updateRoastAudio,
   }) async {
     try {
-      final request = textToSpeechRequest ?? TextToSpeechCall.call;
-      final audioResult = await request(
-        text: roastText,
-        voiceId: voiceId,
-      );
-      final audioUrl = TextToSpeechCall.audio(audioResult.jsonBody ?? '');
-      if (audioUrl == null || audioUrl.isEmpty) {
-        return null;
-      }
+      return await AppPerformanceMonitor.trace<String?>(
+        name: 'roast_audio_attach',
+        attributes: {
+          'has_existing_reference': roastReference == null ? 'false' : 'true',
+        },
+        resultAttributes: (audioUrl) => {
+          'status':
+              audioUrl == null || audioUrl.isEmpty ? 'no_audio' : 'audio_ready',
+        },
+        action: () async {
+          final request = textToSpeechRequest ?? TextToSpeechCall.call;
+          final audioResult = await request(
+            text: roastText,
+            voiceId: voiceId,
+          );
+          final audioUrl = TextToSpeechCall.audio(audioResult.jsonBody ?? '');
+          if (audioUrl == null || audioUrl.isEmpty) {
+            return null;
+          }
 
-      final updater = updateRoastAudio ??
-          (String url) => roastReference!.update(
-                createAddedDishHistoryRecordData(roastAudio: url),
-              );
-      await updater(audioUrl);
-      return audioUrl;
+          final updater = updateRoastAudio ??
+              (String url) => roastReference!.update(
+                    createAddedDishHistoryRecordData(roastAudio: url),
+                  );
+          await updater(audioUrl);
+          return audioUrl;
+        },
+      );
     } catch (error) {
       unawaited(AppErrorReporter.report(
         area: 'roast_audio',
