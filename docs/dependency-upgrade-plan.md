@@ -15,6 +15,8 @@ This plan is based on `flutter pub outdated --json` from the current
 | Discontinued packages | 0 |
 | Current packages affected by advisory | 0 |
 | `dependency_overrides` in `pubspec.yaml` | 0 |
+| Functions high/critical npm advisories | 0 |
+| Functions low npm advisories | 9 accepted |
 
 Previously discontinued packages are no longer present:
 
@@ -26,8 +28,30 @@ Previously discontinued packages are no longer present:
 - [x] Discontinued packages are absent or have an approved exception.
 - [x] `dependency_overrides` are minimal and documented.
 - [x] `flutter pub outdated` shows no current advisories or discontinued direct/dev packages without a plan.
+- [x] Functions `npm audit --omit=dev --audit-level=high` passes for both codebases.
 - [ ] Dependency upgrade PRs stay small and verifiable.
 - [ ] After upgrade waves, the app builds and passes smoke flows: auth, Home, add dish, chat, subscription.
+
+## Accepted npm Low Findings
+
+Both Functions codebases currently report 9 low-severity transitive npm audit
+findings through the Firebase Admin / Google Cloud dependency chain:
+`@google-cloud/firestore`, `@google-cloud/storage`, `google-gax`,
+`retry-request`, `teeny-request`, `http-proxy-agent`, and
+`@tootallnate/once`.
+
+`npm audit fix --force` proposes semver-major downgrades such as
+`firebase-admin` 10.3.0 / `firebase-functions` 4.9.0 or
+`@google-cloud/storage` 5.18.3. Do not apply those forced fixes because the
+project is on Firebase Functions v7, Node 22, and deployed source parity now
+depends on the newer runtime stack.
+
+Current policy:
+
+- Block high/critical production advisories in `scripts/local_ci.sh`.
+- Keep low findings accepted until upstream packages provide a non-downgrade
+  fix.
+- Recheck this section during each dependency wave.
 
 ## Upgrade Waves
 

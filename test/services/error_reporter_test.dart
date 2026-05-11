@@ -31,5 +31,42 @@ void main() {
       expect(captured!.attributes.values.join(' '), isNot(contains('token')));
       expect(captured!.attributes['very_long_value']!.length, 100);
     });
+
+    test('keeps reports bounded and swallows sink failures', () async {
+      AppErrorReporter.setSinkForTesting((_) {
+        throw StateError('sink failed');
+      });
+
+      await AppErrorReporter.report(
+        area: 'platform dispatcher',
+        message:
+            'abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz',
+        error: ArgumentError('raw user data'),
+        stackTrace: StackTrace.current,
+        fatal: true,
+      );
+
+      AppErrorReport? captured;
+      AppErrorReporter.setSinkForTesting((report) {
+        captured = report;
+      });
+
+      await AppErrorReporter.report(
+        area: 'platform dispatcher',
+        message:
+            'abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz',
+        error: ArgumentError('raw user data'),
+        stackTrace: StackTrace.current,
+        fatal: true,
+      );
+
+      expect(captured, isNotNull);
+      expect(captured!.area, 'platform_dispatcher');
+      expect(captured!.message.length, 120);
+      expect(captured!.attributes['error_type'], 'ArgumentError');
+      expect(captured!.attributes['has_stack'], 'true');
+      expect(captured!.fatal, isTrue);
+      expect(captured!.attributes.values.join(' '), isNot(contains('raw')));
+    });
   });
 }

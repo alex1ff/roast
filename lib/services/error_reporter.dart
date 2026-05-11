@@ -33,6 +33,13 @@ class AppErrorReporter {
 
   static void resetForTesting() {
     _sink = null;
+    if (_installed) {
+      FlutterError.onError = _previousFlutterErrorHandler;
+      PlatformDispatcher.instance.onError = _previousPlatformErrorHandler;
+    }
+    _installed = false;
+    _previousFlutterErrorHandler = null;
+    _previousPlatformErrorHandler = null;
   }
 
   static void installGlobalHandlers({AppErrorReportSink? sink}) {
