@@ -289,7 +289,7 @@ class _HomeScrollView extends StatelessWidget {
               ),
             ),
             SliverPadding(
-              padding: const EdgeInsets.fromLTRB(6.0, 24.0, 6.0, 0.0),
+              padding: const EdgeInsets.fromLTRB(6.0, 4.0, 6.0, 0.0),
               sliver: SliverToBoxAdapter(
                 child: _DailyGoalSection(
                   summary: summary,
@@ -302,7 +302,7 @@ class _HomeScrollView extends StatelessWidget {
                 ),
               ),
             ),
-            const SliverToBoxAdapter(child: SizedBox(height: 6.0)),
+            const SliverToBoxAdapter(child: SizedBox(height: 40.0)),
             if (records.isEmpty)
               SliverToBoxAdapter(
                 child: Padding(
@@ -384,7 +384,6 @@ class _HomeHeader extends StatelessWidget {
           onSelectDate: onSelectDate,
           onToggleExpanded: onToggleCalendar,
         ),
-        const SizedBox(height: 16.0),
       ],
     );
   }
