@@ -160,7 +160,9 @@ class _ChatCopyWidgetState extends State<ChatCopyWidget> {
           .where(
             'addedDate',
             isGreaterThan: functions.dateFilterMinusWeek(getCurrentTimestamp),
-          ),
+          )
+          .orderBy('addedDate', descending: true),
+      limit: 24,
     );
     _model.hist = history;
     return history;

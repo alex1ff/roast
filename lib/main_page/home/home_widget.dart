@@ -13,6 +13,7 @@ import '/services/nutrition_summary.dart';
 import '/services/user_account_mutations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:provider/provider.dart';
 import 'home_model.dart';
@@ -937,20 +938,57 @@ class _HomeWidgetState extends State<HomeWidget> {
                                                                     borderRadius:
                                                                         BorderRadius.circular(
                                                                             12.0),
-                                                                    child: Image
-                                                                        .network(
-                                                                      valueOrDefault<
-                                                                          String>(
+                                                                    child:
+                                                                        CachedNetworkImage(
+                                                                      imageUrl:
+                                                                          valueOrDefault<
+                                                                              String>(
                                                                         dailyDishListItem
                                                                             .image,
                                                                         'https://firebasestorage.googleapis.com/v0/b/eat-out-a-i-h2yogm.firebasestorage.app/o/AppImages%2FZaglushkaDish.png?alt=media&token=removed',
                                                                       ),
+                                                                      memCacheWidth:
+                                                                          160,
+                                                                      memCacheHeight:
+                                                                          220,
+                                                                      maxWidthDiskCache:
+                                                                          320,
+                                                                      maxHeightDiskCache:
+                                                                          440,
+                                                                      fadeInDuration:
+                                                                          Duration(
+                                                                              milliseconds: 0),
+                                                                      fadeOutDuration:
+                                                                          Duration(
+                                                                              milliseconds: 0),
                                                                       width:
                                                                           80.0,
                                                                       height: double
                                                                           .infinity,
                                                                       fit: BoxFit
                                                                           .cover,
+                                                                      errorWidget: (context,
+                                                                              url,
+                                                                              error) =>
+                                                                          Container(
+                                                                        width:
+                                                                            80.0,
+                                                                        height:
+                                                                            double.infinity,
+                                                                        color: Color(
+                                                                            0xFFE5E7EB),
+                                                                        alignment:
+                                                                            Alignment.center,
+                                                                        child:
+                                                                            Icon(
+                                                                          Icons
+                                                                              .image_not_supported_outlined,
+                                                                          color:
+                                                                              Color(0xFF8E8E93),
+                                                                          size:
+                                                                              20.0,
+                                                                        ),
+                                                                      ),
                                                                     ),
                                                                   ),
                                                                   Flexible(

@@ -452,8 +452,9 @@ class _DishAddAIWidgetState extends State<DishAddAIWidget> {
                                 } else {
                                   return Builder(
                                     builder: (context) {
-                                      if (_model.uploadedFileUrl_uploadedPhoto2 !=
-                                              '') {
+                                      if (_model
+                                              .uploadedFileUrl_uploadedPhoto2 !=
+                                          '') {
                                         return Container(
                                           width: 170.0,
                                           height: 170.0,
@@ -466,12 +467,34 @@ class _DishAddAIWidgetState extends State<DishAddAIWidget> {
                                                   borderRadius:
                                                       BorderRadius.circular(
                                                           8.0),
-                                                  child: Image.network(
-                                                    _model
-                                                        .uploadedFileUrl_uploadedPhoto2,
-                                                    width: 163.0,
-                                                    height: 163.0,
-                                                    fit: BoxFit.cover,
+                                                  child: Builder(
+                                                    builder: (context) {
+                                                      final uploadedBytes = _model
+                                                          .uploadedLocalFile_uploadedPhoto2
+                                                          .bytes;
+                                                      if (uploadedBytes !=
+                                                              null &&
+                                                          uploadedBytes
+                                                              .isNotEmpty) {
+                                                        return Image.memory(
+                                                          uploadedBytes,
+                                                          width: 163.0,
+                                                          height: 163.0,
+                                                          fit: BoxFit.cover,
+                                                          cacheWidth: 326,
+                                                          cacheHeight: 326,
+                                                        );
+                                                      }
+                                                      return Image.network(
+                                                        _model
+                                                            .uploadedFileUrl_uploadedPhoto2,
+                                                        width: 163.0,
+                                                        height: 163.0,
+                                                        fit: BoxFit.cover,
+                                                        cacheWidth: 326,
+                                                        cacheHeight: 326,
+                                                      );
+                                                    },
                                                   ),
                                                 ),
                                               ),
@@ -695,9 +718,9 @@ class _DishAddAIWidgetState extends State<DishAddAIWidget> {
                           padding: EdgeInsets.all(6.0),
                           child: FFButtonWidget(
                             onPressed: ((_model.dishNameTextController.text ==
-                                            '') &&
+                                        '') &&
                                     (_model.uploadedFileUrl_uploadedPhoto2 ==
-                                            ''))
+                                        ''))
                                 ? null
                                 : () async {
                                     await showDialog(

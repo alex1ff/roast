@@ -216,6 +216,14 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
                                                               imageUrl:
                                                                   stackAddedDishHistoryRecord
                                                                       .image,
+                                                              memCacheWidth:
+                                                                  160,
+                                                              memCacheHeight:
+                                                                  220,
+                                                              maxWidthDiskCache:
+                                                                  320,
+                                                              maxHeightDiskCache:
+                                                                  440,
                                                               width: 80.0,
                                                               height: 110.0,
                                                               fit: BoxFit.cover,
@@ -994,6 +1002,14 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
                                                                             Duration(milliseconds: 0),
                                                                         imageUrl:
                                                                             stackAddedDishHistoryRecord.roastImage,
+                                                                        memCacheWidth:
+                                                                            180,
+                                                                        memCacheHeight:
+                                                                            180,
+                                                                        maxWidthDiskCache:
+                                                                            360,
+                                                                        maxHeightDiskCache:
+                                                                            360,
                                                                         width: MediaQuery.sizeOf(context).width *
                                                                             0.15,
                                                                         height:
