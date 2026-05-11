@@ -22,6 +22,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'profile_model.dart';
+import 'profile_rows.dart';
 export 'profile_model.dart';
 
 class ProfileWidget extends StatefulWidget {
@@ -659,373 +660,78 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                     ),
                                   ),
                                 ),
-                                Container(
-                                  width: double.infinity,
-                                  decoration: BoxDecoration(
-                                    color: FlutterFlowTheme.of(context)
-                                        .primaryBackground,
-                                    borderRadius: BorderRadius.circular(20.0),
-                                  ),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.max,
-                                    children: [
-                                      Builder(
-                                        builder: (context) => InkWell(
-                                          splashColor: Colors.transparent,
-                                          focusColor: Colors.transparent,
-                                          hoverColor: Colors.transparent,
-                                          highlightColor: Colors.transparent,
-                                          onTap: () async {
-                                            if (revenue_cat.activeEntitlementIds
-                                                .contains(
-                                                    FFAppConstants.Premium)) {
-                                              await showDialog(
-                                                context: context,
-                                                builder: (dialogContext) {
-                                                  return Dialog(
-                                                    elevation: 0,
-                                                    insetPadding:
-                                                        EdgeInsets.zero,
-                                                    backgroundColor:
-                                                        Colors.transparent,
-                                                    alignment:
-                                                        AlignmentDirectional(
-                                                                0.0, 0.0)
-                                                            .resolve(
-                                                                Directionality.of(
-                                                                    context)),
-                                                    child: GestureDetector(
-                                                      onTap: () {
-                                                        FocusScope.of(
-                                                                dialogContext)
-                                                            .unfocus();
-                                                        FocusManager.instance
-                                                            .primaryFocus
-                                                            ?.unfocus();
-                                                      },
-                                                      child:
-                                                          UserCurrentSubscriptionWidget(),
-                                                    ),
-                                                  );
-                                                },
-                                              );
-
-                                              return;
-                                            } else {
-                                              context.pushNamed(
-                                                  SubscriptionPageWidget
-                                                      .routeName);
-
-                                              return;
-                                            }
-                                          },
-                                          child: Container(
-                                            height: 55.0,
-                                            decoration: BoxDecoration(),
-                                            child: Padding(
-                                              padding: EdgeInsetsDirectional
-                                                  .fromSTEB(
-                                                      12.0, 0.0, 12.0, 0.0),
-                                              child: Row(
-                                                mainAxisSize: MainAxisSize.max,
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
-                                                children: [
-                                                  Flexible(
-                                                    child: Padding(
-                                                      padding:
-                                                          EdgeInsetsDirectional
-                                                              .fromSTEB(
-                                                                  0.0,
-                                                                  0.0,
-                                                                  16.0,
-                                                                  0.0),
-                                                      child: Text(
-                                                        'Subscription',
-                                                        maxLines: 1,
-                                                        style:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .bodyMedium
-                                                                .override(
-                                                                  fontFamily:
-                                                                      'SF Pro',
-                                                                  color: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .primaryText,
-                                                                  fontSize:
-                                                                      16.0,
-                                                                  letterSpacing:
-                                                                      0.0,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .normal,
-                                                                ),
-                                                        overflow: TextOverflow
-                                                            .ellipsis,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  Icon(
-                                                    FFIcons.kfdsfedf,
-                                                    color: Color(0x3C3C4399),
-                                                    size: 18.0,
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      Divider(
-                                        height: 1.0,
-                                        thickness: 1.0,
-                                        indent: 12.0,
-                                        endIndent: 12.0,
-                                        color: FlutterFlowTheme.of(context)
-                                            .alternate,
-                                      ),
-                                      InkWell(
+                                ProfileSection(
+                                  children: [
+                                    Builder(
+                                      builder: (context) => InkWell(
                                         splashColor: Colors.transparent,
                                         focusColor: Colors.transparent,
                                         hoverColor: Colors.transparent,
                                         highlightColor: Colors.transparent,
                                         onTap: () async {
-                                          await showModalBottomSheet(
-                                            isScrollControlled: true,
-                                            backgroundColor: Colors.transparent,
-                                            context: context,
-                                            builder: (context) {
-                                              return GestureDetector(
-                                                onTap: () {
-                                                  FocusScope.of(context)
-                                                      .unfocus();
-                                                  FocusManager
-                                                      .instance.primaryFocus
-                                                      ?.unfocus();
-                                                },
-                                                child: Padding(
-                                                  padding:
-                                                      MediaQuery.viewInsetsOf(
-                                                          context),
-                                                  child: Container(
-                                                    height: MediaQuery.sizeOf(
-                                                                context)
-                                                            .height *
-                                                        0.25,
+                                          if (revenue_cat.activeEntitlementIds
+                                              .contains(
+                                                  FFAppConstants.Premium)) {
+                                            await showDialog(
+                                              context: context,
+                                              builder: (dialogContext) {
+                                                return Dialog(
+                                                  elevation: 0,
+                                                  insetPadding: EdgeInsets.zero,
+                                                  backgroundColor:
+                                                      Colors.transparent,
+                                                  alignment:
+                                                      AlignmentDirectional(
+                                                              0.0, 0.0)
+                                                          .resolve(
+                                                              Directionality.of(
+                                                                  context)),
+                                                  child: GestureDetector(
+                                                    onTap: () {
+                                                      FocusScope.of(
+                                                              dialogContext)
+                                                          .unfocus();
+                                                      FocusManager
+                                                          .instance.primaryFocus
+                                                          ?.unfocus();
+                                                    },
                                                     child:
-                                                        UniversalPickerWidget(
-                                                      options: FFAppConstants
-                                                          .RoastLevelVariants,
-                                                      initialValue:
-                                                          valueOrDefault(
-                                                              currentUserDocument
-                                                                  ?.roastLevel,
-                                                              ''),
-                                                      onSelected:
-                                                          (value) async {
-                                                        unawaited(
-                                                          () async {
-                                                            await currentUserReference!
-                                                                .update(
-                                                                    createUsersRecordData(
-                                                              roastLevel: value,
-                                                            ));
-                                                          }(),
-                                                        );
-                                                        Navigator.pop(context);
-                                                      },
-                                                    ),
+                                                        UserCurrentSubscriptionWidget(),
                                                   ),
-                                                ),
-                                              );
-                                            },
-                                          ).then(
-                                              (value) => safeSetState(() {}));
+                                                );
+                                              },
+                                            );
+
+                                            return;
+                                          } else {
+                                            context.pushNamed(
+                                                SubscriptionPageWidget
+                                                    .routeName);
+
+                                            return;
+                                          }
                                         },
                                         child: Container(
+                                          height: 55.0,
                                           decoration: BoxDecoration(),
                                           child: Padding(
                                             padding:
                                                 EdgeInsetsDirectional.fromSTEB(
-                                                    12.0, 16.0, 12.0, 16.0),
+                                                    12.0, 0.0, 12.0, 0.0),
                                             child: Row(
                                               mainAxisSize: MainAxisSize.max,
                                               mainAxisAlignment:
-                                                  MainAxisAlignment.start,
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
                                               children: [
-                                                Expanded(
-                                                  child: Text(
-                                                    'Roast Severity Level',
-                                                    style: FlutterFlowTheme.of(
-                                                            context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          fontFamily: 'SF Pro',
-                                                          color: FlutterFlowTheme
-                                                                  .of(context)
-                                                              .textfieldsText,
-                                                          fontSize: 16.0,
-                                                          letterSpacing: 0.0,
-                                                          fontWeight:
-                                                              FontWeight.normal,
-                                                        ),
-                                                  ),
-                                                ),
-                                                Padding(
-                                                  padding: EdgeInsetsDirectional
-                                                      .fromSTEB(
-                                                          12.0, 0.0, 0.0, 0.0),
-                                                  child: AuthUserStreamWidget(
-                                                    builder: (context) => Text(
-                                                      valueOrDefault<String>(
-                                                        valueOrDefault(
-                                                            currentUserDocument
-                                                                ?.roastLevel,
-                                                            ''),
-                                                        'Not set',
-                                                      ),
-                                                      textAlign: TextAlign.end,
-                                                      style: FlutterFlowTheme
-                                                              .of(context)
-                                                          .bodyMedium
-                                                          .override(
-                                                            fontFamily:
-                                                                'SF Pro',
-                                                            fontSize: 16.0,
-                                                            letterSpacing: 0.0,
-                                                          ),
-                                                    ),
-                                                  ),
-                                                ),
-                                                Padding(
-                                                  padding: EdgeInsetsDirectional
-                                                      .fromSTEB(
-                                                          8.0, 0.0, 0.0, 0.0),
-                                                  child: Icon(
-                                                    Icons.unfold_more,
-                                                    color: FlutterFlowTheme.of(
-                                                            context)
-                                                        .listPicker,
-                                                    size: 24.0,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      Divider(
-                                        height: 1.0,
-                                        thickness: 1.0,
-                                        indent: 12.0,
-                                        endIndent: 12.0,
-                                        color: FlutterFlowTheme.of(context)
-                                            .alternate,
-                                      ),
-                                      InkWell(
-                                        splashColor: Colors.transparent,
-                                        focusColor: Colors.transparent,
-                                        hoverColor: Colors.transparent,
-                                        highlightColor: Colors.transparent,
-                                        onTap: () async {
-                                          await showModalBottomSheet(
-                                            isScrollControlled: true,
-                                            backgroundColor: Colors.transparent,
-                                            context: context,
-                                            builder: (context) {
-                                              return GestureDetector(
-                                                onTap: () {
-                                                  FocusScope.of(context)
-                                                      .unfocus();
-                                                  FocusManager
-                                                      .instance.primaryFocus
-                                                      ?.unfocus();
-                                                },
-                                                child: Padding(
-                                                  padding:
-                                                      MediaQuery.viewInsetsOf(
-                                                          context),
-                                                  child: Container(
-                                                    height: MediaQuery.sizeOf(
-                                                                context)
-                                                            .height *
-                                                        0.25,
-                                                    child:
-                                                        UniversalPickerWidget(
-                                                      options: FFAppConstants
-                                                          .UserGoal,
-                                                      initialValue:
-                                                          valueOrDefault(
-                                                              currentUserDocument
-                                                                  ?.userGoal,
-                                                              ''),
-                                                      onSelected:
-                                                          (value) async {
-                                                        unawaited(
-                                                          () async {
-                                                            await currentUserReference!
-                                                                .update(
-                                                                    createUsersRecordData(
-                                                              userGoal: value,
-                                                            ));
-                                                          }(),
-                                                        );
-                                                        Navigator.pop(context);
-                                                      },
-                                                    ),
-                                                  ),
-                                                ),
-                                              );
-                                            },
-                                          ).then(
-                                              (value) => safeSetState(() {}));
-                                        },
-                                        child: Container(
-                                          decoration: BoxDecoration(),
-                                          child: Padding(
-                                            padding:
-                                                EdgeInsetsDirectional.fromSTEB(
-                                                    12.0, 16.0, 12.0, 16.0),
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.max,
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.start,
-                                              children: [
-                                                Expanded(
-                                                  child: Text(
-                                                    'Your goal (if any)',
-                                                    style: FlutterFlowTheme.of(
-                                                            context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          fontFamily: 'SF Pro',
-                                                          color: FlutterFlowTheme
-                                                                  .of(context)
-                                                              .textfieldsText,
-                                                          fontSize: 16.0,
-                                                          letterSpacing: 0.0,
-                                                          fontWeight:
-                                                              FontWeight.normal,
-                                                        ),
-                                                  ),
-                                                ),
-                                                Padding(
-                                                  padding: EdgeInsetsDirectional
-                                                      .fromSTEB(
-                                                          8.0, 0.0, 0.0, 0.0),
-                                                  child: AuthUserStreamWidget(
-                                                    builder: (context) =>
-                                                        AutoSizeText(
-                                                      valueOrDefault<String>(
-                                                        valueOrDefault(
-                                                            currentUserDocument
-                                                                ?.userGoal,
-                                                            ''),
-                                                        'Not set',
-                                                      ),
-                                                      textAlign: TextAlign.end,
+                                                Flexible(
+                                                  child: Padding(
+                                                    padding:
+                                                        EdgeInsetsDirectional
+                                                            .fromSTEB(0.0, 0.0,
+                                                                16.0, 0.0),
+                                                    child: Text(
+                                                      'Subscription',
                                                       maxLines: 1,
                                                       style:
                                                           FlutterFlowTheme.of(
@@ -1040,735 +746,864 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                                                 fontSize: 16.0,
                                                                 letterSpacing:
                                                                     0.0,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .normal,
                                                               ),
                                                       overflow:
                                                           TextOverflow.ellipsis,
                                                     ),
                                                   ),
                                                 ),
-                                                Padding(
-                                                  padding: EdgeInsetsDirectional
-                                                      .fromSTEB(
-                                                          8.0, 0.0, 0.0, 0.0),
-                                                  child: Icon(
-                                                    Icons.unfold_more,
-                                                    color: FlutterFlowTheme.of(
-                                                            context)
-                                                        .listPicker,
-                                                    size: 24.0,
-                                                  ),
+                                                Icon(
+                                                  FFIcons.kfdsfedf,
+                                                  color: Color(0x3C3C4399),
+                                                  size: 18.0,
                                                 ),
                                               ],
                                             ),
                                           ),
                                         ),
                                       ),
-                                    ],
-                                  ),
+                                    ),
+                                    ProfileDivider(),
+                                    ProfilePickerRow(
+                                      title: 'Roast Severity Level',
+                                      valueLeftPadding: 12.0,
+                                      value: AuthUserStreamWidget(
+                                        builder: (context) => Text(
+                                          valueOrDefault<String>(
+                                            valueOrDefault(
+                                                currentUserDocument?.roastLevel,
+                                                ''),
+                                            'Not set',
+                                          ),
+                                          textAlign: TextAlign.end,
+                                          style: FlutterFlowTheme.of(context)
+                                              .bodyMedium
+                                              .override(
+                                                fontFamily: 'SF Pro',
+                                                fontSize: 16.0,
+                                                letterSpacing: 0.0,
+                                              ),
+                                        ),
+                                      ),
+                                      onTap: () async {
+                                        await showModalBottomSheet(
+                                          isScrollControlled: true,
+                                          backgroundColor: Colors.transparent,
+                                          context: context,
+                                          builder: (context) {
+                                            return GestureDetector(
+                                              onTap: () {
+                                                FocusScope.of(context)
+                                                    .unfocus();
+                                                FocusManager
+                                                    .instance.primaryFocus
+                                                    ?.unfocus();
+                                              },
+                                              child: Padding(
+                                                padding:
+                                                    MediaQuery.viewInsetsOf(
+                                                        context),
+                                                child: Container(
+                                                  height:
+                                                      MediaQuery.sizeOf(context)
+                                                              .height *
+                                                          0.25,
+                                                  child: UniversalPickerWidget(
+                                                    options: FFAppConstants
+                                                        .RoastLevelVariants,
+                                                    initialValue:
+                                                        valueOrDefault(
+                                                            currentUserDocument
+                                                                ?.roastLevel,
+                                                            ''),
+                                                    onSelected: (value) async {
+                                                      unawaited(
+                                                        () async {
+                                                          await currentUserReference!
+                                                              .update(
+                                                                  createUsersRecordData(
+                                                            roastLevel: value,
+                                                          ));
+                                                        }(),
+                                                      );
+                                                      Navigator.pop(context);
+                                                    },
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        ).then((value) => safeSetState(() {}));
+                                      },
+                                    ),
+                                    ProfileDivider(),
+                                    ProfilePickerRow(
+                                      title: 'Your goal (if any)',
+                                      value: AuthUserStreamWidget(
+                                        builder: (context) => AutoSizeText(
+                                          valueOrDefault<String>(
+                                            valueOrDefault(
+                                                currentUserDocument?.userGoal,
+                                                ''),
+                                            'Not set',
+                                          ),
+                                          textAlign: TextAlign.end,
+                                          maxLines: 1,
+                                          style: FlutterFlowTheme.of(context)
+                                              .bodyMedium
+                                              .override(
+                                                fontFamily: 'SF Pro',
+                                                color:
+                                                    FlutterFlowTheme.of(context)
+                                                        .primaryText,
+                                                fontSize: 16.0,
+                                                letterSpacing: 0.0,
+                                              ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      onTap: () async {
+                                        await showModalBottomSheet(
+                                          isScrollControlled: true,
+                                          backgroundColor: Colors.transparent,
+                                          context: context,
+                                          builder: (context) {
+                                            return GestureDetector(
+                                              onTap: () {
+                                                FocusScope.of(context)
+                                                    .unfocus();
+                                                FocusManager
+                                                    .instance.primaryFocus
+                                                    ?.unfocus();
+                                              },
+                                              child: Padding(
+                                                padding:
+                                                    MediaQuery.viewInsetsOf(
+                                                        context),
+                                                child: Container(
+                                                  height:
+                                                      MediaQuery.sizeOf(context)
+                                                              .height *
+                                                          0.25,
+                                                  child: UniversalPickerWidget(
+                                                    options:
+                                                        FFAppConstants.UserGoal,
+                                                    initialValue:
+                                                        valueOrDefault(
+                                                            currentUserDocument
+                                                                ?.userGoal,
+                                                            ''),
+                                                    onSelected: (value) async {
+                                                      unawaited(
+                                                        () async {
+                                                          await currentUserReference!
+                                                              .update(
+                                                                  createUsersRecordData(
+                                                            userGoal: value,
+                                                          ));
+                                                        }(),
+                                                      );
+                                                      Navigator.pop(context);
+                                                    },
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        ).then((value) => safeSetState(() {}));
+                                      },
+                                    ),
+                                  ],
                                 ),
                                 Row(
                                   mainAxisSize: MainAxisSize.max,
                                   children: [
                                     Expanded(
-                                      child: Container(
-                                        width: double.infinity,
-                                        decoration: BoxDecoration(
-                                          color: FlutterFlowTheme.of(context)
-                                              .primaryBackground,
-                                          borderRadius:
-                                              BorderRadius.circular(20.0),
-                                        ),
-                                        child: Padding(
-                                          padding:
-                                              EdgeInsetsDirectional.fromSTEB(
-                                                  0.0, 6.0, 0.0, 6.0),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Text(
-                                                'g/kg',
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          fontFamily: 'SF Pro',
-                                                          fontSize: 16.0,
-                                                          letterSpacing: 0.0,
-                                                          fontWeight:
-                                                              FontWeight.normal,
-                                                        ),
-                                              ),
-                                              Padding(
-                                                padding: EdgeInsetsDirectional
-                                                    .fromSTEB(
-                                                        4.0, 0.0, 0.0, 0.0),
-                                                child: AuthUserStreamWidget(
-                                                  builder: (context) =>
-                                                      Switch.adaptive(
-                                                    value: _model.switchValue1!,
-                                                    onChanged:
-                                                        (newValue) async {
-                                                      safeSetState(() =>
-                                                          _model.switchValue1 =
-                                                              newValue);
-                                                      if (newValue) {
-                                                        HapticFeedback
-                                                            .heavyImpact();
+                                      child: ProfileUnitSwitchTile(
+                                        leftLabel: 'g/kg',
+                                        rightLabel: 'oz/lbs',
+                                        mainAxisSize: MainAxisSize.min,
+                                        switchWidget: AuthUserStreamWidget(
+                                          builder: (context) => Switch.adaptive(
+                                            value: _model.switchValue1!,
+                                            onChanged: (newValue) async {
+                                              safeSetState(() => _model
+                                                  .switchValue1 = newValue);
+                                              if (newValue) {
+                                                HapticFeedback.heavyImpact();
 
-                                                        await currentUserReference!
-                                                            .update(
-                                                                createUsersRecordData(
-                                                          measurementOz: true,
-                                                        ));
-                                                      } else {
-                                                        HapticFeedback
-                                                            .heavyImpact();
+                                                await currentUserReference!
+                                                    .update(
+                                                        createUsersRecordData(
+                                                  measurementOz: true,
+                                                ));
+                                              } else {
+                                                HapticFeedback.heavyImpact();
 
-                                                        await currentUserReference!
-                                                            .update(
-                                                                createUsersRecordData(
-                                                          measurementOz: false,
-                                                        ));
-                                                      }
-                                                    },
-                                                    activeThumbColor:
-                                                        FlutterFlowTheme.of(
-                                                                context)
-                                                            .primary,
-                                                    activeTrackColor:
-                                                        FlutterFlowTheme.of(
-                                                                context)
-                                                            .primary,
-                                                    inactiveTrackColor:
-                                                        FlutterFlowTheme.of(
-                                                                context)
-                                                            .alternate,
-                                                    inactiveThumbColor:
-                                                        FlutterFlowTheme.of(
-                                                                context)
-                                                            .secondaryBackground,
-                                                  ),
-                                                ),
-                                              ),
-                                              Padding(
-                                                padding: EdgeInsetsDirectional
-                                                    .fromSTEB(
-                                                        4.0, 0.0, 0.0, 0.0),
-                                                child: Text(
-                                                  'oz/lbs',
-                                                  style: FlutterFlowTheme.of(
-                                                          context)
-                                                      .bodyMedium
-                                                      .override(
-                                                        fontFamily: 'SF Pro',
-                                                        fontSize: 16.0,
-                                                        letterSpacing: 0.0,
-                                                      ),
-                                                ),
-                                              ),
-                                            ],
+                                                await currentUserReference!
+                                                    .update(
+                                                        createUsersRecordData(
+                                                  measurementOz: false,
+                                                ));
+                                              }
+                                            },
+                                            activeThumbColor:
+                                                FlutterFlowTheme.of(context)
+                                                    .primary,
+                                            activeTrackColor:
+                                                FlutterFlowTheme.of(context)
+                                                    .primary,
+                                            inactiveTrackColor:
+                                                FlutterFlowTheme.of(context)
+                                                    .alternate,
+                                            inactiveThumbColor:
+                                                FlutterFlowTheme.of(context)
+                                                    .secondaryBackground,
                                           ),
                                         ),
                                       ),
                                     ),
                                     Expanded(
-                                      child: Container(
-                                        width: double.infinity,
-                                        decoration: BoxDecoration(
-                                          color: FlutterFlowTheme.of(context)
-                                              .primaryBackground,
-                                          borderRadius:
-                                              BorderRadius.circular(20.0),
-                                        ),
-                                        child: Padding(
-                                          padding:
-                                              EdgeInsetsDirectional.fromSTEB(
-                                                  0.0, 6.0, 0.0, 6.0),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.max,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Text(
-                                                'cm',
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          fontFamily: 'SF Pro',
-                                                          fontSize: 16.0,
-                                                          letterSpacing: 0.0,
-                                                          fontWeight:
-                                                              FontWeight.normal,
-                                                        ),
-                                              ),
-                                              Padding(
-                                                padding: EdgeInsetsDirectional
-                                                    .fromSTEB(
-                                                        4.0, 0.0, 0.0, 0.0),
-                                                child: AuthUserStreamWidget(
-                                                  builder: (context) =>
-                                                      Switch.adaptive(
-                                                    value: _model.switchValue2!,
-                                                    onChanged:
-                                                        (newValue) async {
-                                                      safeSetState(() =>
-                                                          _model.switchValue2 =
-                                                              newValue);
-                                                      if (newValue) {
-                                                        HapticFeedback
-                                                            .heavyImpact();
+                                      child: ProfileUnitSwitchTile(
+                                        leftLabel: 'cm',
+                                        rightLabel: 'ft',
+                                        switchWidget: AuthUserStreamWidget(
+                                          builder: (context) => Switch.adaptive(
+                                            value: _model.switchValue2!,
+                                            onChanged: (newValue) async {
+                                              safeSetState(() => _model
+                                                  .switchValue2 = newValue);
+                                              if (newValue) {
+                                                HapticFeedback.heavyImpact();
 
-                                                        await currentUserReference!
-                                                            .update(
-                                                                createUsersRecordData(
-                                                          highMeasurementFt:
-                                                              true,
-                                                        ));
-                                                      } else {
-                                                        HapticFeedback
-                                                            .heavyImpact();
+                                                await currentUserReference!
+                                                    .update(
+                                                        createUsersRecordData(
+                                                  highMeasurementFt: true,
+                                                ));
+                                              } else {
+                                                HapticFeedback.heavyImpact();
 
-                                                        await currentUserReference!
-                                                            .update(
-                                                                createUsersRecordData(
-                                                          highMeasurementFt:
-                                                              false,
-                                                        ));
-                                                      }
-                                                    },
-                                                    activeThumbColor:
-                                                        FlutterFlowTheme.of(
-                                                                context)
-                                                            .primary,
-                                                    activeTrackColor:
-                                                        FlutterFlowTheme.of(
-                                                                context)
-                                                            .primary,
-                                                    inactiveTrackColor:
-                                                        FlutterFlowTheme.of(
-                                                                context)
-                                                            .alternate,
-                                                    inactiveThumbColor:
-                                                        FlutterFlowTheme.of(
-                                                                context)
-                                                            .secondaryBackground,
-                                                  ),
-                                                ),
-                                              ),
-                                              Padding(
-                                                padding: EdgeInsetsDirectional
-                                                    .fromSTEB(
-                                                        4.0, 0.0, 0.0, 0.0),
-                                                child: Text(
-                                                  'ft',
-                                                  style: FlutterFlowTheme.of(
-                                                          context)
-                                                      .bodyMedium
-                                                      .override(
-                                                        fontFamily: 'SF Pro',
-                                                        fontSize: 16.0,
-                                                        letterSpacing: 0.0,
-                                                      ),
-                                                ),
-                                              ),
-                                            ],
+                                                await currentUserReference!
+                                                    .update(
+                                                        createUsersRecordData(
+                                                  highMeasurementFt: false,
+                                                ));
+                                              }
+                                            },
+                                            activeThumbColor:
+                                                FlutterFlowTheme.of(context)
+                                                    .primary,
+                                            activeTrackColor:
+                                                FlutterFlowTheme.of(context)
+                                                    .primary,
+                                            inactiveTrackColor:
+                                                FlutterFlowTheme.of(context)
+                                                    .alternate,
+                                            inactiveThumbColor:
+                                                FlutterFlowTheme.of(context)
+                                                    .secondaryBackground,
                                           ),
                                         ),
                                       ),
                                     ),
                                   ].divide(SizedBox(width: 6.0)),
                                 ),
-                                Container(
-                                  width: double.infinity,
-                                  decoration: BoxDecoration(
-                                    color: FlutterFlowTheme.of(context)
-                                        .primaryBackground,
-                                    borderRadius: BorderRadius.circular(20.0),
-                                  ),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.max,
-                                    children: [
-                                      InkWell(
-                                        splashColor: Colors.transparent,
-                                        focusColor: Colors.transparent,
-                                        hoverColor: Colors.transparent,
-                                        highlightColor: Colors.transparent,
-                                        onTap: () async {
-                                          _model.hPickerResult =
-                                              await actions.heightPicker(
-                                            context,
-                                            valueOrDefault<bool>(
-                                                        currentUserDocument
-                                                            ?.highMeasurementFt,
-                                                        false) ==
-                                                    false
-                                                ? true
-                                                : false,
-                                            valueOrDefault(
-                                                currentUserDocument?.height,
-                                                0.0),
-                                            'English',
-                                          );
-                                          if (_model.hPickerResult != null) {
-                                            await currentUserReference!
-                                                .update(createUsersRecordData(
-                                              height: _model.hPickerResult,
-                                            ));
-                                          }
+                                ProfileSection(
+                                  children: [
+                                    InkWell(
+                                      splashColor: Colors.transparent,
+                                      focusColor: Colors.transparent,
+                                      hoverColor: Colors.transparent,
+                                      highlightColor: Colors.transparent,
+                                      onTap: () async {
+                                        _model.hPickerResult =
+                                            await actions.heightPicker(
+                                          context,
+                                          valueOrDefault<bool>(
+                                                      currentUserDocument
+                                                          ?.highMeasurementFt,
+                                                      false) ==
+                                                  false
+                                              ? true
+                                              : false,
+                                          valueOrDefault(
+                                              currentUserDocument?.height, 0.0),
+                                          'English',
+                                        );
+                                        if (_model.hPickerResult != null) {
+                                          await currentUserReference!
+                                              .update(createUsersRecordData(
+                                            height: _model.hPickerResult,
+                                          ));
+                                        }
 
-                                          safeSetState(() {});
-                                        },
-                                        child: Container(
-                                          decoration: BoxDecoration(),
-                                          child: Padding(
-                                            padding:
-                                                EdgeInsetsDirectional.fromSTEB(
-                                                    12.0, 16.0, 12.0, 16.0),
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.max,
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: [
-                                                Expanded(
-                                                  child: Text(
-                                                    'Height',
-                                                    style: FlutterFlowTheme.of(
-                                                            context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          fontFamily: 'SF Pro',
-                                                          color: FlutterFlowTheme
-                                                                  .of(context)
-                                                              .textfieldsText,
-                                                          fontSize: 16.0,
-                                                          letterSpacing: 0.0,
-                                                          fontWeight:
-                                                              FontWeight.normal,
-                                                        ),
-                                                  ),
+                                        safeSetState(() {});
+                                      },
+                                      child: Container(
+                                        decoration: BoxDecoration(),
+                                        child: Padding(
+                                          padding:
+                                              EdgeInsetsDirectional.fromSTEB(
+                                                  12.0, 16.0, 12.0, 16.0),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.max,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Expanded(
+                                                child: Text(
+                                                  'Height',
+                                                  style: FlutterFlowTheme.of(
+                                                          context)
+                                                      .bodyMedium
+                                                      .override(
+                                                        fontFamily: 'SF Pro',
+                                                        color:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .textfieldsText,
+                                                        fontSize: 16.0,
+                                                        letterSpacing: 0.0,
+                                                        fontWeight:
+                                                            FontWeight.normal,
+                                                      ),
                                                 ),
-                                                AuthUserStreamWidget(
-                                                  builder: (context) => Text(
-                                                    valueOrDefault<String>(
-                                                      () {
-                                                        if (valueOrDefault(
+                                              ),
+                                              AuthUserStreamWidget(
+                                                builder: (context) => Text(
+                                                  valueOrDefault<String>(
+                                                    () {
+                                                      if (valueOrDefault(
+                                                              currentUserDocument
+                                                                  ?.height,
+                                                              0.0) ==
+                                                          0.0) {
+                                                        return 'Not set';
+                                                      } else if (valueOrDefault<
+                                                              bool>(
+                                                          currentUserDocument
+                                                              ?.highMeasurementFt,
+                                                          false)) {
+                                                        return functions
+                                                            .cmToFt(valueOrDefault(
                                                                 currentUserDocument
                                                                     ?.height,
-                                                                0.0) ==
-                                                            0.0) {
-                                                          return 'Not set';
-                                                        } else if (valueOrDefault<
-                                                                bool>(
-                                                            currentUserDocument
-                                                                ?.highMeasurementFt,
-                                                            false)) {
-                                                          return functions
-                                                              .cmToFt(valueOrDefault(
-                                                                  currentUserDocument
-                                                                      ?.height,
-                                                                  0.0))
-                                                              ?.toString();
-                                                        } else {
-                                                          return valueOrDefault(
-                                                                  currentUserDocument
-                                                                      ?.height,
-                                                                  0.0)
-                                                              .toString();
-                                                        }
-                                                      }(),
-                                                      '0',
-                                                    ),
-                                                    textAlign: TextAlign.end,
-                                                    style: FlutterFlowTheme.of(
-                                                            context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          fontFamily: 'SF Pro',
-                                                          color: valueOrDefault(
-                                                                      currentUserDocument
-                                                                          ?.height,
-                                                                      0.0) ==
-                                                                  0.0
-                                                              ? Color(
-                                                                  0xFF9B9A9D)
-                                                              : FlutterFlowTheme
-                                                                      .of(context)
-                                                                  .primaryText,
-                                                          fontSize: 16.0,
-                                                          letterSpacing: 0.0,
-                                                        ),
+                                                                0.0))
+                                                            ?.toString();
+                                                      } else {
+                                                        return valueOrDefault(
+                                                                currentUserDocument
+                                                                    ?.height,
+                                                                0.0)
+                                                            .toString();
+                                                      }
+                                                    }(),
+                                                    '0',
                                                   ),
+                                                  textAlign: TextAlign.end,
+                                                  style: FlutterFlowTheme.of(
+                                                          context)
+                                                      .bodyMedium
+                                                      .override(
+                                                        fontFamily: 'SF Pro',
+                                                        color: valueOrDefault(
+                                                                    currentUserDocument
+                                                                        ?.height,
+                                                                    0.0) ==
+                                                                0.0
+                                                            ? Color(0xFF9B9A9D)
+                                                            : FlutterFlowTheme
+                                                                    .of(context)
+                                                                .primaryText,
+                                                        fontSize: 16.0,
+                                                        letterSpacing: 0.0,
+                                                      ),
                                                 ),
-                                                Padding(
-                                                  padding: EdgeInsetsDirectional
-                                                      .fromSTEB(
-                                                          8.0, 0.0, 0.0, 0.0),
-                                                  child: Icon(
-                                                    Icons.unfold_more,
-                                                    color: Color(0x3C3C4399),
-                                                    size: 22.0,
-                                                  ),
+                                              ),
+                                              Padding(
+                                                padding: EdgeInsetsDirectional
+                                                    .fromSTEB(
+                                                        8.0, 0.0, 0.0, 0.0),
+                                                child: Icon(
+                                                  Icons.unfold_more,
+                                                  color: Color(0x3C3C4399),
+                                                  size: 22.0,
                                                 ),
-                                              ],
-                                            ),
+                                              ),
+                                            ],
                                           ),
                                         ),
                                       ),
-                                      Divider(
-                                        height: 1.0,
-                                        thickness: 1.0,
-                                        indent: 12.0,
-                                        endIndent: 12.0,
-                                        color: FlutterFlowTheme.of(context)
-                                            .alternate,
-                                      ),
-                                      InkWell(
-                                        splashColor: Colors.transparent,
-                                        focusColor: Colors.transparent,
-                                        hoverColor: Colors.transparent,
-                                        highlightColor: Colors.transparent,
-                                        onTap: () async {
-                                          _model.wPickerResult =
-                                              await actions.weightPicker(
-                                            context,
-                                            valueOrDefault<bool>(
-                                                        currentUserDocument
-                                                            ?.measurementOz,
-                                                        false) ==
-                                                    false
-                                                ? true
-                                                : false,
-                                            valueOrDefault(
-                                                currentUserDocument?.weight,
-                                                0.0),
-                                            'English',
-                                          );
-                                          if (_model.wPickerResult != null) {
-                                            await currentUserReference!
-                                                .update(createUsersRecordData(
-                                              weight: _model.wPickerResult,
-                                            ));
-                                          }
+                                    ),
+                                    ProfileDivider(),
+                                    InkWell(
+                                      splashColor: Colors.transparent,
+                                      focusColor: Colors.transparent,
+                                      hoverColor: Colors.transparent,
+                                      highlightColor: Colors.transparent,
+                                      onTap: () async {
+                                        _model.wPickerResult =
+                                            await actions.weightPicker(
+                                          context,
+                                          valueOrDefault<bool>(
+                                                      currentUserDocument
+                                                          ?.measurementOz,
+                                                      false) ==
+                                                  false
+                                              ? true
+                                              : false,
+                                          valueOrDefault(
+                                              currentUserDocument?.weight, 0.0),
+                                          'English',
+                                        );
+                                        if (_model.wPickerResult != null) {
+                                          await currentUserReference!
+                                              .update(createUsersRecordData(
+                                            weight: _model.wPickerResult,
+                                          ));
+                                        }
 
-                                          safeSetState(() {});
-                                        },
-                                        child: Container(
-                                          decoration: BoxDecoration(),
-                                          child: Padding(
-                                            padding:
-                                                EdgeInsetsDirectional.fromSTEB(
-                                                    12.0, 16.0, 12.0, 16.0),
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.max,
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.start,
-                                              children: [
-                                                Expanded(
-                                                  child: Text(
-                                                    'Weight',
-                                                    style: FlutterFlowTheme.of(
-                                                            context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          fontFamily: 'SF Pro',
-                                                          color: FlutterFlowTheme
-                                                                  .of(context)
-                                                              .textfieldsText,
-                                                          fontSize: 16.0,
-                                                          letterSpacing: 0.0,
-                                                          fontWeight:
-                                                              FontWeight.normal,
-                                                        ),
-                                                  ),
+                                        safeSetState(() {});
+                                      },
+                                      child: Container(
+                                        decoration: BoxDecoration(),
+                                        child: Padding(
+                                          padding:
+                                              EdgeInsetsDirectional.fromSTEB(
+                                                  12.0, 16.0, 12.0, 16.0),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.max,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            children: [
+                                              Expanded(
+                                                child: Text(
+                                                  'Weight',
+                                                  style: FlutterFlowTheme.of(
+                                                          context)
+                                                      .bodyMedium
+                                                      .override(
+                                                        fontFamily: 'SF Pro',
+                                                        color:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .textfieldsText,
+                                                        fontSize: 16.0,
+                                                        letterSpacing: 0.0,
+                                                        fontWeight:
+                                                            FontWeight.normal,
+                                                      ),
                                                 ),
-                                                AuthUserStreamWidget(
-                                                  builder: (context) => Text(
-                                                    valueOrDefault<String>(
-                                                      () {
-                                                        if (valueOrDefault(
+                                              ),
+                                              AuthUserStreamWidget(
+                                                builder: (context) => Text(
+                                                  valueOrDefault<String>(
+                                                    () {
+                                                      if (valueOrDefault(
+                                                              currentUserDocument
+                                                                  ?.weight,
+                                                              0.0) ==
+                                                          0.0) {
+                                                        return 'Not set';
+                                                      } else if (valueOrDefault<
+                                                              bool>(
+                                                          currentUserDocument
+                                                              ?.measurementOz,
+                                                          false)) {
+                                                        return functions
+                                                            .kgToLbs(valueOrDefault(
                                                                 currentUserDocument
                                                                     ?.weight,
-                                                                0.0) ==
-                                                            0.0) {
-                                                          return 'Not set';
-                                                        } else if (valueOrDefault<
-                                                                bool>(
-                                                            currentUserDocument
-                                                                ?.measurementOz,
-                                                            false)) {
-                                                          return functions
-                                                              .kgToLbs(valueOrDefault(
-                                                                  currentUserDocument
-                                                                      ?.weight,
-                                                                  0.0))
-                                                              ?.toString();
-                                                        } else {
-                                                          return valueOrDefault(
-                                                                  currentUserDocument
-                                                                      ?.weight,
-                                                                  0.0)
-                                                              .toString();
-                                                        }
-                                                      }(),
-                                                      '0',
-                                                    ),
-                                                    textAlign: TextAlign.end,
-                                                    style: FlutterFlowTheme.of(
-                                                            context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          fontFamily: 'SF Pro',
-                                                          color: valueOrDefault(
-                                                                      currentUserDocument
-                                                                          ?.weight,
-                                                                      0.0) ==
-                                                                  0.0
-                                                              ? Color(
-                                                                  0xFF9B9A9D)
-                                                              : FlutterFlowTheme
-                                                                      .of(context)
-                                                                  .primaryText,
-                                                          fontSize: 16.0,
-                                                          letterSpacing: 0.0,
-                                                        ),
+                                                                0.0))
+                                                            ?.toString();
+                                                      } else {
+                                                        return valueOrDefault(
+                                                                currentUserDocument
+                                                                    ?.weight,
+                                                                0.0)
+                                                            .toString();
+                                                      }
+                                                    }(),
+                                                    '0',
                                                   ),
+                                                  textAlign: TextAlign.end,
+                                                  style: FlutterFlowTheme.of(
+                                                          context)
+                                                      .bodyMedium
+                                                      .override(
+                                                        fontFamily: 'SF Pro',
+                                                        color: valueOrDefault(
+                                                                    currentUserDocument
+                                                                        ?.weight,
+                                                                    0.0) ==
+                                                                0.0
+                                                            ? Color(0xFF9B9A9D)
+                                                            : FlutterFlowTheme
+                                                                    .of(context)
+                                                                .primaryText,
+                                                        fontSize: 16.0,
+                                                        letterSpacing: 0.0,
+                                                      ),
                                                 ),
-                                                Padding(
-                                                  padding: EdgeInsetsDirectional
-                                                      .fromSTEB(
-                                                          8.0, 0.0, 0.0, 0.0),
-                                                  child: Icon(
-                                                    Icons.unfold_more,
-                                                    color: Color(0x3C3C4399),
-                                                    size: 22.0,
-                                                  ),
+                                              ),
+                                              Padding(
+                                                padding: EdgeInsetsDirectional
+                                                    .fromSTEB(
+                                                        8.0, 0.0, 0.0, 0.0),
+                                                child: Icon(
+                                                  Icons.unfold_more,
+                                                  color: Color(0x3C3C4399),
+                                                  size: 22.0,
                                                 ),
-                                              ],
-                                            ),
+                                              ),
+                                            ],
                                           ),
                                         ),
                                       ),
-                                      Divider(
-                                        height: 1.0,
-                                        thickness: 1.0,
-                                        indent: 12.0,
-                                        endIndent: 12.0,
-                                        color: FlutterFlowTheme.of(context)
-                                            .alternate,
-                                      ),
-                                      InkWell(
-                                        splashColor: Colors.transparent,
-                                        focusColor: Colors.transparent,
-                                        hoverColor: Colors.transparent,
-                                        highlightColor: Colors.transparent,
-                                        onTap: () async {
-                                          _model.agePicker =
-                                              await actions.agePicker(
-                                            context,
-                                            valueOrDefault(
-                                                currentUserDocument?.age, 0),
-                                            'English',
-                                          );
-                                          if (_model.agePicker != null) {
-                                            await currentUserReference!
-                                                .update(createUsersRecordData(
-                                              age: _model.agePicker,
-                                            ));
-                                          }
+                                    ),
+                                    ProfileDivider(),
+                                    InkWell(
+                                      splashColor: Colors.transparent,
+                                      focusColor: Colors.transparent,
+                                      hoverColor: Colors.transparent,
+                                      highlightColor: Colors.transparent,
+                                      onTap: () async {
+                                        _model.agePicker =
+                                            await actions.agePicker(
+                                          context,
+                                          valueOrDefault(
+                                              currentUserDocument?.age, 0),
+                                          'English',
+                                        );
+                                        if (_model.agePicker != null) {
+                                          await currentUserReference!
+                                              .update(createUsersRecordData(
+                                            age: _model.agePicker,
+                                          ));
+                                        }
 
-                                          safeSetState(() {});
-                                        },
-                                        child: Container(
-                                          decoration: BoxDecoration(),
-                                          child: Padding(
-                                            padding:
-                                                EdgeInsetsDirectional.fromSTEB(
-                                                    12.0, 16.0, 12.0, 16.0),
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.max,
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.start,
-                                              children: [
-                                                Expanded(
-                                                  child: Text(
-                                                    'Age',
-                                                    style: FlutterFlowTheme.of(
-                                                            context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          fontFamily: 'SF Pro',
-                                                          color: FlutterFlowTheme
-                                                                  .of(context)
-                                                              .textfieldsText,
-                                                          fontSize: 16.0,
-                                                          letterSpacing: 0.0,
-                                                          fontWeight:
-                                                              FontWeight.normal,
-                                                        ),
-                                                  ),
+                                        safeSetState(() {});
+                                      },
+                                      child: Container(
+                                        decoration: BoxDecoration(),
+                                        child: Padding(
+                                          padding:
+                                              EdgeInsetsDirectional.fromSTEB(
+                                                  12.0, 16.0, 12.0, 16.0),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.max,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            children: [
+                                              Expanded(
+                                                child: Text(
+                                                  'Age',
+                                                  style: FlutterFlowTheme.of(
+                                                          context)
+                                                      .bodyMedium
+                                                      .override(
+                                                        fontFamily: 'SF Pro',
+                                                        color:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .textfieldsText,
+                                                        fontSize: 16.0,
+                                                        letterSpacing: 0.0,
+                                                        fontWeight:
+                                                            FontWeight.normal,
+                                                      ),
                                                 ),
-                                                AuthUserStreamWidget(
-                                                  builder: (context) => Text(
-                                                    valueOrDefault(
-                                                                currentUserDocument
-                                                                    ?.age,
-                                                                0) ==
-                                                            0
-                                                        ? 'Not set'
-                                                        : valueOrDefault(
-                                                                currentUserDocument
-                                                                    ?.age,
-                                                                0)
-                                                            .toString(),
-                                                    textAlign: TextAlign.end,
-                                                    style: FlutterFlowTheme.of(
-                                                            context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          fontFamily: 'SF Pro',
-                                                          color: valueOrDefault(
-                                                                      currentUserDocument
-                                                                          ?.age,
-                                                                      0) ==
-                                                                  0
-                                                              ? Color(
-                                                                  0xFF9B9A9D)
-                                                              : FlutterFlowTheme
-                                                                      .of(context)
-                                                                  .primaryText,
-                                                          fontSize: 16.0,
-                                                          letterSpacing: 0.0,
-                                                        ),
-                                                  ),
+                                              ),
+                                              AuthUserStreamWidget(
+                                                builder: (context) => Text(
+                                                  valueOrDefault(
+                                                              currentUserDocument
+                                                                  ?.age,
+                                                              0) ==
+                                                          0
+                                                      ? 'Not set'
+                                                      : valueOrDefault(
+                                                              currentUserDocument
+                                                                  ?.age,
+                                                              0)
+                                                          .toString(),
+                                                  textAlign: TextAlign.end,
+                                                  style: FlutterFlowTheme.of(
+                                                          context)
+                                                      .bodyMedium
+                                                      .override(
+                                                        fontFamily: 'SF Pro',
+                                                        color: valueOrDefault(
+                                                                    currentUserDocument
+                                                                        ?.age,
+                                                                    0) ==
+                                                                0
+                                                            ? Color(0xFF9B9A9D)
+                                                            : FlutterFlowTheme
+                                                                    .of(context)
+                                                                .primaryText,
+                                                        fontSize: 16.0,
+                                                        letterSpacing: 0.0,
+                                                      ),
                                                 ),
-                                                Padding(
-                                                  padding: EdgeInsetsDirectional
-                                                      .fromSTEB(
-                                                          8.0, 0.0, 0.0, 0.0),
-                                                  child: Icon(
-                                                    Icons.unfold_more,
-                                                    color: Color(0x3C3C4399),
-                                                    size: 22.0,
-                                                  ),
+                                              ),
+                                              Padding(
+                                                padding: EdgeInsetsDirectional
+                                                    .fromSTEB(
+                                                        8.0, 0.0, 0.0, 0.0),
+                                                child: Icon(
+                                                  Icons.unfold_more,
+                                                  color: Color(0x3C3C4399),
+                                                  size: 22.0,
                                                 ),
-                                              ],
-                                            ),
+                                              ),
+                                            ],
                                           ),
                                         ),
                                       ),
-                                      Divider(
-                                        height: 1.0,
-                                        thickness: 1.0,
-                                        indent: 12.0,
-                                        endIndent: 12.0,
-                                        color: FlutterFlowTheme.of(context)
-                                            .alternate,
+                                    ),
+                                    ProfileDivider(),
+                                    InkWell(
+                                      splashColor: Colors.transparent,
+                                      focusColor: Colors.transparent,
+                                      hoverColor: Colors.transparent,
+                                      highlightColor: Colors.transparent,
+                                      onTap: () async {
+                                        await showModalBottomSheet(
+                                          isScrollControlled: true,
+                                          backgroundColor: Colors.transparent,
+                                          context: context,
+                                          builder: (context) {
+                                            return GestureDetector(
+                                              onTap: () {
+                                                FocusScope.of(context)
+                                                    .unfocus();
+                                                FocusManager
+                                                    .instance.primaryFocus
+                                                    ?.unfocus();
+                                              },
+                                              child: Padding(
+                                                padding:
+                                                    MediaQuery.viewInsetsOf(
+                                                        context),
+                                                child: Container(
+                                                  height:
+                                                      MediaQuery.sizeOf(context)
+                                                              .height *
+                                                          0.25,
+                                                  child: UniversalPickerWidget(
+                                                    options:
+                                                        FFAppConstants.gender,
+                                                    initialValue: valueOrDefault(
+                                                                currentUserDocument
+                                                                    ?.gender,
+                                                                '') !=
+                                                            ''
+                                                        ? valueOrDefault(
+                                                            currentUserDocument
+                                                                ?.gender,
+                                                            '')
+                                                        : 'Male',
+                                                    onSelected: (value) async {
+                                                      unawaited(
+                                                        () async {
+                                                          await currentUserReference!
+                                                              .update(
+                                                                  createUsersRecordData(
+                                                            gender: value,
+                                                          ));
+                                                        }(),
+                                                      );
+                                                      Navigator.pop(context);
+                                                    },
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        ).then((value) => safeSetState(() {}));
+                                      },
+                                      child: Container(
+                                        decoration: BoxDecoration(),
+                                        child: Padding(
+                                          padding:
+                                              EdgeInsetsDirectional.fromSTEB(
+                                                  12.0, 16.0, 12.0, 16.0),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.max,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            children: [
+                                              Expanded(
+                                                child: Text(
+                                                  'Gender',
+                                                  style: FlutterFlowTheme.of(
+                                                          context)
+                                                      .bodyMedium
+                                                      .override(
+                                                        fontFamily: 'SF Pro',
+                                                        color:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .textfieldsText,
+                                                        fontSize: 16.0,
+                                                        letterSpacing: 0.0,
+                                                        fontWeight:
+                                                            FontWeight.normal,
+                                                      ),
+                                                ),
+                                              ),
+                                              AuthUserStreamWidget(
+                                                builder: (context) => Text(
+                                                  valueOrDefault<String>(
+                                                    valueOrDefault(
+                                                        currentUserDocument
+                                                            ?.gender,
+                                                        ''),
+                                                    'Not set',
+                                                  ),
+                                                  style: FlutterFlowTheme.of(
+                                                          context)
+                                                      .bodyMedium
+                                                      .override(
+                                                        fontFamily: 'SF Pro',
+                                                        color: valueOrDefault(
+                                                                    currentUserDocument
+                                                                        ?.gender,
+                                                                    '') ==
+                                                                ''
+                                                            ? Color(0xFF9B9A9D)
+                                                            : FlutterFlowTheme
+                                                                    .of(context)
+                                                                .primaryText,
+                                                        fontSize: 16.0,
+                                                        letterSpacing: 0.0,
+                                                      ),
+                                                ),
+                                              ),
+                                              Padding(
+                                                padding: EdgeInsetsDirectional
+                                                    .fromSTEB(
+                                                        8.0, 0.0, 0.0, 0.0),
+                                                child: Icon(
+                                                  Icons.unfold_more,
+                                                  color: FlutterFlowTheme.of(
+                                                          context)
+                                                      .listPicker,
+                                                  size: 24.0,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
                                       ),
-                                      InkWell(
-                                        splashColor: Colors.transparent,
-                                        focusColor: Colors.transparent,
-                                        hoverColor: Colors.transparent,
-                                        highlightColor: Colors.transparent,
-                                        onTap: () async {
-                                          await showModalBottomSheet(
-                                            isScrollControlled: true,
-                                            backgroundColor: Colors.transparent,
-                                            context: context,
-                                            builder: (context) {
-                                              return GestureDetector(
-                                                onTap: () {
-                                                  FocusScope.of(context)
-                                                      .unfocus();
-                                                  FocusManager
-                                                      .instance.primaryFocus
-                                                      ?.unfocus();
-                                                },
-                                                child: Padding(
-                                                  padding:
-                                                      MediaQuery.viewInsetsOf(
-                                                          context),
-                                                  child: Container(
-                                                    height: MediaQuery.sizeOf(
-                                                                context)
-                                                            .height *
-                                                        0.25,
-                                                    child:
-                                                        UniversalPickerWidget(
-                                                      options:
-                                                          FFAppConstants.gender,
-                                                      initialValue: valueOrDefault(
-                                                                  currentUserDocument
-                                                                      ?.gender,
-                                                                  '') !=
-                                                              ''
-                                                          ? valueOrDefault(
-                                                              currentUserDocument
-                                                                  ?.gender,
-                                                              '')
-                                                          : 'Male',
-                                                      onSelected:
-                                                          (value) async {
-                                                        unawaited(
-                                                          () async {
-                                                            await currentUserReference!
-                                                                .update(
-                                                                    createUsersRecordData(
-                                                              gender: value,
-                                                            ));
-                                                          }(),
-                                                        );
-                                                        Navigator.pop(context);
-                                                      },
-                                                    ),
+                                    ),
+                                    ProfileDivider(),
+                                    InkWell(
+                                      splashColor: Colors.transparent,
+                                      focusColor: Colors.transparent,
+                                      hoverColor: Colors.transparent,
+                                      highlightColor: Colors.transparent,
+                                      onTap: () async {
+                                        await showModalBottomSheet(
+                                          isScrollControlled: true,
+                                          backgroundColor: Colors.transparent,
+                                          context: context,
+                                          builder: (context) {
+                                            return GestureDetector(
+                                              onTap: () {
+                                                FocusScope.of(context)
+                                                    .unfocus();
+                                                FocusManager
+                                                    .instance.primaryFocus
+                                                    ?.unfocus();
+                                              },
+                                              child: Padding(
+                                                padding:
+                                                    MediaQuery.viewInsetsOf(
+                                                        context),
+                                                child: Container(
+                                                  height:
+                                                      MediaQuery.sizeOf(context)
+                                                              .height *
+                                                          0.25,
+                                                  child: UniversalPickerWidget(
+                                                    options: FFAppConstants
+                                                        .ActivityLevel,
+                                                    initialValue:
+                                                        valueOrDefault(
+                                                            currentUserDocument
+                                                                ?.activityLevel,
+                                                            ''),
+                                                    onSelected: (value) async {
+                                                      unawaited(
+                                                        () async {
+                                                          await currentUserReference!
+                                                              .update(
+                                                                  createUsersRecordData(
+                                                            activityLevel:
+                                                                value,
+                                                          ));
+                                                        }(),
+                                                      );
+                                                      Navigator.pop(context);
+                                                    },
                                                   ),
                                                 ),
-                                              );
-                                            },
-                                          ).then(
-                                              (value) => safeSetState(() {}));
-                                        },
-                                        child: Container(
-                                          decoration: BoxDecoration(),
-                                          child: Padding(
-                                            padding:
-                                                EdgeInsetsDirectional.fromSTEB(
-                                                    12.0, 16.0, 12.0, 16.0),
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.max,
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.start,
-                                              children: [
-                                                Expanded(
-                                                  child: Text(
-                                                    'Gender',
-                                                    style: FlutterFlowTheme.of(
-                                                            context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          fontFamily: 'SF Pro',
-                                                          color: FlutterFlowTheme
-                                                                  .of(context)
-                                                              .textfieldsText,
-                                                          fontSize: 16.0,
-                                                          letterSpacing: 0.0,
-                                                          fontWeight:
-                                                              FontWeight.normal,
-                                                        ),
-                                                  ),
+                                              ),
+                                            );
+                                          },
+                                        ).then((value) => safeSetState(() {}));
+                                      },
+                                      child: Container(
+                                        decoration: BoxDecoration(),
+                                        child: Padding(
+                                          padding:
+                                              EdgeInsetsDirectional.fromSTEB(
+                                                  12.0, 16.0, 12.0, 16.0),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.max,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            children: [
+                                              Expanded(
+                                                child: Text(
+                                                  'Activity Level',
+                                                  style: FlutterFlowTheme.of(
+                                                          context)
+                                                      .bodyMedium
+                                                      .override(
+                                                        fontFamily: 'SF Pro',
+                                                        color:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .textfieldsText,
+                                                        fontSize: 16.0,
+                                                        letterSpacing: 0.0,
+                                                        fontWeight:
+                                                            FontWeight.normal,
+                                                      ),
                                                 ),
-                                                AuthUserStreamWidget(
+                                              ),
+                                              Padding(
+                                                padding: EdgeInsetsDirectional
+                                                    .fromSTEB(
+                                                        16.0, 0.0, 0.0, 0.0),
+                                                child: AuthUserStreamWidget(
                                                   builder: (context) => Text(
                                                     valueOrDefault<String>(
                                                       valueOrDefault(
                                                           currentUserDocument
-                                                              ?.gender,
+                                                              ?.activityLevel,
                                                           ''),
                                                       'Not set',
                                                     ),
+                                                    textAlign: TextAlign.end,
+                                                    maxLines: 1,
                                                     style: FlutterFlowTheme.of(
                                                             context)
                                                         .bodyMedium
@@ -1776,7 +1611,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                                           fontFamily: 'SF Pro',
                                                           color: valueOrDefault(
                                                                       currentUserDocument
-                                                                          ?.gender,
+                                                                          ?.activityLevel,
                                                                       '') ==
                                                                   ''
                                                               ? Color(
@@ -1789,486 +1624,303 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                                         ),
                                                   ),
                                                 ),
-                                                Padding(
-                                                  padding: EdgeInsetsDirectional
-                                                      .fromSTEB(
-                                                          8.0, 0.0, 0.0, 0.0),
-                                                  child: Icon(
-                                                    Icons.unfold_more,
-                                                    color: FlutterFlowTheme.of(
-                                                            context)
-                                                        .listPicker,
-                                                    size: 24.0,
-                                                  ),
+                                              ),
+                                              Padding(
+                                                padding: EdgeInsetsDirectional
+                                                    .fromSTEB(
+                                                        8.0, 0.0, 0.0, 0.0),
+                                                child: Icon(
+                                                  Icons.unfold_more,
+                                                  color: FlutterFlowTheme.of(
+                                                          context)
+                                                      .listPicker,
+                                                  size: 24.0,
                                                 ),
-                                              ],
-                                            ),
+                                              ),
+                                            ],
                                           ),
                                         ),
                                       ),
-                                      Divider(
-                                        height: 1.0,
-                                        thickness: 1.0,
-                                        indent: 12.0,
-                                        endIndent: 12.0,
-                                        color: FlutterFlowTheme.of(context)
-                                            .alternate,
-                                      ),
-                                      InkWell(
-                                        splashColor: Colors.transparent,
-                                        focusColor: Colors.transparent,
-                                        hoverColor: Colors.transparent,
-                                        highlightColor: Colors.transparent,
-                                        onTap: () async {
-                                          await showModalBottomSheet(
-                                            isScrollControlled: true,
-                                            backgroundColor: Colors.transparent,
-                                            context: context,
-                                            builder: (context) {
-                                              return GestureDetector(
-                                                onTap: () {
-                                                  FocusScope.of(context)
-                                                      .unfocus();
-                                                  FocusManager
-                                                      .instance.primaryFocus
-                                                      ?.unfocus();
-                                                },
-                                                child: Padding(
-                                                  padding:
-                                                      MediaQuery.viewInsetsOf(
-                                                          context),
-                                                  child: Container(
-                                                    height: MediaQuery.sizeOf(
-                                                                context)
-                                                            .height *
-                                                        0.25,
-                                                    child:
-                                                        UniversalPickerWidget(
-                                                      options: FFAppConstants
-                                                          .ActivityLevel,
-                                                      initialValue: valueOrDefault(
-                                                          currentUserDocument
-                                                              ?.activityLevel,
-                                                          ''),
-                                                      onSelected:
-                                                          (value) async {
-                                                        unawaited(
-                                                          () async {
-                                                            await currentUserReference!
-                                                                .update(
-                                                                    createUsersRecordData(
-                                                              activityLevel:
-                                                                  value,
-                                                            ));
-                                                          }(),
-                                                        );
-                                                        Navigator.pop(context);
-                                                      },
-                                                    ),
-                                                  ),
-                                                ),
-                                              );
-                                            },
-                                          ).then(
-                                              (value) => safeSetState(() {}));
-                                        },
-                                        child: Container(
-                                          decoration: BoxDecoration(),
-                                          child: Padding(
-                                            padding:
-                                                EdgeInsetsDirectional.fromSTEB(
-                                                    12.0, 16.0, 12.0, 16.0),
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.max,
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.start,
-                                              children: [
-                                                Expanded(
-                                                  child: Text(
-                                                    'Activity Level',
-                                                    style: FlutterFlowTheme.of(
-                                                            context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          fontFamily: 'SF Pro',
-                                                          color: FlutterFlowTheme
-                                                                  .of(context)
-                                                              .textfieldsText,
-                                                          fontSize: 16.0,
-                                                          letterSpacing: 0.0,
-                                                          fontWeight:
-                                                              FontWeight.normal,
-                                                        ),
-                                                  ),
-                                                ),
-                                                Padding(
-                                                  padding: EdgeInsetsDirectional
-                                                      .fromSTEB(
-                                                          16.0, 0.0, 0.0, 0.0),
-                                                  child: AuthUserStreamWidget(
-                                                    builder: (context) => Text(
-                                                      valueOrDefault<String>(
-                                                        valueOrDefault(
-                                                            currentUserDocument
-                                                                ?.activityLevel,
-                                                            ''),
-                                                        'Not set',
-                                                      ),
-                                                      textAlign: TextAlign.end,
-                                                      maxLines: 1,
-                                                      style: FlutterFlowTheme
-                                                              .of(context)
-                                                          .bodyMedium
-                                                          .override(
-                                                            fontFamily:
-                                                                'SF Pro',
-                                                            color: valueOrDefault(
-                                                                        currentUserDocument
-                                                                            ?.activityLevel,
-                                                                        '') ==
-                                                                    ''
-                                                                ? Color(
-                                                                    0xFF9B9A9D)
-                                                                : FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .primaryText,
-                                                            fontSize: 16.0,
-                                                            letterSpacing: 0.0,
-                                                          ),
-                                                    ),
-                                                  ),
-                                                ),
-                                                Padding(
-                                                  padding: EdgeInsetsDirectional
-                                                      .fromSTEB(
-                                                          8.0, 0.0, 0.0, 0.0),
-                                                  child: Icon(
-                                                    Icons.unfold_more,
-                                                    color: FlutterFlowTheme.of(
-                                                            context)
-                                                        .listPicker,
-                                                    size: 24.0,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                                    ),
+                                  ],
                                 ),
-                                Container(
-                                  width: double.infinity,
-                                  decoration: BoxDecoration(
-                                    color: FlutterFlowTheme.of(context)
-                                        .primaryBackground,
-                                    borderRadius: BorderRadius.circular(20.0),
-                                  ),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.max,
-                                    children: [
-                                      Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            12.0, 7.0, 10.0, 7.0),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.max,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Flexible(
-                                              child: Text(
-                                                'Meat eater?',
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          fontFamily: 'SF Pro',
-                                                          color: FlutterFlowTheme
-                                                                  .of(context)
-                                                              .textfieldsText,
-                                                          fontSize: 16.0,
-                                                          letterSpacing: 0.0,
-                                                          fontWeight:
-                                                              FontWeight.normal,
-                                                        ),
-                                              ),
+                                ProfileSection(
+                                  children: [
+                                    Padding(
+                                      padding: EdgeInsetsDirectional.fromSTEB(
+                                          12.0, 7.0, 10.0, 7.0),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.max,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Flexible(
+                                            child: Text(
+                                              'Meat eater?',
+                                              style:
+                                                  FlutterFlowTheme.of(context)
+                                                      .bodyMedium
+                                                      .override(
+                                                        fontFamily: 'SF Pro',
+                                                        color:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .textfieldsText,
+                                                        fontSize: 16.0,
+                                                        letterSpacing: 0.0,
+                                                        fontWeight:
+                                                            FontWeight.normal,
+                                                      ),
                                             ),
-                                            AuthUserStreamWidget(
-                                              builder: (context) =>
-                                                  Switch.adaptive(
-                                                value: _model.switchValue3!,
-                                                onChanged: (newValue) async {
-                                                  safeSetState(() => _model
-                                                      .switchValue3 = newValue);
-                                                  if (newValue) {
-                                                    HapticFeedback
-                                                        .heavyImpact();
+                                          ),
+                                          AuthUserStreamWidget(
+                                            builder: (context) =>
+                                                Switch.adaptive(
+                                              value: _model.switchValue3!,
+                                              onChanged: (newValue) async {
+                                                safeSetState(() => _model
+                                                    .switchValue3 = newValue);
+                                                if (newValue) {
+                                                  HapticFeedback.heavyImpact();
 
-                                                    await currentUserReference!
-                                                        .update(
-                                                            createUsersRecordData(
-                                                      meatEater: true,
-                                                    ));
-                                                  } else {
-                                                    HapticFeedback
-                                                        .heavyImpact();
+                                                  await currentUserReference!
+                                                      .update(
+                                                          createUsersRecordData(
+                                                    meatEater: true,
+                                                  ));
+                                                } else {
+                                                  HapticFeedback.heavyImpact();
 
-                                                    await currentUserReference!
-                                                        .update(
-                                                            createUsersRecordData(
-                                                      meatEater: false,
-                                                    ));
-                                                  }
-                                                },
-                                                activeThumbColor:
-                                                    FlutterFlowTheme.of(context)
-                                                        .secondaryBackground,
-                                                activeTrackColor:
-                                                    Color(0xFF34C759),
-                                                inactiveTrackColor:
-                                                    FlutterFlowTheme.of(context)
-                                                        .alternate,
-                                                inactiveThumbColor:
-                                                    FlutterFlowTheme.of(context)
-                                                        .secondaryBackground,
-                                              ),
+                                                  await currentUserReference!
+                                                      .update(
+                                                          createUsersRecordData(
+                                                    meatEater: false,
+                                                  ));
+                                                }
+                                              },
+                                              activeThumbColor:
+                                                  FlutterFlowTheme.of(context)
+                                                      .secondaryBackground,
+                                              activeTrackColor:
+                                                  Color(0xFF34C759),
+                                              inactiveTrackColor:
+                                                  FlutterFlowTheme.of(context)
+                                                      .alternate,
+                                              inactiveThumbColor:
+                                                  FlutterFlowTheme.of(context)
+                                                      .secondaryBackground,
                                             ),
-                                          ],
-                                        ),
+                                          ),
+                                        ],
                                       ),
-                                      Divider(
-                                        height: 1.0,
-                                        thickness: 1.0,
-                                        indent: 12.0,
-                                        endIndent: 12.0,
-                                        color: FlutterFlowTheme.of(context)
-                                            .alternate,
-                                      ),
-                                      Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            12.0, 7.0, 10.0, 7.0),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.max,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Flexible(
-                                              child: Text(
-                                                'Dairy eater?',
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          fontFamily: 'SF Pro',
-                                                          color: FlutterFlowTheme
-                                                                  .of(context)
-                                                              .textfieldsText,
-                                                          fontSize: 16.0,
-                                                          letterSpacing: 0.0,
-                                                          fontWeight:
-                                                              FontWeight.normal,
-                                                        ),
-                                              ),
+                                    ),
+                                    ProfileDivider(),
+                                    Padding(
+                                      padding: EdgeInsetsDirectional.fromSTEB(
+                                          12.0, 7.0, 10.0, 7.0),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.max,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Flexible(
+                                            child: Text(
+                                              'Dairy eater?',
+                                              style:
+                                                  FlutterFlowTheme.of(context)
+                                                      .bodyMedium
+                                                      .override(
+                                                        fontFamily: 'SF Pro',
+                                                        color:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .textfieldsText,
+                                                        fontSize: 16.0,
+                                                        letterSpacing: 0.0,
+                                                        fontWeight:
+                                                            FontWeight.normal,
+                                                      ),
                                             ),
-                                            AuthUserStreamWidget(
-                                              builder: (context) =>
-                                                  Switch.adaptive(
-                                                value: _model.switchValue4!,
-                                                onChanged: (newValue) async {
-                                                  safeSetState(() => _model
-                                                      .switchValue4 = newValue);
-                                                  if (newValue) {
-                                                    await currentUserReference!
-                                                        .update(
-                                                            createUsersRecordData(
-                                                      dairyEater: true,
-                                                    ));
-                                                    HapticFeedback
-                                                        .heavyImpact();
-                                                  } else {
-                                                    HapticFeedback
-                                                        .heavyImpact();
+                                          ),
+                                          AuthUserStreamWidget(
+                                            builder: (context) =>
+                                                Switch.adaptive(
+                                              value: _model.switchValue4!,
+                                              onChanged: (newValue) async {
+                                                safeSetState(() => _model
+                                                    .switchValue4 = newValue);
+                                                if (newValue) {
+                                                  await currentUserReference!
+                                                      .update(
+                                                          createUsersRecordData(
+                                                    dairyEater: true,
+                                                  ));
+                                                  HapticFeedback.heavyImpact();
+                                                } else {
+                                                  HapticFeedback.heavyImpact();
 
-                                                    await currentUserReference!
-                                                        .update(
-                                                            createUsersRecordData(
-                                                      dairyEater: false,
-                                                    ));
-                                                  }
-                                                },
-                                                activeThumbColor:
-                                                    FlutterFlowTheme.of(context)
-                                                        .primary,
-                                                activeTrackColor:
-                                                    Color(0xFF34C759),
-                                                inactiveTrackColor:
-                                                    FlutterFlowTheme.of(context)
-                                                        .alternate,
-                                                inactiveThumbColor:
-                                                    FlutterFlowTheme.of(context)
-                                                        .secondaryBackground,
-                                              ),
+                                                  await currentUserReference!
+                                                      .update(
+                                                          createUsersRecordData(
+                                                    dairyEater: false,
+                                                  ));
+                                                }
+                                              },
+                                              activeThumbColor:
+                                                  FlutterFlowTheme.of(context)
+                                                      .primary,
+                                              activeTrackColor:
+                                                  Color(0xFF34C759),
+                                              inactiveTrackColor:
+                                                  FlutterFlowTheme.of(context)
+                                                      .alternate,
+                                              inactiveThumbColor:
+                                                  FlutterFlowTheme.of(context)
+                                                      .secondaryBackground,
                                             ),
-                                          ],
-                                        ),
+                                          ),
+                                        ],
                                       ),
-                                      Divider(
-                                        height: 1.0,
-                                        thickness: 1.0,
-                                        indent: 12.0,
-                                        endIndent: 12.0,
-                                        color: FlutterFlowTheme.of(context)
-                                            .alternate,
-                                      ),
-                                      Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            12.0, 7.0, 10.0, 7.0),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.max,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Flexible(
-                                              child: Text(
-                                                'Halal',
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          fontFamily: 'SF Pro',
-                                                          color: FlutterFlowTheme
-                                                                  .of(context)
-                                                              .textfieldsText,
-                                                          fontSize: 16.0,
-                                                          letterSpacing: 0.0,
-                                                          fontWeight:
-                                                              FontWeight.normal,
-                                                        ),
-                                              ),
+                                    ),
+                                    ProfileDivider(),
+                                    Padding(
+                                      padding: EdgeInsetsDirectional.fromSTEB(
+                                          12.0, 7.0, 10.0, 7.0),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.max,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Flexible(
+                                            child: Text(
+                                              'Halal',
+                                              style:
+                                                  FlutterFlowTheme.of(context)
+                                                      .bodyMedium
+                                                      .override(
+                                                        fontFamily: 'SF Pro',
+                                                        color:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .textfieldsText,
+                                                        fontSize: 16.0,
+                                                        letterSpacing: 0.0,
+                                                        fontWeight:
+                                                            FontWeight.normal,
+                                                      ),
                                             ),
-                                            AuthUserStreamWidget(
-                                              builder: (context) =>
-                                                  Switch.adaptive(
-                                                value: _model.switchValue5!,
-                                                onChanged: (newValue) async {
-                                                  safeSetState(() => _model
-                                                      .switchValue5 = newValue);
-                                                  if (newValue) {
-                                                    HapticFeedback
-                                                        .heavyImpact();
+                                          ),
+                                          AuthUserStreamWidget(
+                                            builder: (context) =>
+                                                Switch.adaptive(
+                                              value: _model.switchValue5!,
+                                              onChanged: (newValue) async {
+                                                safeSetState(() => _model
+                                                    .switchValue5 = newValue);
+                                                if (newValue) {
+                                                  HapticFeedback.heavyImpact();
 
-                                                    await currentUserReference!
-                                                        .update(
-                                                            createUsersRecordData(
-                                                      halal: true,
-                                                    ));
-                                                  } else {
-                                                    HapticFeedback
-                                                        .heavyImpact();
+                                                  await currentUserReference!
+                                                      .update(
+                                                          createUsersRecordData(
+                                                    halal: true,
+                                                  ));
+                                                } else {
+                                                  HapticFeedback.heavyImpact();
 
-                                                    await currentUserReference!
-                                                        .update(
-                                                            createUsersRecordData(
-                                                      halal: false,
-                                                    ));
-                                                  }
-                                                },
-                                                activeThumbColor:
-                                                    FlutterFlowTheme.of(context)
-                                                        .primary,
-                                                activeTrackColor:
-                                                    Color(0xFF34C759),
-                                                inactiveTrackColor:
-                                                    FlutterFlowTheme.of(context)
-                                                        .alternate,
-                                                inactiveThumbColor:
-                                                    FlutterFlowTheme.of(context)
-                                                        .secondaryBackground,
-                                              ),
+                                                  await currentUserReference!
+                                                      .update(
+                                                          createUsersRecordData(
+                                                    halal: false,
+                                                  ));
+                                                }
+                                              },
+                                              activeThumbColor:
+                                                  FlutterFlowTheme.of(context)
+                                                      .primary,
+                                              activeTrackColor:
+                                                  Color(0xFF34C759),
+                                              inactiveTrackColor:
+                                                  FlutterFlowTheme.of(context)
+                                                      .alternate,
+                                              inactiveThumbColor:
+                                                  FlutterFlowTheme.of(context)
+                                                      .secondaryBackground,
                                             ),
-                                          ],
-                                        ),
+                                          ),
+                                        ],
                                       ),
-                                      Divider(
-                                        height: 1.0,
-                                        thickness: 1.0,
-                                        indent: 12.0,
-                                        endIndent: 12.0,
-                                        color: FlutterFlowTheme.of(context)
-                                            .alternate,
-                                      ),
-                                      Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            12.0, 7.0, 10.0, 7.0),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.max,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Flexible(
-                                              child: Text(
-                                                'Gluten free?',
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          fontFamily: 'SF Pro',
-                                                          color: FlutterFlowTheme
-                                                                  .of(context)
-                                                              .textfieldsText,
-                                                          fontSize: 16.0,
-                                                          letterSpacing: 0.0,
-                                                          fontWeight:
-                                                              FontWeight.normal,
-                                                        ),
-                                              ),
+                                    ),
+                                    ProfileDivider(),
+                                    Padding(
+                                      padding: EdgeInsetsDirectional.fromSTEB(
+                                          12.0, 7.0, 10.0, 7.0),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.max,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Flexible(
+                                            child: Text(
+                                              'Gluten free?',
+                                              style:
+                                                  FlutterFlowTheme.of(context)
+                                                      .bodyMedium
+                                                      .override(
+                                                        fontFamily: 'SF Pro',
+                                                        color:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .textfieldsText,
+                                                        fontSize: 16.0,
+                                                        letterSpacing: 0.0,
+                                                        fontWeight:
+                                                            FontWeight.normal,
+                                                      ),
                                             ),
-                                            AuthUserStreamWidget(
-                                              builder: (context) =>
-                                                  Switch.adaptive(
-                                                value: _model.switchValue6!,
-                                                onChanged: (newValue) async {
-                                                  safeSetState(() => _model
-                                                      .switchValue6 = newValue);
-                                                  if (newValue) {
-                                                    HapticFeedback
-                                                        .heavyImpact();
+                                          ),
+                                          AuthUserStreamWidget(
+                                            builder: (context) =>
+                                                Switch.adaptive(
+                                              value: _model.switchValue6!,
+                                              onChanged: (newValue) async {
+                                                safeSetState(() => _model
+                                                    .switchValue6 = newValue);
+                                                if (newValue) {
+                                                  HapticFeedback.heavyImpact();
 
-                                                    await currentUserReference!
-                                                        .update(
-                                                            createUsersRecordData(
-                                                      glutenFree: true,
-                                                    ));
-                                                  } else {
-                                                    HapticFeedback
-                                                        .heavyImpact();
+                                                  await currentUserReference!
+                                                      .update(
+                                                          createUsersRecordData(
+                                                    glutenFree: true,
+                                                  ));
+                                                } else {
+                                                  HapticFeedback.heavyImpact();
 
-                                                    await currentUserReference!
-                                                        .update(
-                                                            createUsersRecordData(
-                                                      glutenFree: false,
-                                                    ));
-                                                  }
-                                                },
-                                                activeThumbColor:
-                                                    FlutterFlowTheme.of(context)
-                                                        .primary,
-                                                activeTrackColor:
-                                                    Color(0xFF34C759),
-                                                inactiveTrackColor:
-                                                    FlutterFlowTheme.of(context)
-                                                        .alternate,
-                                                inactiveThumbColor:
-                                                    FlutterFlowTheme.of(context)
-                                                        .secondaryBackground,
-                                              ),
+                                                  await currentUserReference!
+                                                      .update(
+                                                          createUsersRecordData(
+                                                    glutenFree: false,
+                                                  ));
+                                                }
+                                              },
+                                              activeThumbColor:
+                                                  FlutterFlowTheme.of(context)
+                                                      .primary,
+                                              activeTrackColor:
+                                                  Color(0xFF34C759),
+                                              inactiveTrackColor:
+                                                  FlutterFlowTheme.of(context)
+                                                      .alternate,
+                                              inactiveThumbColor:
+                                                  FlutterFlowTheme.of(context)
+                                                      .secondaryBackground,
                                             ),
-                                          ],
-                                        ),
+                                          ),
+                                        ],
                                       ),
-                                    ],
-                                  ),
+                                    ),
+                                  ],
                                 ),
                                 Container(
                                   width: double.infinity,
@@ -2357,14 +2009,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                           ),
                                         ),
                                       ),
-                                      Divider(
-                                        height: 1.0,
-                                        thickness: 1.0,
-                                        indent: 12.0,
-                                        endIndent: 12.0,
-                                        color: FlutterFlowTheme.of(context)
-                                            .alternate,
-                                      ),
+                                      ProfileDivider(),
                                       InkWell(
                                         splashColor: Colors.transparent,
                                         focusColor: Colors.transparent,
@@ -2412,14 +2057,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                           ),
                                         ),
                                       ),
-                                      Divider(
-                                        height: 1.0,
-                                        thickness: 1.0,
-                                        indent: 12.0,
-                                        endIndent: 12.0,
-                                        color: FlutterFlowTheme.of(context)
-                                            .alternate,
-                                      ),
+                                      ProfileDivider(),
                                       InkWell(
                                         splashColor: Colors.transparent,
                                         focusColor: Colors.transparent,
@@ -2467,14 +2105,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                           ),
                                         ),
                                       ),
-                                      Divider(
-                                        height: 1.0,
-                                        thickness: 1.0,
-                                        indent: 12.0,
-                                        endIndent: 12.0,
-                                        color: FlutterFlowTheme.of(context)
-                                            .alternate,
-                                      ),
+                                      ProfileDivider(),
                                       InkWell(
                                         splashColor: Colors.transparent,
                                         focusColor: Colors.transparent,
@@ -2536,14 +2167,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                           ),
                                         ),
                                       ),
-                                      Divider(
-                                        height: 1.0,
-                                        thickness: 1.0,
-                                        indent: 12.0,
-                                        endIndent: 12.0,
-                                        color: FlutterFlowTheme.of(context)
-                                            .alternate,
-                                      ),
+                                      ProfileDivider(),
                                       Builder(
                                         builder: (context) => InkWell(
                                           splashColor: Colors.transparent,
@@ -2619,14 +2243,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                           ),
                                         ),
                                       ),
-                                      Divider(
-                                        height: 1.0,
-                                        thickness: 1.0,
-                                        indent: 12.0,
-                                        endIndent: 12.0,
-                                        color: FlutterFlowTheme.of(context)
-                                            .alternate,
-                                      ),
+                                      ProfileDivider(),
                                       Container(
                                         height: 55.0,
                                         decoration: BoxDecoration(),
