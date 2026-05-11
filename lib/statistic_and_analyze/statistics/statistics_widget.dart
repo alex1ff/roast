@@ -61,6 +61,11 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
   @override
   Widget build(BuildContext context) {
     context.watch<FFAppState>();
+    final statisticsMonth = _model.month ?? getCurrentTimestamp;
+    final statisticsMonthStart =
+        DateTime(statisticsMonth.year, statisticsMonth.month, 1);
+    final statisticsMonthEnd =
+        DateTime(statisticsMonth.year, statisticsMonth.month + 1, 1);
 
     return GestureDetector(
       onTap: () {
@@ -80,10 +85,20 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
                 child: StreamBuilder<List<AddedDishHistoryRecord>>(
                   stream: queryAddedDishHistoryRecord(
                     queryBuilder: (addedDishHistoryRecord) =>
-                        addedDishHistoryRecord.where(
-                      'user',
-                      isEqualTo: currentUserReference,
-                    ),
+                        addedDishHistoryRecord
+                            .where(
+                              'user',
+                              isEqualTo: currentUserReference,
+                            )
+                            .where(
+                              'addedDate',
+                              isGreaterThanOrEqualTo: statisticsMonthStart,
+                            )
+                            .where(
+                              'addedDate',
+                              isLessThan: statisticsMonthEnd,
+                            )
+                            .orderBy('addedDate', descending: true),
                   ),
                   builder: (context, snapshot) {
                     // Customize what your widget looks like when it's loading.
