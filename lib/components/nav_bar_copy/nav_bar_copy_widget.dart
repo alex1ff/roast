@@ -46,7 +46,7 @@ class _NavBarCopyWidgetState extends State<NavBarCopyWidget> {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(20.0),
@@ -54,380 +54,189 @@ class _NavBarCopyWidgetState extends State<NavBarCopyWidget> {
         ),
       ),
       child: Padding(
-        padding: EdgeInsetsDirectional.fromSTEB(20.0, 15.0, 20.0, 25.0),
+        padding: const EdgeInsetsDirectional.fromSTEB(20.0, 15.0, 20.0, 25.0),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Expanded(
-              child: InkWell(
-                splashColor: Colors.transparent,
-                focusColor: Colors.transparent,
-                hoverColor: Colors.transparent,
-                highlightColor: Colors.transparent,
-                onTap: () async {
-                  if (widget.activePage != 'Profile') {
-                    context.pushNamed(
-                      ProfileWidget.routeName,
-                      extra: <String, dynamic>{
-                        '__transition_info__': TransitionInfo(
-                          hasTransition: true,
-                          transitionType: PageTransitionType.fade,
-                          duration: Duration(milliseconds: 0),
-                        ),
-                      },
-                    );
-                  }
-                },
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Builder(
-                      builder: (context) {
-                        if (widget.activePage == 'Profile') {
-                          return SvgPicture.asset(
-                            'assets/images/Property_1=30,_Property_2=user-edit,_Property_3=green.svg',
-                            width: 30.0,
-                            height: 30.0,
-                            fit: BoxFit.cover,
-                          );
-                        } else {
-                          return Image.asset(
-                            'assets/images/Property_1=24,_Property_2=user-edit.webp',
-                            width: 30.0,
-                            height: 30.0,
-                            fit: BoxFit.cover,
-                          );
-                        }
-                      },
-                    ),
-                    Padding(
-                      padding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 3.0, 0.0, 0.0),
-                      child: Text(
-                        'Profile',
-                        style: FlutterFlowTheme.of(context).bodyMedium.override(
-                              font: TextStyle(
-                                fontFamily: 'SF Pro',
-                                fontWeight: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .fontWeight,
-                                fontStyle: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .fontStyle,
-                              ),
-                              fontSize: 12.0,
-                              letterSpacing: 0.0,
-                              fontWeight: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .fontWeight,
-                              fontStyle: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .fontStyle,
-                            ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            _NavBarItem(
+              activePage: widget.activePage,
+              pageKey: 'Profile',
+              routeName: ProfileWidget.routeName,
+              label: 'Profile',
+              activeAsset:
+                  'assets/images/Property_1=30,_Property_2=user-edit,_Property_3=green.svg',
+              inactiveAsset:
+                  'assets/images/Property_1=24,_Property_2=user-edit.webp',
+              activeAssetIsSvg: true,
             ),
-            Expanded(
-              child: Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(0.0, 3.0, 0.0, 0.0),
-                child: InkWell(
-                  splashColor: Colors.transparent,
-                  focusColor: Colors.transparent,
-                  hoverColor: Colors.transparent,
-                  highlightColor: Colors.transparent,
-                  onTap: () async {
-                    if (widget.activePage != 'Add') {
-                      context.pushNamed(
-                        DishAddAIWidget.routeName,
-                        extra: <String, dynamic>{
-                          '__transition_info__': TransitionInfo(
-                            hasTransition: true,
-                            transitionType: PageTransitionType.fade,
-                            duration: Duration(milliseconds: 0),
-                          ),
-                        },
-                      );
-                    }
-                  },
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Builder(
-                        builder: (context) {
-                          if (widget.activePage == 'Add') {
-                            return SvgPicture.asset(
-                              'assets/images/Property_1=30,_Property_2=camera,_Property_3=green.svg',
-                              width: 30.0,
-                              height: 30.0,
-                              fit: BoxFit.cover,
-                            );
-                          } else {
-                            return Image.asset(
-                              'assets/images/Property_1=24,_Property_2=camera.webp',
-                              width: 30.0,
-                              height: 30.0,
-                              fit: BoxFit.cover,
-                            );
-                          }
-                        },
-                      ),
-                      Padding(
-                        padding:
-                            EdgeInsetsDirectional.fromSTEB(0.0, 3.0, 0.0, 0.0),
-                        child: Text(
-                          'Add Dish',
-                          style:
-                              FlutterFlowTheme.of(context).bodyMedium.override(
-                                    font: TextStyle(
-                                      fontFamily: 'SF Pro',
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontStyle,
-                                    ),
-                                    fontSize: 12.0,
-                                    letterSpacing: 0.0,
-                                    fontWeight: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontWeight,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontStyle,
-                                  ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+            _NavBarItem(
+              activePage: widget.activePage,
+              pageKey: 'Add',
+              routeName: DishAddAIWidget.routeName,
+              label: 'Add Dish',
+              activeAsset:
+                  'assets/images/Property_1=30,_Property_2=camera,_Property_3=green.svg',
+              inactiveAsset:
+                  'assets/images/Property_1=24,_Property_2=camera.webp',
+              activeAssetIsSvg: true,
+              topPadding: 3.0,
             ),
-            Expanded(
-              child: InkWell(
-                splashColor: Colors.transparent,
-                focusColor: Colors.transparent,
-                hoverColor: Colors.transparent,
-                highlightColor: Colors.transparent,
-                onTap: () async {
-                  if (widget.activePage != 'Home') {
-                    context.pushNamed(
-                      HomeWidget.routeName,
-                      extra: <String, dynamic>{
-                        '__transition_info__': TransitionInfo(
-                          hasTransition: true,
-                          transitionType: PageTransitionType.fade,
-                          duration: Duration(milliseconds: 0),
-                        ),
-                      },
-                    );
-                  }
-                },
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Builder(
-                      builder: (context) {
-                        if (widget.activePage == 'Home') {
-                          return SvgPicture.asset(
-                            'assets/images/Property_1=30,_Property_2=home,_Property_3=green.svg',
-                            width: 30.0,
-                            height: 30.0,
-                            fit: BoxFit.cover,
-                          );
-                        } else {
-                          return Image.asset(
-                            'assets/images/Property_1=24,_Property_2=home.webp',
-                            width: 30.0,
-                            height: 30.0,
-                            fit: BoxFit.cover,
-                          );
-                        }
-                      },
-                    ),
-                    Padding(
-                      padding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 3.0, 0.0, 0.0),
-                      child: Text(
-                        'Home',
-                        style: FlutterFlowTheme.of(context).bodyMedium.override(
-                              font: TextStyle(
-                                fontFamily: 'SF Pro',
-                                fontWeight: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .fontWeight,
-                                fontStyle: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .fontStyle,
-                              ),
-                              fontSize: 12.0,
-                              letterSpacing: 0.0,
-                              fontWeight: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .fontWeight,
-                              fontStyle: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .fontStyle,
-                            ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            _NavBarItem(
+              activePage: widget.activePage,
+              pageKey: 'Home',
+              routeName: HomeWidget.routeName,
+              label: 'Home',
+              activeAsset:
+                  'assets/images/Property_1=30,_Property_2=home,_Property_3=green.svg',
+              inactiveAsset:
+                  'assets/images/Property_1=24,_Property_2=home.webp',
+              activeAssetIsSvg: true,
             ),
-            Expanded(
-              child: InkWell(
-                splashColor: Colors.transparent,
-                focusColor: Colors.transparent,
-                hoverColor: Colors.transparent,
-                highlightColor: Colors.transparent,
-                onTap: () async {
-                  if (widget.activePage != 'Chat') {
-                    context.pushNamed(
-                      ChatCopyWidget.routeName,
-                      extra: <String, dynamic>{
-                        '__transition_info__': TransitionInfo(
-                          hasTransition: true,
-                          transitionType: PageTransitionType.fade,
-                          duration: Duration(milliseconds: 0),
-                        ),
-                      },
-                    );
-                  }
-                },
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Builder(
-                      builder: (context) {
-                        if (widget.activePage == 'Chat') {
-                          return Image.asset(
-                            'assets/images/ChatOn.png',
-                            width: 30.0,
-                            height: 30.0,
-                            fit: BoxFit.cover,
-                          );
-                        } else {
-                          return Image.asset(
-                            'assets/images/ChatOff.png',
-                            width: 30.0,
-                            height: 30.0,
-                            fit: BoxFit.cover,
-                          );
-                        }
-                      },
-                    ),
-                    Padding(
-                      padding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 3.0, 0.0, 0.0),
-                      child: Text(
-                        'Chat',
-                        style: FlutterFlowTheme.of(context).bodyMedium.override(
-                              font: TextStyle(
-                                fontFamily: 'SF Pro',
-                                fontWeight: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .fontWeight,
-                                fontStyle: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .fontStyle,
-                              ),
-                              fontSize: 12.0,
-                              letterSpacing: 0.0,
-                              fontWeight: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .fontWeight,
-                              fontStyle: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .fontStyle,
-                            ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            _NavBarItem(
+              activePage: widget.activePage,
+              pageKey: 'Chat',
+              routeName: ChatCopyWidget.routeName,
+              label: 'Chat',
+              activeAsset: 'assets/images/ChatOn.png',
+              inactiveAsset: 'assets/images/ChatOff.png',
             ),
-            Expanded(
-              child: InkWell(
-                splashColor: Colors.transparent,
-                focusColor: Colors.transparent,
-                hoverColor: Colors.transparent,
-                highlightColor: Colors.transparent,
-                onTap: () async {
-                  if (widget.activePage != 'Stats') {
-                    context.pushNamed(
-                      StatisticsWidget.routeName,
-                      extra: <String, dynamic>{
-                        '__transition_info__': TransitionInfo(
-                          hasTransition: true,
-                          transitionType: PageTransitionType.fade,
-                          duration: Duration(milliseconds: 0),
-                        ),
-                      },
-                    );
-                  }
-                },
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Builder(
-                      builder: (context) {
-                        if (widget.activePage == 'Stats') {
-                          return SvgPicture.asset(
-                            'assets/images/Property_1=30,_Property_2=calendar-2,_Property_3=green.svg',
-                            width: 30.0,
-                            height: 30.0,
-                            fit: BoxFit.cover,
-                          );
-                        } else {
-                          return Image.asset(
-                            'assets/images/Property_1=24,_Property_2=calendar-2.webp',
-                            width: 30.0,
-                            height: 30.0,
-                            fit: BoxFit.cover,
-                          );
-                        }
-                      },
-                    ),
-                    Padding(
-                      padding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 3.0, 0.0, 0.0),
-                      child: Text(
-                        'Stats',
-                        textAlign: TextAlign.center,
-                        style: FlutterFlowTheme.of(context).bodyMedium.override(
-                              font: TextStyle(
-                                fontFamily: 'SF Pro',
-                                fontWeight: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .fontWeight,
-                                fontStyle: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .fontStyle,
-                              ),
-                              fontSize: 12.0,
-                              letterSpacing: 0.0,
-                              fontWeight: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .fontWeight,
-                              fontStyle: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .fontStyle,
-                            ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            _NavBarItem(
+              activePage: widget.activePage,
+              pageKey: 'Stats',
+              routeName: StatisticsWidget.routeName,
+              label: 'Stats',
+              activeAsset:
+                  'assets/images/Property_1=30,_Property_2=calendar-2,_Property_3=green.svg',
+              inactiveAsset:
+                  'assets/images/Property_1=24,_Property_2=calendar-2.webp',
+              activeAssetIsSvg: true,
+              textAlign: TextAlign.center,
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _NavBarItem extends StatelessWidget {
+  const _NavBarItem({
+    required this.activePage,
+    required this.pageKey,
+    required this.routeName,
+    required this.label,
+    required this.activeAsset,
+    required this.inactiveAsset,
+    this.activeAssetIsSvg = false,
+    this.topPadding = 0.0,
+    this.textAlign,
+  });
+
+  final String? activePage;
+  final String pageKey;
+  final String routeName;
+  final String label;
+  final String activeAsset;
+  final String inactiveAsset;
+  final bool activeAssetIsSvg;
+  final double topPadding;
+  final TextAlign? textAlign;
+
+  bool get isActive => activePage == pageKey;
+
+  @override
+  Widget build(BuildContext context) {
+    final item = InkWell(
+      splashColor: Colors.transparent,
+      focusColor: Colors.transparent,
+      hoverColor: Colors.transparent,
+      highlightColor: Colors.transparent,
+      onTap: () async {
+        if (isActive) {
+          return;
+        }
+        context.pushNamed(
+          routeName,
+          extra: <String, dynamic>{
+            '__transition_info__': const TransitionInfo(
+              hasTransition: true,
+              transitionType: PageTransitionType.fade,
+              duration: Duration(milliseconds: 0),
+            ),
+          },
+        );
+      },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _NavBarIcon(
+            asset: isActive ? activeAsset : inactiveAsset,
+            isSvg: isActive && activeAssetIsSvg,
+          ),
+          Padding(
+            padding: const EdgeInsetsDirectional.fromSTEB(0.0, 3.0, 0.0, 0.0),
+            child: Text(
+              label,
+              textAlign: textAlign,
+              style: FlutterFlowTheme.of(context).bodyMedium.override(
+                    font: TextStyle(
+                      fontFamily: 'SF Pro',
+                      fontWeight:
+                          FlutterFlowTheme.of(context).bodyMedium.fontWeight,
+                      fontStyle:
+                          FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                    ),
+                    fontSize: 12.0,
+                    letterSpacing: 0.0,
+                    fontWeight:
+                        FlutterFlowTheme.of(context).bodyMedium.fontWeight,
+                    fontStyle:
+                        FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                  ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    return Expanded(
+      child: topPadding > 0
+          ? Padding(
+              padding:
+                  EdgeInsetsDirectional.fromSTEB(0.0, topPadding, 0.0, 0.0),
+              child: item,
+            )
+          : item,
+    );
+  }
+}
+
+class _NavBarIcon extends StatelessWidget {
+  const _NavBarIcon({
+    required this.asset,
+    required this.isSvg,
+  });
+
+  final String asset;
+  final bool isSvg;
+
+  @override
+  Widget build(BuildContext context) {
+    if (isSvg) {
+      return SvgPicture.asset(
+        asset,
+        width: 30.0,
+        height: 30.0,
+        fit: BoxFit.cover,
+      );
+    }
+    return Image.asset(
+      asset,
+      width: 30.0,
+      height: 30.0,
+      fit: BoxFit.cover,
     );
   }
 }

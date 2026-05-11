@@ -1,6 +1,5 @@
 import '/auth/firebase_auth/auth_util.dart';
 import '/backend/ai_agents/ai_agent.dart';
-import '/backend/api_requests/api_calls.dart';
 import '/backend/backend.dart';
 import '/components/loading_animation/loading_animation_widget.dart';
 import '/flutter_flow/flutter_flow_drop_down.dart';
@@ -10,6 +9,7 @@ import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/form_field_controller.dart';
 import '/main_page/subscription_pop_up/subscription_pop_up_widget.dart';
 import '/main_page/subscription_pop_up_copy/subscription_pop_up_copy_widget.dart';
+import '/services/roast_audio_service.dart';
 import '/services/user_account_mutations.dart';
 import '/services/usage_limit_service.dart';
 import 'dart:async';
@@ -73,18 +73,14 @@ class _ChoosePersonWidgetState extends State<ChoosePersonWidget> {
   }) {
     unawaited(
       () async {
-        final audioResult = await TextToSpeechCall.call(
-          text: roastText,
+        final audioUrl = await RoastAudioService.generateAndAttach(
+          roastReference: roastReference,
+          roastText: roastText,
           voiceId: voiceId,
         );
-        final audioUrl = TextToSpeechCall.audio(audioResult.jsonBody ?? '');
         if (audioUrl == null || audioUrl.isEmpty) {
           return;
         }
-
-        await roastReference.update(
-          createAddedDishHistoryRecordData(roastAudio: audioUrl),
-        );
 
         if (!mounted) {
           return;
