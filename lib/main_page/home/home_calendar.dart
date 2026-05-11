@@ -54,8 +54,8 @@ class HomeCalendarCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     dateTimeFormat(
-                      'yMMMM',
-                      month,
+                      'yMMMd',
+                      selectedDate,
                       locale: FFLocalizations.of(context).languageCode,
                     ),
                     textAlign: TextAlign.center,
@@ -88,10 +88,8 @@ class HomeCalendarCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 14.0),
-            if (isExpanded) ...[
-              const _WeekdayHeader(),
-              const SizedBox(height: 10.0),
-            ],
+            const _WeekdayHeader(),
+            const SizedBox(height: 10.0),
             GridView.builder(
               padding: EdgeInsets.zero,
               shrinkWrap: true,
@@ -114,7 +112,6 @@ class HomeCalendarCard extends StatelessWidget {
                   isSelected: isSameHomeCalendarDay(day, selectedDate),
                   hasRecords: summary.count > 0,
                   kcal: summary.kcal,
-                  showWeekday: !isExpanded,
                   onTap: () => onSelectDate(day),
                 );
               },
@@ -218,7 +215,6 @@ class _CalendarDayButton extends StatelessWidget {
     required this.isSelected,
     required this.hasRecords,
     required this.kcal,
-    required this.showWeekday,
     required this.onTap,
   });
 
@@ -226,7 +222,6 @@ class _CalendarDayButton extends StatelessWidget {
   final bool isSelected;
   final bool hasRecords;
   final int kcal;
-  final bool showWeekday;
   final VoidCallback onTap;
 
   @override
@@ -256,25 +251,6 @@ class _CalendarDayButton extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (showWeekday)
-                Text(
-                  dateTimeFormat(
-                    'E',
-                    day,
-                    locale: FFLocalizations.of(context).languageCode,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: FlutterFlowTheme.of(context).bodyMedium.override(
-                        fontFamily: 'SF Pro',
-                        color: isSelected
-                            ? Colors.white70
-                            : FlutterFlowTheme.of(context).secondaryText,
-                        fontSize: 10.0,
-                        letterSpacing: 0.0,
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
               Text(
                 day.day.toString(),
                 style: FlutterFlowTheme.of(context).bodyMedium.override(

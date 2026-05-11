@@ -19,6 +19,8 @@ class KcalBottomSheetWidget extends StatefulWidget {
 
 class _KcalBottomSheetWidgetState extends State<KcalBottomSheetWidget> {
   late KcalBottomSheetModel _model;
+  bool _hasLoadedUserValues = false;
+  bool _isSaving = false;
 
   CalorieGoalResult get _calculation => CalorieGoalService.calculate(
         heightCm: _model.height,
@@ -39,20 +41,6 @@ class _KcalBottomSheetWidgetState extends State<KcalBottomSheetWidget> {
   void initState() {
     super.initState();
     _model = createModel(context, () => KcalBottomSheetModel());
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final user = currentUserDocument;
-      if (user == null) return;
-      safeSetState(() {
-        _model.height = user.height > 0 ? user.height : null;
-        _model.weight = user.weight > 0 ? user.weight : null;
-        _model.age = user.age > 0 ? user.age : null;
-        _model.gender = user.gender.isNotEmpty ? user.gender : null;
-        _model.activityLevel =
-            user.activityLevel.isNotEmpty ? user.activityLevel : null;
-        _model.userGoal = user.userGoal.isNotEmpty ? user.userGoal : null;
-      });
-    });
   }
 
   @override
@@ -134,204 +122,294 @@ class _KcalBottomSheetWidgetState extends State<KcalBottomSheetWidget> {
     );
   }
 
+  void _loadUserValues(UsersRecord? user) {
+    if (_hasLoadedUserValues || user == null) return;
+
+    _model.height ??= user.height > 0 ? user.height : null;
+    _model.weight ??= user.weight > 0 ? user.weight : null;
+    _model.age ??= user.age > 0 ? user.age : null;
+    _model.gender ??= user.gender.isNotEmpty ? user.gender : null;
+    _model.activityLevel ??=
+        user.activityLevel.isNotEmpty ? user.activityLevel : null;
+    _model.userGoal ??= user.userGoal.isNotEmpty ? user.userGoal : null;
+    _hasLoadedUserValues = true;
+  }
+
+  Future<void> _ensureUserValuesLoaded() async {
+    if (_hasLoadedUserValues) return;
+
+    final user = currentUserDocument;
+    if (user != null) {
+      _loadUserValues(user);
+      return;
+    }
+
+    final userReference = currentUserReference;
+    if (userReference == null) return;
+
+    try {
+      final loadedUser = await UsersRecord.getDocumentOnce(userReference);
+      currentUserDocument = loadedUser;
+      if (mounted) {
+        safeSetState(() => _loadUserValues(loadedUser));
+      }
+    } catch (_) {
+      // Save will show a user-facing error if required fields are still absent.
+    }
+  }
+
+  String _missingFieldsMessage(List<String> fields) {
+    const labels = <String, String>{
+      'heightCm': 'Height',
+      'weightKg': 'Weight',
+      'age': 'Age',
+      'gender': 'Gender',
+      'activityLevel': 'Activity level',
+      'userGoal': 'Goal',
+    };
+
+    return fields.map((field) => labels[field] ?? field).join(', ');
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message),
+        ),
+      );
+  }
+
   Future<void> _saveGoals() async {
+    if (_isSaving) return;
+
+    await _ensureUserValuesLoaded();
+
     final result = _calculation;
     if (!result.isComplete) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Complete: ${result.missingFields.join(', ')}',
-          ),
-        ),
+      _showError(
+        'Please fill in: ${_missingFieldsMessage(result.missingFields)}.',
       );
       return;
     }
 
-    await currentUserReference!.update(
-      createUsersRecordData(
-        height: _model.height,
-        weight: _model.weight,
-        age: _model.age,
-        gender: _model.gender,
-        activityLevel: _model.activityLevel,
-        userGoal: _model.userGoal,
-        kcalGoal: result.kcalGoal,
-        proteinsGoal: result.proteinsGoal,
-        fatsGoal: result.fatsGoal,
-        carbsGoal: result.carbsGoal,
-      ),
-    );
+    final userReference = currentUserReference;
+    if (userReference == null) {
+      _showError('Unable to save. Please sign in again.');
+      return;
+    }
 
-    if (mounted) {
-      Navigator.pop(context);
+    safeSetState(() => _isSaving = true);
+    try {
+      await userReference.update(
+        createUsersRecordData(
+          height: _model.height,
+          weight: _model.weight,
+          age: _model.age,
+          gender: _model.gender,
+          activityLevel: _model.activityLevel,
+          userGoal: _model.userGoal,
+          kcalGoal: result.kcalGoal,
+          proteinsGoal: result.proteinsGoal,
+          fatsGoal: result.fatsGoal,
+          carbsGoal: result.carbsGoal,
+        ),
+      );
+
+      if (mounted) {
+        Navigator.pop(context);
+      }
+    } catch (_) {
+      if (mounted) {
+        _showError('Could not save calorie goals. Please try again.');
+      }
+    } finally {
+      if (mounted) {
+        safeSetState(() => _isSaving = false);
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final result = _calculation;
+    return AuthUserStreamWidget(
+      builder: (context) {
+        _loadUserValues(currentUserDocument);
+        final result = _calculation;
 
-    return Padding(
-      padding: EdgeInsetsDirectional.fromSTEB(0.0, 50.0, 0.0, 0.0),
-      child: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: BoxDecoration(
-          color: FlutterFlowTheme.of(context).secondaryBackground,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(25.0),
-            topRight: Radius.circular(25.0),
-          ),
-          border: Border.all(
-            color: FlutterFlowTheme.of(context).primary,
-            width: 2.0,
-          ),
-        ),
-        child: Align(
-          alignment: AlignmentDirectional(0.0, -1.0),
+        return Padding(
+          padding: EdgeInsetsDirectional.fromSTEB(0.0, 50.0, 0.0, 0.0),
           child: Container(
-            constraints: BoxConstraints(maxWidth: 600.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(6.0, 6.0, 6.0, 0.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Padding(
-                        padding:
-                            EdgeInsetsDirectional.fromSTEB(10.0, 0.0, 0.0, 0.0),
-                        child: Text(
-                          'Calorie goals',
-                          style:
-                              FlutterFlowTheme.of(context).titleMedium.override(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: BoxDecoration(
+              color: FlutterFlowTheme.of(context).secondaryBackground,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(25.0),
+                topRight: Radius.circular(25.0),
+              ),
+              border: Border.all(
+                color: FlutterFlowTheme.of(context).primary,
+                width: 2.0,
+              ),
+            ),
+            child: Align(
+              alignment: AlignmentDirectional(0.0, -1.0),
+              child: Container(
+                constraints: BoxConstraints(maxWidth: 600.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    Padding(
+                      padding:
+                          EdgeInsetsDirectional.fromSTEB(6.0, 6.0, 6.0, 0.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Padding(
+                            padding: EdgeInsetsDirectional.fromSTEB(
+                                10.0, 0.0, 0.0, 0.0),
+                            child: Text(
+                              'Calorie goals',
+                              style: FlutterFlowTheme.of(context)
+                                  .titleMedium
+                                  .override(
                                     fontFamily: 'SF Pro',
                                     fontSize: 20.0,
                                     letterSpacing: 0.0,
                                   ),
-                        ),
-                      ),
-                      FlutterFlowIconButton(
-                        borderRadius: 8.0,
-                        buttonSize: 45.0,
-                        icon: Icon(
-                          Icons.close,
-                          color: FlutterFlowTheme.of(context).primaryText,
-                          size: 24.0,
-                        ),
-                        onPressed: () async {
-                          Navigator.pop(context);
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding:
-                        EdgeInsetsDirectional.fromSTEB(12.0, 16.0, 12.0, 16.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.max,
-                      children: [
-                        _GoalPreview(result: result),
-                        _PickerRow(
-                          title: 'Height',
-                          value: _model.height == null
-                              ? 'Not set'
-                              : '${_model.height!.toStringAsFixed(1)} cm',
-                          isEmpty: _model.height == null,
-                          onTap: _pickHeight,
-                        ),
-                        _PickerRow(
-                          title: 'Weight',
-                          value: _model.weight == null
-                              ? 'Not set'
-                              : '${_model.weight!.toStringAsFixed(1)} kg',
-                          isEmpty: _model.weight == null,
-                          onTap: _pickWeight,
-                        ),
-                        _PickerRow(
-                          title: 'Age',
-                          value: _model.age == null
-                              ? 'Not set'
-                              : '${_model.age} years',
-                          isEmpty: _model.age == null,
-                          onTap: _pickAge,
-                        ),
-                        _PickerRow(
-                          title: 'Gender',
-                          value: _model.gender ?? 'Not set',
-                          isEmpty: _model.gender == null,
-                          onTap: () => _pickString(
-                            options: FFAppConstants.gender,
-                            initialValue: _model.gender,
-                            onSelected: (value) {
-                              safeSetState(() => _model.gender = value);
-                            },
-                          ),
-                        ),
-                        _PickerRow(
-                          title: 'Activity level',
-                          value: _model.activityLevel ?? 'Not set',
-                          isEmpty: _model.activityLevel == null,
-                          onTap: () => _pickString(
-                            options: FFAppConstants.ActivityLevel,
-                            initialValue: _model.activityLevel,
-                            onSelected: (value) {
-                              safeSetState(() => _model.activityLevel = value);
-                            },
-                          ),
-                        ),
-                        _PickerRow(
-                          title: 'Goal',
-                          value: _model.userGoal ?? 'Not set',
-                          isEmpty: _model.userGoal == null,
-                          onTap: () => _pickString(
-                            options: FFAppConstants.UserGoal,
-                            initialValue: _model.userGoal,
-                            onSelected: (value) {
-                              safeSetState(() => _model.userGoal = value);
-                            },
-                          ),
-                        ),
-                      ].divide(SizedBox(height: 10.0)),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding:
-                      EdgeInsetsDirectional.fromSTEB(12.0, 8.0, 12.0, 20.0),
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(16.0),
-                    onTap: _saveGoals,
-                    child: Container(
-                      width: double.infinity,
-                      height: 52.0,
-                      decoration: BoxDecoration(
-                        color: FlutterFlowTheme.of(context).primary,
-                        borderRadius: BorderRadius.circular(16.0),
-                      ),
-                      alignment: AlignmentDirectional(0.0, 0.0),
-                      child: Text(
-                        'Save and apply goals',
-                        style: FlutterFlowTheme.of(context).bodyMedium.override(
-                              fontFamily: 'SF Pro',
-                              color: FlutterFlowTheme.of(context)
-                                  .secondaryBackground,
-                              fontSize: 16.0,
-                              letterSpacing: 0.0,
-                              fontWeight: FontWeight.w600,
                             ),
+                          ),
+                          FlutterFlowIconButton(
+                            borderRadius: 8.0,
+                            buttonSize: 45.0,
+                            icon: Icon(
+                              Icons.close,
+                              color: FlutterFlowTheme.of(context).primaryText,
+                              size: 24.0,
+                            ),
+                            onPressed: () async {
+                              Navigator.pop(context);
+                            },
+                          ),
+                        ],
                       ),
                     ),
-                  ),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        padding: EdgeInsetsDirectional.fromSTEB(
+                            12.0, 16.0, 12.0, 16.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.max,
+                          children: [
+                            _GoalPreview(result: result),
+                            _PickerRow(
+                              title: 'Height',
+                              value: _model.height == null
+                                  ? 'Not set'
+                                  : '${_model.height!.toStringAsFixed(1)} cm',
+                              isEmpty: _model.height == null,
+                              onTap: _pickHeight,
+                            ),
+                            _PickerRow(
+                              title: 'Weight',
+                              value: _model.weight == null
+                                  ? 'Not set'
+                                  : '${_model.weight!.toStringAsFixed(1)} kg',
+                              isEmpty: _model.weight == null,
+                              onTap: _pickWeight,
+                            ),
+                            _PickerRow(
+                              title: 'Age',
+                              value: _model.age == null
+                                  ? 'Not set'
+                                  : '${_model.age} years',
+                              isEmpty: _model.age == null,
+                              onTap: _pickAge,
+                            ),
+                            _PickerRow(
+                              title: 'Gender',
+                              value: _model.gender ?? 'Not set',
+                              isEmpty: _model.gender == null,
+                              onTap: () => _pickString(
+                                options: FFAppConstants.gender,
+                                initialValue: _model.gender,
+                                onSelected: (value) {
+                                  safeSetState(() => _model.gender = value);
+                                },
+                              ),
+                            ),
+                            _PickerRow(
+                              title: 'Activity level',
+                              value: _model.activityLevel ?? 'Not set',
+                              isEmpty: _model.activityLevel == null,
+                              onTap: () => _pickString(
+                                options: FFAppConstants.ActivityLevel,
+                                initialValue: _model.activityLevel,
+                                onSelected: (value) {
+                                  safeSetState(
+                                      () => _model.activityLevel = value);
+                                },
+                              ),
+                            ),
+                            _PickerRow(
+                              title: 'Goal',
+                              value: _model.userGoal ?? 'Not set',
+                              isEmpty: _model.userGoal == null,
+                              onTap: () => _pickString(
+                                options: FFAppConstants.UserGoal,
+                                initialValue: _model.userGoal,
+                                onSelected: (value) {
+                                  safeSetState(() => _model.userGoal = value);
+                                },
+                              ),
+                            ),
+                          ].divide(SizedBox(height: 10.0)),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding:
+                          EdgeInsetsDirectional.fromSTEB(12.0, 8.0, 12.0, 20.0),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(16.0),
+                        onTap: _isSaving
+                            ? null
+                            : () async {
+                                await _saveGoals();
+                              },
+                        child: Container(
+                          width: double.infinity,
+                          height: 52.0,
+                          decoration: BoxDecoration(
+                            color: FlutterFlowTheme.of(context).primary,
+                            borderRadius: BorderRadius.circular(16.0),
+                          ),
+                          alignment: AlignmentDirectional(0.0, 0.0),
+                          child: Text(
+                            _isSaving ? 'Saving...' : 'Save and apply goals',
+                            style: FlutterFlowTheme.of(context)
+                                .bodyMedium
+                                .override(
+                                  fontFamily: 'SF Pro',
+                                  color: FlutterFlowTheme.of(context)
+                                      .secondaryBackground,
+                                  fontSize: 16.0,
+                                  letterSpacing: 0.0,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
@@ -460,31 +538,35 @@ class _PickerRow extends StatelessWidget {
           padding: EdgeInsetsDirectional.fromSTEB(16.0, 15.0, 12.0, 15.0),
           child: Row(
             children: [
-              Expanded(
-                child: Text(
-                  title,
-                  style: FlutterFlowTheme.of(context).bodyMedium.override(
-                        fontFamily: 'SF Pro',
-                        color: FlutterFlowTheme.of(context).textfieldsText,
-                        fontSize: 16.0,
-                        letterSpacing: 0.0,
-                      ),
-                ),
+              Text(
+                title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: FlutterFlowTheme.of(context).bodyMedium.override(
+                      fontFamily: 'SF Pro',
+                      color: FlutterFlowTheme.of(context).textfieldsText,
+                      fontSize: 16.0,
+                      letterSpacing: 0.0,
+                    ),
               ),
-              Flexible(
-                child: Text(
-                  value,
-                  textAlign: TextAlign.end,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: FlutterFlowTheme.of(context).bodyMedium.override(
-                        fontFamily: 'SF Pro',
-                        color: isEmpty
-                            ? Color(0xFF9B9A9D)
-                            : FlutterFlowTheme.of(context).primaryText,
-                        fontSize: 16.0,
-                        letterSpacing: 0.0,
-                      ),
+              SizedBox(width: 12.0),
+              Expanded(
+                child: Align(
+                  alignment: AlignmentDirectional.centerEnd,
+                  child: Text(
+                    value,
+                    textAlign: TextAlign.end,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: FlutterFlowTheme.of(context).bodyMedium.override(
+                          fontFamily: 'SF Pro',
+                          color: isEmpty
+                              ? Color(0xFF9B9A9D)
+                              : FlutterFlowTheme.of(context).primaryText,
+                          fontSize: 16.0,
+                          letterSpacing: 0.0,
+                        ),
+                  ),
                 ),
               ),
               Padding(

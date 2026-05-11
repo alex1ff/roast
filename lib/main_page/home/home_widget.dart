@@ -369,11 +369,7 @@ class _HomeHeader extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          dateTimeFormat(
-            'yMMMd',
-            selectedDate,
-            locale: FFLocalizations.of(context).languageCode,
-          ),
+          'Daily Goal',
           style: FlutterFlowTheme.of(context).bodyMedium.override(
                 fontFamily: 'SF Pro',
                 fontSize: 21.0,
@@ -390,19 +386,6 @@ class _HomeHeader extends StatelessWidget {
           onChangeMonth: onChangeMonth,
           onSelectDate: onSelectDate,
           onToggleExpanded: onToggleCalendar,
-        ),
-        const SizedBox(height: 24.0),
-        Align(
-          alignment: Alignment.center,
-          child: Text(
-            'Daily Goal',
-            style: FlutterFlowTheme.of(context).bodyMedium.override(
-                  fontFamily: 'SF Pro',
-                  fontSize: 18.0,
-                  letterSpacing: 0.0,
-                  fontWeight: FontWeight.w600,
-                ),
-          ),
         ),
         const SizedBox(height: 16.0),
       ],
