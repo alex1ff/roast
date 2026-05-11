@@ -81,6 +81,29 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
     super.dispose();
   }
 
+  void _generateAudioForRoast({
+    required DocumentReference roastReference,
+    required String roastText,
+    required String voiceId,
+  }) {
+    unawaited(
+      () async {
+        final audioResult = await TextToSpeechCall.call(
+          text: roastText,
+          voiceId: voiceId,
+        );
+        final audioUrl = TextToSpeechCall.audio(audioResult.jsonBody ?? '');
+        if (audioUrl == null || audioUrl.isEmpty) {
+          return;
+        }
+
+        await roastReference.update(
+          createAddedDishHistoryRecordData(roastAudio: audioUrl),
+        );
+      }(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     context.watch<FFAppState>();
@@ -1058,45 +1081,59 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
                                                                                     letterSpacing: 0.0,
                                                                                   ),
                                                                             ),
-                                                                            Padding(
-                                                                              padding: EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 0.0),
-                                                                              child: Row(
-                                                                                mainAxisSize: MainAxisSize.max,
-                                                                                children: [
-                                                                                  if (responsiveVisibility(
-                                                                                    context: context,
-                                                                                    phone: false,
-                                                                                  ))
-                                                                                    FlutterFlowIconButton(
-                                                                                      borderRadius: 100.0,
-                                                                                      buttonSize: 35.0,
-                                                                                      fillColor: FlutterFlowTheme.of(context).primary,
-                                                                                      icon: Icon(
-                                                                                        Icons.play_arrow,
-                                                                                        color: FlutterFlowTheme.of(context).info,
-                                                                                        size: 17.0,
+                                                                            if (stackAddedDishHistoryRecord.roastAudio.trim().isNotEmpty)
+                                                                              Padding(
+                                                                                padding: EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 0.0),
+                                                                                child: Row(
+                                                                                  mainAxisSize: MainAxisSize.max,
+                                                                                  children: [
+                                                                                    if (responsiveVisibility(
+                                                                                      context: context,
+                                                                                      phone: false,
+                                                                                    ))
+                                                                                      FlutterFlowIconButton(
+                                                                                        borderRadius: 100.0,
+                                                                                        buttonSize: 35.0,
+                                                                                        fillColor: FlutterFlowTheme.of(context).primary,
+                                                                                        icon: Icon(
+                                                                                          Icons.play_arrow,
+                                                                                          color: FlutterFlowTheme.of(context).info,
+                                                                                          size: 17.0,
+                                                                                        ),
+                                                                                        onPressed: () async {
+                                                                                          _model.soundPlayer1 ??= AudioPlayer();
+                                                                                          if (_model.soundPlayer1!.playing) {
+                                                                                            await _model.soundPlayer1!.stop();
+                                                                                          }
+                                                                                          _model.soundPlayer1!.setVolume(1.0);
+                                                                                          await _model.soundPlayer1!.setUrl(stackAddedDishHistoryRecord.roastAudio).then((_) => _model.soundPlayer1!.play());
+                                                                                        },
                                                                                       ),
-                                                                                      onPressed: () async {
-                                                                                        _model.soundPlayer1 ??= AudioPlayer();
-                                                                                        if (_model.soundPlayer1!.playing) {
-                                                                                          await _model.soundPlayer1!.stop();
-                                                                                        }
-                                                                                        _model.soundPlayer1!.setVolume(1.0);
-                                                                                        await _model.soundPlayer1!.setUrl(stackAddedDishHistoryRecord.roastAudio).then((_) => _model.soundPlayer1!.play());
-                                                                                      },
-                                                                                    ),
-                                                                                  Container(
-                                                                                    width: MediaQuery.sizeOf(context).width * 0.71,
-                                                                                    height: 54.0,
-                                                                                    child: custom_widgets.AudioMessageWidget(
+                                                                                    Container(
                                                                                       width: MediaQuery.sizeOf(context).width * 0.71,
                                                                                       height: 54.0,
-                                                                                      audioUrl: stackAddedDishHistoryRecord.roastAudio,
+                                                                                      child: custom_widgets.AudioMessageWidget(
+                                                                                        width: MediaQuery.sizeOf(context).width * 0.71,
+                                                                                        height: 54.0,
+                                                                                        audioUrl: stackAddedDishHistoryRecord.roastAudio,
+                                                                                      ),
                                                                                     ),
-                                                                                  ),
-                                                                                ],
+                                                                                  ],
+                                                                                ),
+                                                                              )
+                                                                            else
+                                                                              Padding(
+                                                                                padding: EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 0.0),
+                                                                                child: Text(
+                                                                                  'Audio is being prepared',
+                                                                                  style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                                                                        fontFamily: 'SF Pro',
+                                                                                        color: FlutterFlowTheme.of(context).secondaryText,
+                                                                                        fontSize: 14.0,
+                                                                                        letterSpacing: 0.0,
+                                                                                      ),
+                                                                                ),
                                                                               ),
-                                                                            ),
                                                                           ],
                                                                         ),
                                                                       ),
@@ -1258,54 +1295,28 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
                                                                               true;
                                                                           if (_model.roast !=
                                                                               null) {
-                                                                            _model.audioResultt2 =
-                                                                                await TextToSpeechCall.call(
-                                                                              text: getJsonField(
-                                                                                _model.roast,
-                                                                                r'''$.roast''',
-                                                                              ).toString(),
-                                                                              voiceId: stackAddedDishHistoryRecord.roastVoiceId,
-                                                                            );
-
-                                                                            _shouldSetState =
-                                                                                true;
+                                                                            final roastText =
+                                                                                getJsonField(
+                                                                              _model.roast,
+                                                                              r'''$.roast''',
+                                                                            ).toString();
                                                                             unawaited(
                                                                               UserAccountMutations.recordUsage(
                                                                                 UserUsageFeature.roast,
                                                                               ),
                                                                             );
-                                                                            if ((_model.audioResultt2?.succeeded ??
-                                                                                true)) {
-                                                                              unawaited(
-                                                                                () async {
-                                                                                  await widget.dish!.update(createAddedDishHistoryRecordData(
-                                                                                    roastText: getJsonField(
-                                                                                      _model.roast,
-                                                                                      r'''$.roast''',
-                                                                                    ).toString(),
-                                                                                    roastAudio: TextToSpeechCall.audio(
-                                                                                      (_model.audioResultt2?.jsonBody ?? ''),
-                                                                                    ),
-                                                                                  ));
-                                                                                }(),
-                                                                              );
-                                                                              Navigator.pop(context);
-                                                                              safeSetState(() {});
-                                                                              _model.soundPlayer2 ??= AudioPlayer();
-                                                                              if (_model.soundPlayer2!.playing) {
-                                                                                await _model.soundPlayer2!.stop();
-                                                                              }
-                                                                              _model.soundPlayer2!.setVolume(1.0);
-                                                                              _model.soundPlayer2!
-                                                                                  .setUrl(TextToSpeechCall.audio(
-                                                                                    (_model.audioResultt2?.jsonBody ?? ''),
-                                                                                  )!)
-                                                                                  .then((_) => _model.soundPlayer2!.play());
-
-                                                                              if (_shouldSetState)
-                                                                                safeSetState(() {});
-                                                                              return;
-                                                                            }
+                                                                            await widget.dish!.update(createAddedDishHistoryRecordData(
+                                                                              roastText: roastText,
+                                                                              roastAudio: '',
+                                                                            ));
+                                                                            _generateAudioForRoast(
+                                                                              roastReference: widget.dish!,
+                                                                              roastText: roastText,
+                                                                              voiceId: stackAddedDishHistoryRecord.roastVoiceId,
+                                                                            );
+                                                                            Navigator.pop(context);
+                                                                            safeSetState(() {});
+                                                                            return;
                                                                           }
                                                                           Navigator.pop(
                                                                               context);
@@ -2507,160 +2518,111 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
 
                                                   _shouldSetState = true;
                                                   if (_model.reroas != null) {
-                                                    _model.audioResultt22 =
-                                                        await TextToSpeechCall
-                                                            .call(
-                                                      text: getJsonField(
-                                                        _model.reroas,
-                                                        r'''$.roast''',
-                                                      ).toString(),
+                                                    final roastText =
+                                                        getJsonField(
+                                                      _model.reroas,
+                                                      r'''$.roast''',
+                                                    ).toString();
+                                                    unawaited(
+                                                      UserAccountMutations
+                                                          .recordUsage(
+                                                        UserUsageFeature.roast,
+                                                      ),
+                                                    );
+                                                    await stackAddedDishHistoryRecord
+                                                        .reference
+                                                        .update({
+                                                      ...createAddedDishHistoryRecordData(
+                                                        dishWeight:
+                                                            getJsonField(
+                                                          _model.reroas,
+                                                          r'''$.dish_weight''',
+                                                        ),
+                                                        kcal: getJsonField(
+                                                          _model.reroas,
+                                                          r'''$.kcal''',
+                                                        ),
+                                                        carbs: getJsonField(
+                                                          _model.reroas,
+                                                          r'''$.carbs''',
+                                                        ),
+                                                        fats: getJsonField(
+                                                          _model.reroas,
+                                                          r'''$.fats''',
+                                                        ),
+                                                        proteins: getJsonField(
+                                                          _model.reroas,
+                                                          r'''$.proteins''',
+                                                        ),
+                                                        roastText: roastText,
+                                                        badge: getJsonField(
+                                                          _model.reroas,
+                                                          r'''$.primary_badge_text''',
+                                                        ).toString(),
+                                                        impact: getJsonField(
+                                                          _model.reroas,
+                                                          r'''$.goal_impact_text''',
+                                                        ).toString(),
+                                                        calorieshare:
+                                                            getJsonField(
+                                                          _model.reroas,
+                                                          r'''$.daily_calorie_share_text''',
+                                                        ).toString(),
+                                                        roastAudio: '',
+                                                      ),
+                                                      ...mapToFirestore(
+                                                        {
+                                                          'main_ingredients':
+                                                              (getJsonField(
+                                                            _model.reroas,
+                                                            r'''$.main_ingredients''',
+                                                            true,
+                                                          ) as List?)
+                                                                  ?.map<String>(
+                                                                      (e) => e
+                                                                          .toString())
+                                                                  .toList()
+                                                                  .cast<
+                                                                      String>(),
+                                                          'vitamins':
+                                                              getDishPageVitaminsDataListFirestoreData(
+                                                            (getJsonField(
+                                                              _model.reroas,
+                                                              r'''$.vitaminsAndMinerals''',
+                                                              true,
+                                                            )
+                                                                        ?.toList()
+                                                                        .map<DishPageVitaminsDataStruct?>(DishPageVitaminsDataStruct
+                                                                            .maybeFromMap)
+                                                                        .toList()
+                                                                    as Iterable<
+                                                                        DishPageVitaminsDataStruct?>)
+                                                                .withoutNulls,
+                                                          ),
+                                                          'health_tips':
+                                                              (getJsonField(
+                                                            _model.reroas,
+                                                            r'''$.smart_tweaks''',
+                                                            true,
+                                                          ) as List?)
+                                                                  ?.map<String>(
+                                                                      (e) => e
+                                                                          .toString())
+                                                                  .toList()
+                                                                  .cast<
+                                                                      String>(),
+                                                        },
+                                                      ),
+                                                    });
+                                                    _generateAudioForRoast(
+                                                      roastReference:
+                                                          stackAddedDishHistoryRecord
+                                                              .reference,
+                                                      roastText: roastText,
                                                       voiceId:
                                                           stackAddedDishHistoryRecord
                                                               .roastVoiceId,
                                                     );
-
-                                                    _shouldSetState = true;
-                                                    if (TextToSpeechCall.audio(
-                                                              (_model.audioResultt22
-                                                                      ?.jsonBody ??
-                                                                  ''),
-                                                            ) !=
-                                                            null &&
-                                                        TextToSpeechCall.audio(
-                                                              (_model.audioResultt22
-                                                                      ?.jsonBody ??
-                                                                  ''),
-                                                            ) !=
-                                                            '') {
-                                                      unawaited(
-                                                        UserAccountMutations
-                                                            .recordUsage(
-                                                          UserUsageFeature
-                                                              .roast,
-                                                        ),
-                                                      );
-                                                      unawaited(
-                                                        () async {
-                                                          await stackAddedDishHistoryRecord
-                                                              .reference
-                                                              .update({
-                                                            ...createAddedDishHistoryRecordData(
-                                                              dishWeight:
-                                                                  getJsonField(
-                                                                _model.reroas,
-                                                                r'''$.dish_weight''',
-                                                              ),
-                                                              kcal:
-                                                                  getJsonField(
-                                                                _model.reroas,
-                                                                r'''$.kcal''',
-                                                              ),
-                                                              carbs:
-                                                                  getJsonField(
-                                                                _model.reroas,
-                                                                r'''$.carbs''',
-                                                              ),
-                                                              fats:
-                                                                  getJsonField(
-                                                                _model.reroas,
-                                                                r'''$.fats''',
-                                                              ),
-                                                              proteins:
-                                                                  getJsonField(
-                                                                _model.reroas,
-                                                                r'''$.proteins''',
-                                                              ),
-                                                              roastText:
-                                                                  getJsonField(
-                                                                _model.reroas,
-                                                                r'''$.roast''',
-                                                              ).toString(),
-                                                              badge:
-                                                                  getJsonField(
-                                                                _model.reroas,
-                                                                r'''$.primary_badge_text''',
-                                                              ).toString(),
-                                                              impact:
-                                                                  getJsonField(
-                                                                _model.reroas,
-                                                                r'''$.goal_impact_text''',
-                                                              ).toString(),
-                                                              calorieshare:
-                                                                  getJsonField(
-                                                                _model.reroas,
-                                                                r'''$.daily_calorie_share_text''',
-                                                              ).toString(),
-                                                              roastAudio:
-                                                                  TextToSpeechCall
-                                                                      .audio(
-                                                                (_model.audioResultt22
-                                                                        ?.jsonBody ??
-                                                                    ''),
-                                                              ),
-                                                            ),
-                                                            ...mapToFirestore(
-                                                              {
-                                                                'main_ingredients':
-                                                                    (getJsonField(
-                                                                  _model.reroas,
-                                                                  r'''$.main_ingredients''',
-                                                                  true,
-                                                                ) as List?)
-                                                                        ?.map<String>((e) => e
-                                                                            .toString())
-                                                                        .toList()
-                                                                        .cast<
-                                                                            String>(),
-                                                                'vitamins':
-                                                                    getDishPageVitaminsDataListFirestoreData(
-                                                                  (getJsonField(
-                                                                    _model
-                                                                        .reroas,
-                                                                    r'''$.vitaminsAndMinerals''',
-                                                                    true,
-                                                                  )?.toList().map<DishPageVitaminsDataStruct?>(DishPageVitaminsDataStruct.maybeFromMap).toList()
-                                                                          as Iterable<
-                                                                              DishPageVitaminsDataStruct?>)
-                                                                      .withoutNulls,
-                                                                ),
-                                                                'health_tips':
-                                                                    (getJsonField(
-                                                                  _model.reroas,
-                                                                  r'''$.smart_tweaks''',
-                                                                  true,
-                                                                ) as List?)
-                                                                        ?.map<String>((e) => e
-                                                                            .toString())
-                                                                        .toList()
-                                                                        .cast<
-                                                                            String>(),
-                                                              },
-                                                            ),
-                                                          });
-                                                        }(),
-                                                      );
-                                                      _model.soundPlayer3 ??=
-                                                          AudioPlayer();
-                                                      if (_model.soundPlayer3!
-                                                          .playing) {
-                                                        await _model
-                                                            .soundPlayer3!
-                                                            .stop();
-                                                      }
-                                                      _model.soundPlayer3!
-                                                          .setVolume(1.0);
-                                                      _model.soundPlayer3!
-                                                          .setUrl(
-                                                              TextToSpeechCall
-                                                                  .audio(
-                                                            (_model.audioResultt22
-                                                                    ?.jsonBody ??
-                                                                ''),
-                                                          )!)
-                                                          .then((_) => _model
-                                                              .soundPlayer3!
-                                                              .play());
-                                                    }
                                                     Navigator.pop(context);
                                                     _model.editMode = false;
                                                     safeSetState(() {});

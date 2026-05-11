@@ -66,6 +66,40 @@ class _ChoosePersonWidgetState extends State<ChoosePersonWidget> {
     super.dispose();
   }
 
+  void _generateAudioForRoast({
+    required DocumentReference roastReference,
+    required String roastText,
+    required String? voiceId,
+  }) {
+    unawaited(
+      () async {
+        final audioResult = await TextToSpeechCall.call(
+          text: roastText,
+          voiceId: voiceId,
+        );
+        final audioUrl = TextToSpeechCall.audio(audioResult.jsonBody ?? '');
+        if (audioUrl == null || audioUrl.isEmpty) {
+          return;
+        }
+
+        await roastReference.update(
+          createAddedDishHistoryRecordData(roastAudio: audioUrl),
+        );
+
+        if (!mounted) {
+          return;
+        }
+        _model.soundPlayer ??= AudioPlayer();
+        if (_model.soundPlayer!.playing) {
+          await _model.soundPlayer!.stop();
+        }
+        _model.soundPlayer!.setVolume(1.0);
+        await _model.soundPlayer!.setUrl(audioUrl);
+        await _model.soundPlayer!.play();
+      }(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     context.watch<FFAppState>();
@@ -343,307 +377,166 @@ class _ChoosePersonWidgetState extends State<ChoosePersonWidget> {
 
                                       _shouldSetState = true;
                                       if (_model.roast != null) {
-                                        _model.audioResultt =
-                                            await TextToSpeechCall.call(
-                                          text: getJsonField(
-                                            _model.roast,
-                                            r'''$.roast''',
-                                          ).toString(),
-                                          voiceId: _model.dropDownValue,
-                                        );
-
-                                        _shouldSetState = true;
+                                        final roastText = getJsonField(
+                                          _model.roast,
+                                          r'''$.roast''',
+                                        ).toString();
                                         unawaited(
                                           UserAccountMutations.recordUsage(
                                             UserUsageFeature.roast,
                                           ),
                                         );
-                                        if ((_model.audioResultt?.succeeded ??
-                                            true)) {
-                                          var addedDishHistoryRecordReference =
-                                              AddedDishHistoryRecord.collection
-                                                  .doc();
-                                          await addedDishHistoryRecordReference
-                                              .set({
-                                            ...createAddedDishHistoryRecordData(
-                                              dishName: getJsonField(
-                                                _model.roast,
-                                                r'''$.dish_name''',
-                                              ).toString(),
-                                              dishWeight: getJsonField(
-                                                _model.roast,
-                                                r'''$.dish_weight''',
-                                              ),
-                                              addedDate: getCurrentTimestamp,
-                                              restaurant: widget.restaurant,
-                                              image: widget.dishPhoto,
-                                              kcal: getJsonField(
-                                                _model.roast,
-                                                r'''$.kcal''',
-                                              ),
-                                              carbs: getJsonField(
-                                                _model.roast,
-                                                r'''$.carbs''',
-                                              ),
-                                              proteins: getJsonField(
-                                                _model.roast,
-                                                r'''$.proteins''',
-                                              ),
-                                              fats: getJsonField(
-                                                _model.roast,
-                                                r'''$.fats''',
-                                              ),
-                                              user: currentUserReference,
-                                              roastText: getJsonField(
-                                                _model.roast,
-                                                r'''$.roast''',
-                                              ).toString(),
-                                              roastAudio:
-                                                  TextToSpeechCall.audio(
-                                                (_model.audioResultt
-                                                        ?.jsonBody ??
-                                                    ''),
-                                              ),
-                                              roastPerson:
-                                                  containerPersonsRecordList
-                                                      .where((e) =>
-                                                          e.voiceId ==
-                                                          _model.dropDownValue)
-                                                      .toList()
-                                                      .firstOrNull
-                                                      ?.name,
-                                              roastVoiceId:
-                                                  _model.dropDownValue,
-                                              roastImage:
-                                                  containerPersonsRecordList
-                                                      .where((e) =>
-                                                          e.voiceId ==
-                                                          _model.dropDownValue)
-                                                      .toList()
-                                                      .firstOrNull
-                                                      ?.image,
-                                              roastLevel: valueOrDefault(
-                                                  currentUserDocument
-                                                      ?.roastLevel,
-                                                  ''),
-                                              badge: getJsonField(
-                                                _model.roast,
-                                                r'''$.primary_badge_text''',
-                                              ).toString(),
-                                              impact: getJsonField(
-                                                _model.roast,
-                                                r'''$.goal_impact_text''',
-                                              ).toString(),
-                                              calorieshare: getJsonField(
-                                                _model.roast,
-                                                r'''$.daily_calorie_share_text''',
-                                              ).toString(),
+                                        var addedDishHistoryRecordReference =
+                                            AddedDishHistoryRecord.collection
+                                                .doc();
+                                        final roastData = {
+                                          ...createAddedDishHistoryRecordData(
+                                            dishName: getJsonField(
+                                              _model.roast,
+                                              r'''$.dish_name''',
+                                            ).toString(),
+                                            dishWeight: getJsonField(
+                                              _model.roast,
+                                              r'''$.dish_weight''',
                                             ),
-                                            ...mapToFirestore(
-                                              {
-                                                'main_ingredients':
-                                                    (getJsonField(
-                                                  _model.roast,
-                                                  r'''$.main_ingredients''',
-                                                  true,
-                                                ) as List?)
-                                                        ?.map<String>(
-                                                            (e) => e.toString())
-                                                        .toList()
-                                                        .cast<String>(),
-                                                'vitamins':
-                                                    getDishPageVitaminsDataListFirestoreData(
-                                                  (getJsonField(
-                                                    _model.roast,
-                                                    r'''$.vitaminsAndMinerals''',
-                                                    true,
-                                                  )
-                                                              ?.toList()
-                                                              .map<DishPageVitaminsDataStruct?>(
-                                                                  DishPageVitaminsDataStruct
-                                                                      .maybeFromMap)
-                                                              .toList()
-                                                          as Iterable<
-                                                              DishPageVitaminsDataStruct?>)
-                                                      .withoutNulls,
-                                                ),
-                                                'health_tips': (getJsonField(
-                                                  _model.roast,
-                                                  r'''$.smart_tweaks''',
-                                                  true,
-                                                ) as List?)
-                                                    ?.map<String>(
-                                                        (e) => e.toString())
-                                                    .toList()
-                                                    .cast<String>(),
-                                              },
+                                            addedDate: getCurrentTimestamp,
+                                            restaurant: widget.restaurant,
+                                            image: widget.dishPhoto,
+                                            kcal: getJsonField(
+                                              _model.roast,
+                                              r'''$.kcal''',
                                             ),
-                                          });
-                                          _model.createdDocument =
-                                              AddedDishHistoryRecord
-                                                  .getDocumentFromData({
-                                            ...createAddedDishHistoryRecordData(
-                                              dishName: getJsonField(
-                                                _model.roast,
-                                                r'''$.dish_name''',
-                                              ).toString(),
-                                              dishWeight: getJsonField(
-                                                _model.roast,
-                                                r'''$.dish_weight''',
-                                              ),
-                                              addedDate: getCurrentTimestamp,
-                                              restaurant: widget.restaurant,
-                                              image: widget.dishPhoto,
-                                              kcal: getJsonField(
-                                                _model.roast,
-                                                r'''$.kcal''',
-                                              ),
-                                              carbs: getJsonField(
-                                                _model.roast,
-                                                r'''$.carbs''',
-                                              ),
-                                              proteins: getJsonField(
-                                                _model.roast,
-                                                r'''$.proteins''',
-                                              ),
-                                              fats: getJsonField(
-                                                _model.roast,
-                                                r'''$.fats''',
-                                              ),
-                                              user: currentUserReference,
-                                              roastText: getJsonField(
-                                                _model.roast,
-                                                r'''$.roast''',
-                                              ).toString(),
-                                              roastAudio:
-                                                  TextToSpeechCall.audio(
-                                                (_model.audioResultt
-                                                        ?.jsonBody ??
-                                                    ''),
-                                              ),
-                                              roastPerson:
-                                                  containerPersonsRecordList
-                                                      .where((e) =>
-                                                          e.voiceId ==
-                                                          _model.dropDownValue)
-                                                      .toList()
-                                                      .firstOrNull
-                                                      ?.name,
-                                              roastVoiceId:
-                                                  _model.dropDownValue,
-                                              roastImage:
-                                                  containerPersonsRecordList
-                                                      .where((e) =>
-                                                          e.voiceId ==
-                                                          _model.dropDownValue)
-                                                      .toList()
-                                                      .firstOrNull
-                                                      ?.image,
-                                              roastLevel: valueOrDefault(
-                                                  currentUserDocument
-                                                      ?.roastLevel,
-                                                  ''),
-                                              badge: getJsonField(
-                                                _model.roast,
-                                                r'''$.primary_badge_text''',
-                                              ).toString(),
-                                              impact: getJsonField(
-                                                _model.roast,
-                                                r'''$.goal_impact_text''',
-                                              ).toString(),
-                                              calorieshare: getJsonField(
-                                                _model.roast,
-                                                r'''$.daily_calorie_share_text''',
-                                              ).toString(),
+                                            carbs: getJsonField(
+                                              _model.roast,
+                                              r'''$.carbs''',
                                             ),
-                                            ...mapToFirestore(
-                                              {
-                                                'main_ingredients':
-                                                    (getJsonField(
-                                                  _model.roast,
-                                                  r'''$.main_ingredients''',
-                                                  true,
-                                                ) as List?)
-                                                        ?.map<String>(
-                                                            (e) => e.toString())
-                                                        .toList()
-                                                        .cast<String>(),
-                                                'vitamins':
-                                                    getDishPageVitaminsDataListFirestoreData(
-                                                  (getJsonField(
-                                                    _model.roast,
-                                                    r'''$.vitaminsAndMinerals''',
-                                                    true,
-                                                  )
-                                                              ?.toList()
-                                                              .map<DishPageVitaminsDataStruct?>(
-                                                                  DishPageVitaminsDataStruct
-                                                                      .maybeFromMap)
-                                                              .toList()
-                                                          as Iterable<
-                                                              DishPageVitaminsDataStruct?>)
-                                                      .withoutNulls,
-                                                ),
-                                                'health_tips': (getJsonField(
-                                                  _model.roast,
-                                                  r'''$.smart_tweaks''',
-                                                  true,
-                                                ) as List?)
-                                                    ?.map<String>(
-                                                        (e) => e.toString())
-                                                    .toList()
-                                                    .cast<String>(),
-                                              },
+                                            proteins: getJsonField(
+                                              _model.roast,
+                                              r'''$.proteins''',
                                             ),
-                                          }, addedDishHistoryRecordReference);
-                                          _shouldSetState = true;
-                                          Navigator.pop(context);
-                                          unawaited(
-                                            () async {
-                                              await widget.action?.call();
-                                            }(),
-                                          );
-                                          Navigator.pop(context);
-
-                                          context.pushNamed(
-                                            DishInfoWidget.routeName,
-                                            queryParameters: {
-                                              'dish': serializeParam(
-                                                _model
-                                                    .createdDocument?.reference,
-                                                ParamType.DocumentReference,
+                                            fats: getJsonField(
+                                              _model.roast,
+                                              r'''$.fats''',
+                                            ),
+                                            user: currentUserReference,
+                                            roastText: roastText,
+                                            roastAudio: '',
+                                            roastPerson:
+                                                containerPersonsRecordList
+                                                    .where((e) =>
+                                                        e.voiceId ==
+                                                        _model.dropDownValue)
+                                                    .firstOrNull
+                                                    ?.name,
+                                            roastVoiceId: _model.dropDownValue,
+                                            roastImage:
+                                                containerPersonsRecordList
+                                                    .where((e) =>
+                                                        e.voiceId ==
+                                                        _model.dropDownValue)
+                                                    .firstOrNull
+                                                    ?.image,
+                                            roastLevel: valueOrDefault(
+                                                currentUserDocument?.roastLevel,
+                                                ''),
+                                            badge: getJsonField(
+                                              _model.roast,
+                                              r'''$.primary_badge_text''',
+                                            ).toString(),
+                                            impact: getJsonField(
+                                              _model.roast,
+                                              r'''$.goal_impact_text''',
+                                            ).toString(),
+                                            calorieshare: getJsonField(
+                                              _model.roast,
+                                              r'''$.daily_calorie_share_text''',
+                                            ).toString(),
+                                          ),
+                                          ...mapToFirestore(
+                                            {
+                                              'main_ingredients': (getJsonField(
+                                                _model.roast,
+                                                r'''$.main_ingredients''',
+                                                true,
+                                              ) as List?)
+                                                  ?.map<String>(
+                                                      (e) => e.toString())
+                                                  .toList()
+                                                  .cast<String>(),
+                                              'vitamins':
+                                                  getDishPageVitaminsDataListFirestoreData(
+                                                (getJsonField(
+                                                  _model.roast,
+                                                  r'''$.vitaminsAndMinerals''',
+                                                  true,
+                                                )
+                                                            ?.toList()
+                                                            .map<DishPageVitaminsDataStruct?>(
+                                                                DishPageVitaminsDataStruct
+                                                                    .maybeFromMap)
+                                                            .toList()
+                                                        as Iterable<
+                                                            DishPageVitaminsDataStruct?>)
+                                                    .withoutNulls,
                                               ),
-                                            }.withoutNulls,
-                                            extra: <String, dynamic>{
-                                              '__transition_info__':
-                                                  TransitionInfo(
-                                                hasTransition: true,
-                                                transitionType:
-                                                    PageTransitionType.fade,
-                                                duration:
-                                                    Duration(milliseconds: 0),
-                                              ),
+                                              'health_tips': (getJsonField(
+                                                _model.roast,
+                                                r'''$.smart_tweaks''',
+                                                true,
+                                              ) as List?)
+                                                  ?.map<String>(
+                                                      (e) => e.toString())
+                                                  .toList()
+                                                  .cast<String>(),
                                             },
-                                          );
+                                          ),
+                                        };
+                                        await addedDishHistoryRecordReference
+                                            .set(roastData);
+                                        _model.createdDocument =
+                                            AddedDishHistoryRecord
+                                                .getDocumentFromData(
+                                          roastData,
+                                          addedDishHistoryRecordReference,
+                                        );
+                                        _generateAudioForRoast(
+                                          roastReference:
+                                              addedDishHistoryRecordReference,
+                                          roastText: roastText,
+                                          voiceId: _model.dropDownValue,
+                                        );
+                                        _shouldSetState = true;
+                                        Navigator.pop(context);
+                                        unawaited(
+                                          () async {
+                                            await widget.action?.call();
+                                          }(),
+                                        );
+                                        Navigator.pop(context);
 
-                                          _model.soundPlayer ??= AudioPlayer();
-                                          if (_model.soundPlayer!.playing) {
-                                            await _model.soundPlayer!.stop();
-                                          }
-                                          _model.soundPlayer!.setVolume(1.0);
-                                          _model.soundPlayer!
-                                              .setUrl(TextToSpeechCall.audio(
-                                                (_model.audioResultt
-                                                        ?.jsonBody ??
-                                                    ''),
-                                              )!)
-                                              .then((_) =>
-                                                  _model.soundPlayer!.play());
+                                        context.pushNamed(
+                                          DishInfoWidget.routeName,
+                                          queryParameters: {
+                                            'dish': serializeParam(
+                                              _model.createdDocument?.reference,
+                                              ParamType.DocumentReference,
+                                            ),
+                                          }.withoutNulls,
+                                          extra: <String, dynamic>{
+                                            '__transition_info__':
+                                                TransitionInfo(
+                                              hasTransition: true,
+                                              transitionType:
+                                                  PageTransitionType.fade,
+                                              duration:
+                                                  Duration(milliseconds: 0),
+                                            ),
+                                          },
+                                        );
 
-                                          if (_shouldSetState)
-                                            safeSetState(() {});
-                                          return;
-                                        }
+                                        if (_shouldSetState)
+                                          safeSetState(() {});
+                                        return;
                                       }
                                       Navigator.pop(context);
                                       ScaffoldMessenger.of(context)
