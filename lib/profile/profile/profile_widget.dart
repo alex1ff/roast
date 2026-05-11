@@ -40,80 +40,6 @@ class _ProfileWidgetState extends State<ProfileWidget> {
   late ProfileModel _model;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
-  bool get _showLegacyProfileTop => false;
-
-  Future<void> _changeAvatarPhoto() async {
-    final selectedMedia = await selectMediaWithSourceBottomSheet(
-      context: context,
-      imageQuality: 60,
-      allowPhoto: true,
-    );
-    if (selectedMedia == null ||
-        !selectedMedia
-            .every((m) => validateFileFormat(m.storagePath, context))) {
-      return;
-    }
-
-    safeSetState(() => _model.isDataUploading_avatarChangePhoto2 = true);
-    var selectedUploadedFiles = <FFUploadedFile>[];
-    var downloadUrls = <String>[];
-    try {
-      selectedUploadedFiles = selectedMedia
-          .map((m) => FFUploadedFile(
-                name: m.storagePath.split('/').last,
-                bytes: m.bytes,
-                height: m.dimensions?.height,
-                width: m.dimensions?.width,
-                blurHash: m.blurHash,
-                originalFilename: m.originalFilename,
-              ))
-          .toList();
-
-      downloadUrls = (await Future.wait(
-        selectedMedia.map((m) async => uploadData(m.storagePath, m.bytes)),
-      ))
-          .where((u) => u != null)
-          .map((u) => u!)
-          .toList();
-    } finally {
-      _model.isDataUploading_avatarChangePhoto2 = false;
-    }
-
-    if (selectedUploadedFiles.length != selectedMedia.length ||
-        downloadUrls.length != selectedMedia.length) {
-      safeSetState(() {});
-      return;
-    }
-
-    safeSetState(() {
-      _model.uploadedLocalFile_avatarChangePhoto2 = selectedUploadedFiles.first;
-      _model.uploadedFileUrl_avatarChangePhoto2 = downloadUrls.first;
-    });
-
-    await currentUserReference?.update(createUsersRecordData(
-      photoUrl: _model.uploadedFileUrl_avatarChangePhoto2,
-    ));
-  }
-
-  Future<void> _openKcalBottomSheet() async {
-    await showModalBottomSheet(
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      context: context,
-      builder: (context) {
-        return GestureDetector(
-          onTap: () {
-            FocusScope.of(context).unfocus();
-            FocusManager.instance.primaryFocus?.unfocus();
-          },
-          child: Padding(
-            padding: MediaQuery.viewInsetsOf(context),
-            child: KcalBottomSheetWidget(),
-          ),
-        );
-      },
-    ).then((value) => safeSetState(() {}));
-  }
 
   Future<void> _updateProfileAndMaybeGoals({
     double? height,
@@ -226,269 +152,312 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                             child: Column(
                               mainAxisSize: MainAxisSize.max,
                               children: [
-                                _ProfileTopCards(
-                                  onChangePhoto: _changeAvatarPhoto,
-                                  onOpenGoals: _openKcalBottomSheet,
-                                ),
-                                if (_showLegacyProfileTop)
-                                  Container(
-                                    width: double.infinity,
-                                    decoration: BoxDecoration(
-                                      color: FlutterFlowTheme.of(context)
-                                          .secondaryBackground,
-                                      borderRadius: BorderRadius.circular(20.0),
-                                    ),
-                                    child: Padding(
-                                      padding: EdgeInsetsDirectional.fromSTEB(
-                                          12.0, 12.0, 0.0, 12.0),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.max,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Container(
-                                            decoration: BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              border: Border.all(
-                                                color: Color(0xFFF2F2F7),
-                                              ),
+                                Container(
+                                  width: double.infinity,
+                                  decoration: BoxDecoration(
+                                    color: FlutterFlowTheme.of(context)
+                                        .secondaryBackground,
+                                    borderRadius: BorderRadius.circular(20.0),
+                                  ),
+                                  child: Padding(
+                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                        12.0, 12.0, 0.0, 12.0),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.max,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            border: Border.all(
+                                              color: Color(0xFFF2F2F7),
                                             ),
-                                            child: InkWell(
-                                              splashColor: Colors.transparent,
-                                              focusColor: Colors.transparent,
-                                              hoverColor: Colors.transparent,
-                                              highlightColor:
-                                                  Colors.transparent,
-                                              onTap: () async {
-                                                final selectedMedia =
-                                                    await selectMediaWithSourceBottomSheet(
-                                                  context: context,
-                                                  imageQuality: 60,
-                                                  allowPhoto: true,
-                                                );
-                                                if (selectedMedia != null &&
-                                                    selectedMedia.every((m) =>
-                                                        validateFileFormat(
-                                                            m.storagePath,
-                                                            context))) {
-                                                  safeSetState(() => _model
-                                                          .isDataUploading_avatarChangePhoto2 =
-                                                      true);
-                                                  var selectedUploadedFiles =
-                                                      <FFUploadedFile>[];
+                                          ),
+                                          child: InkWell(
+                                            splashColor: Colors.transparent,
+                                            focusColor: Colors.transparent,
+                                            hoverColor: Colors.transparent,
+                                            highlightColor: Colors.transparent,
+                                            onTap: () async {
+                                              final selectedMedia =
+                                                  await selectMediaWithSourceBottomSheet(
+                                                context: context,
+                                                imageQuality: 60,
+                                                allowPhoto: true,
+                                              );
+                                              if (selectedMedia != null &&
+                                                  selectedMedia.every((m) =>
+                                                      validateFileFormat(
+                                                          m.storagePath,
+                                                          context))) {
+                                                safeSetState(() => _model
+                                                        .isDataUploading_avatarChangePhoto2 =
+                                                    true);
+                                                var selectedUploadedFiles =
+                                                    <FFUploadedFile>[];
 
-                                                  var downloadUrls = <String>[];
-                                                  try {
-                                                    selectedUploadedFiles =
-                                                        selectedMedia
-                                                            .map((m) =>
-                                                                FFUploadedFile(
-                                                                  name: m
-                                                                      .storagePath
-                                                                      .split(
-                                                                          '/')
-                                                                      .last,
-                                                                  bytes:
-                                                                      m.bytes,
-                                                                  height: m
-                                                                      .dimensions
-                                                                      ?.height,
-                                                                  width: m
-                                                                      .dimensions
-                                                                      ?.width,
-                                                                  blurHash: m
-                                                                      .blurHash,
-                                                                  originalFilename:
-                                                                      m.originalFilename,
-                                                                ))
-                                                            .toList();
+                                                var downloadUrls = <String>[];
+                                                try {
+                                                  selectedUploadedFiles =
+                                                      selectedMedia
+                                                          .map((m) =>
+                                                              FFUploadedFile(
+                                                                name: m
+                                                                    .storagePath
+                                                                    .split('/')
+                                                                    .last,
+                                                                bytes: m.bytes,
+                                                                height: m
+                                                                    .dimensions
+                                                                    ?.height,
+                                                                width: m
+                                                                    .dimensions
+                                                                    ?.width,
+                                                                blurHash:
+                                                                    m.blurHash,
+                                                                originalFilename:
+                                                                    m.originalFilename,
+                                                              ))
+                                                          .toList();
 
-                                                    downloadUrls = (await Future
-                                                            .wait(
-                                                      selectedMedia.map(
-                                                        (m) async =>
-                                                            await uploadData(
-                                                                m.storagePath,
-                                                                m.bytes),
-                                                      ),
-                                                    ))
-                                                        .where((u) => u != null)
-                                                        .map((u) => u!)
-                                                        .toList();
-                                                  } finally {
-                                                    _model.isDataUploading_avatarChangePhoto2 =
-                                                        false;
-                                                  }
-                                                  if (selectedUploadedFiles
-                                                              .length ==
-                                                          selectedMedia
-                                                              .length &&
-                                                      downloadUrls.length ==
-                                                          selectedMedia
-                                                              .length) {
-                                                    safeSetState(() {
-                                                      _model.uploadedLocalFile_avatarChangePhoto2 =
-                                                          selectedUploadedFiles
-                                                              .first;
-                                                      _model.uploadedFileUrl_avatarChangePhoto2 =
-                                                          downloadUrls.first;
-                                                    });
-                                                  } else {
-                                                    safeSetState(() {});
-                                                    return;
-                                                  }
-                                                }
-
-                                                await currentUserReference!
-                                                    .update(
-                                                        createUsersRecordData(
-                                                  photoUrl: _model
-                                                      .uploadedFileUrl_avatarChangePhoto2,
-                                                ));
-                                              },
-                                              child: Container(
-                                                width: 75.0,
-                                                height: 75.0,
-                                                child: Stack(
-                                                  alignment:
-                                                      AlignmentDirectional(
-                                                          1.0, 1.0),
-                                                  children: [
-                                                    AuthUserStreamWidget(
-                                                      builder: (context) =>
-                                                          Container(
-                                                        width: 75.0,
-                                                        height: 75.0,
-                                                        clipBehavior:
-                                                            Clip.antiAlias,
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          shape:
-                                                              BoxShape.circle,
-                                                        ),
-                                                        child:
-                                                            CachedNetworkImage(
-                                                          imageUrl:
-                                                              valueOrDefault<
-                                                                  String>(
-                                                            currentUserPhoto,
-                                                            'https://firebasestorage.googleapis.com/v0/b/roast-nutri-tracker-7c67ct.firebasestorage.app/o/AppImages%2Fuser.png?alt=media&token=removed',
-                                                          ),
-                                                          memCacheWidth: 150,
-                                                          memCacheHeight: 150,
-                                                          fit: BoxFit.cover,
-                                                          errorWidget: (context,
-                                                                  url, error) =>
-                                                              Image.asset(
-                                                            'assets/images/error_image.webp',
-                                                            fit: BoxFit.cover,
-                                                          ),
-                                                        ),
-                                                      ),
+                                                  downloadUrls =
+                                                      (await Future.wait(
+                                                    selectedMedia.map(
+                                                      (m) async =>
+                                                          await uploadData(
+                                                              m.storagePath,
+                                                              m.bytes),
                                                     ),
-                                                    Container(
-                                                      width: 30.0,
-                                                      height: 30.0,
+                                                  ))
+                                                          .where(
+                                                              (u) => u != null)
+                                                          .map((u) => u!)
+                                                          .toList();
+                                                } finally {
+                                                  _model.isDataUploading_avatarChangePhoto2 =
+                                                      false;
+                                                }
+                                                if (selectedUploadedFiles
+                                                            .length ==
+                                                        selectedMedia.length &&
+                                                    downloadUrls.length ==
+                                                        selectedMedia.length) {
+                                                  safeSetState(() {
+                                                    _model.uploadedLocalFile_avatarChangePhoto2 =
+                                                        selectedUploadedFiles
+                                                            .first;
+                                                    _model.uploadedFileUrl_avatarChangePhoto2 =
+                                                        downloadUrls.first;
+                                                  });
+                                                } else {
+                                                  safeSetState(() {});
+                                                  return;
+                                                }
+                                              }
+
+                                              await currentUserReference!
+                                                  .update(createUsersRecordData(
+                                                photoUrl: _model
+                                                    .uploadedFileUrl_avatarChangePhoto2,
+                                              ));
+                                            },
+                                            child: Container(
+                                              width: 75.0,
+                                              height: 75.0,
+                                              child: Stack(
+                                                alignment: AlignmentDirectional(
+                                                    1.0, 1.0),
+                                                children: [
+                                                  AuthUserStreamWidget(
+                                                    builder: (context) =>
+                                                        Container(
+                                                      width: 75.0,
+                                                      height: 75.0,
+                                                      clipBehavior:
+                                                          Clip.antiAlias,
                                                       decoration: BoxDecoration(
-                                                        color:
-                                                            Color(0xFFF2F2F7),
                                                         shape: BoxShape.circle,
                                                       ),
-                                                      alignment:
-                                                          AlignmentDirectional(
-                                                              0.0, 0.0),
-                                                      child: Icon(
-                                                        Icons.edit_off,
-                                                        color:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .primaryText,
-                                                        size: 14.0,
+                                                      child: CachedNetworkImage(
+                                                        imageUrl:
+                                                            valueOrDefault<
+                                                                String>(
+                                                          currentUserPhoto,
+                                                          'https://firebasestorage.googleapis.com/v0/b/roast-nutri-tracker-7c67ct.firebasestorage.app/o/AppImages%2Fuser.png?alt=media&token=removed',
+                                                        ),
+                                                        memCacheWidth: 150,
+                                                        memCacheHeight: 150,
+                                                        fit: BoxFit.cover,
+                                                        errorWidget: (context,
+                                                                url, error) =>
+                                                            Image.asset(
+                                                          'assets/images/error_image.webp',
+                                                          fit: BoxFit.cover,
+                                                        ),
                                                       ),
                                                     ),
-                                                  ],
-                                                ),
+                                                  ),
+                                                  Container(
+                                                    width: 30.0,
+                                                    height: 30.0,
+                                                    decoration: BoxDecoration(
+                                                      color: Color(0xFFF2F2F7),
+                                                      shape: BoxShape.circle,
+                                                    ),
+                                                    alignment:
+                                                        AlignmentDirectional(
+                                                            0.0, 0.0),
+                                                    child: Icon(
+                                                      Icons.edit_off,
+                                                      color:
+                                                          FlutterFlowTheme.of(
+                                                                  context)
+                                                              .primaryText,
+                                                      size: 14.0,
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
                                             ),
                                           ),
-                                          Flexible(
-                                            child: Padding(
-                                              padding: EdgeInsetsDirectional
-                                                  .fromSTEB(
-                                                      12.0, 0.0, 0.0, 0.0),
-                                              child: Column(
-                                                mainAxisSize: MainAxisSize.max,
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                children: [
-                                                  if (valueOrDefault(
-                                                          currentUserDocument
-                                                              ?.kcalGoal,
-                                                          0) !=
-                                                      0)
-                                                    Padding(
-                                                      padding:
-                                                          EdgeInsetsDirectional
-                                                              .fromSTEB(
-                                                                  0.0,
-                                                                  0.0,
-                                                                  0.0,
-                                                                  5.0),
-                                                      child:
-                                                          AuthUserStreamWidget(
-                                                        builder: (context) =>
-                                                            Stack(
-                                                          children: [
-                                                            Align(
-                                                              alignment:
-                                                                  AlignmentDirectional(
-                                                                      0.0, 0.0),
-                                                              child: RichText(
-                                                                textScaler: MediaQuery.of(
-                                                                        context)
-                                                                    .textScaler,
-                                                                text: TextSpan(
-                                                                  children: [
-                                                                    TextSpan(
-                                                                      text: valueOrDefault<
-                                                                          String>(
-                                                                        valueOrDefault(currentUserDocument?.fatsGoal,
-                                                                                0)
-                                                                            .toString(),
-                                                                        '0',
-                                                                      ),
-                                                                      style: FlutterFlowTheme.of(
-                                                                              context)
-                                                                          .bodyMedium
-                                                                          .override(
-                                                                            fontFamily:
-                                                                                'SF Pro',
-                                                                            color:
-                                                                                FlutterFlowTheme.of(context).primaryText,
-                                                                            fontSize:
-                                                                                16.0,
-                                                                            letterSpacing:
-                                                                                0.0,
-                                                                            fontWeight:
-                                                                                FontWeight.w500,
-                                                                          ),
+                                        ),
+                                        Flexible(
+                                          child: Padding(
+                                            padding:
+                                                EdgeInsetsDirectional.fromSTEB(
+                                                    12.0, 0.0, 0.0, 0.0),
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.max,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                if (valueOrDefault(
+                                                        currentUserDocument
+                                                            ?.kcalGoal,
+                                                        0) !=
+                                                    0)
+                                                  Padding(
+                                                    padding:
+                                                        EdgeInsetsDirectional
+                                                            .fromSTEB(0.0, 0.0,
+                                                                0.0, 5.0),
+                                                    child: AuthUserStreamWidget(
+                                                      builder: (context) =>
+                                                          Stack(
+                                                        children: [
+                                                          Align(
+                                                            alignment:
+                                                                AlignmentDirectional(
+                                                                    0.0, 0.0),
+                                                            child: RichText(
+                                                              textScaler:
+                                                                  MediaQuery.of(
+                                                                          context)
+                                                                      .textScaler,
+                                                              text: TextSpan(
+                                                                children: [
+                                                                  TextSpan(
+                                                                    text: valueOrDefault<
+                                                                        String>(
+                                                                      valueOrDefault(
+                                                                              currentUserDocument?.fatsGoal,
+                                                                              0)
+                                                                          .toString(),
+                                                                      '0',
                                                                     ),
-                                                                    TextSpan(
-                                                                      text:
-                                                                          ' Fats',
-                                                                      style:
-                                                                          TextStyle(
-                                                                        color: FlutterFlowTheme.of(context)
-                                                                            .primaryText,
-                                                                        fontWeight:
-                                                                            FontWeight.w500,
-                                                                        fontSize:
-                                                                            15.0,
-                                                                      ),
-                                                                    )
-                                                                  ],
+                                                                    style: FlutterFlowTheme.of(
+                                                                            context)
+                                                                        .bodyMedium
+                                                                        .override(
+                                                                          fontFamily:
+                                                                              'SF Pro',
+                                                                          color:
+                                                                              FlutterFlowTheme.of(context).primaryText,
+                                                                          fontSize:
+                                                                              16.0,
+                                                                          letterSpacing:
+                                                                              0.0,
+                                                                          fontWeight:
+                                                                              FontWeight.w500,
+                                                                        ),
+                                                                  ),
+                                                                  TextSpan(
+                                                                    text:
+                                                                        ' Fats',
+                                                                    style:
+                                                                        TextStyle(
+                                                                      color: FlutterFlowTheme.of(
+                                                                              context)
+                                                                          .primaryText,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w500,
+                                                                      fontSize:
+                                                                          15.0,
+                                                                    ),
+                                                                  )
+                                                                ],
+                                                                style: FlutterFlowTheme.of(
+                                                                        context)
+                                                                    .bodyMedium
+                                                                    .override(
+                                                                      fontFamily:
+                                                                          'SF Pro',
+                                                                      fontSize:
+                                                                          16.0,
+                                                                      letterSpacing:
+                                                                          0.0,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w500,
+                                                                    ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ),
+                                                if (valueOrDefault(
+                                                        currentUserDocument
+                                                            ?.kcalGoal,
+                                                        0) !=
+                                                    0)
+                                                  Padding(
+                                                    padding:
+                                                        EdgeInsetsDirectional
+                                                            .fromSTEB(0.0, 0.0,
+                                                                0.0, 10.0),
+                                                    child: AuthUserStreamWidget(
+                                                      builder: (context) => Row(
+                                                        mainAxisSize:
+                                                            MainAxisSize.max,
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceBetween,
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .end,
+                                                        children: [
+                                                          Flexible(
+                                                            flex: 1,
+                                                            child: Column(
+                                                              mainAxisSize:
+                                                                  MainAxisSize
+                                                                      .min,
+                                                              children: [
+                                                                Text(
+                                                                  valueOrDefault<
+                                                                      String>(
+                                                                    valueOrDefault(
+                                                                            currentUserDocument?.proteinsGoal,
+                                                                            0)
+                                                                        .toString(),
+                                                                    '0',
+                                                                  ),
                                                                   style: FlutterFlowTheme.of(
                                                                           context)
                                                                       .bodyMedium
@@ -501,56 +470,18 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                                                             0.0,
                                                                         fontWeight:
                                                                             FontWeight.w500,
+                                                                        lineHeight:
+                                                                            1.0,
                                                                       ),
                                                                 ),
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  if (valueOrDefault(
-                                                          currentUserDocument
-                                                              ?.kcalGoal,
-                                                          0) !=
-                                                      0)
-                                                    Padding(
-                                                      padding:
-                                                          EdgeInsetsDirectional
-                                                              .fromSTEB(
-                                                                  0.0,
-                                                                  0.0,
-                                                                  0.0,
-                                                                  10.0),
-                                                      child:
-                                                          AuthUserStreamWidget(
-                                                        builder: (context) =>
-                                                            Row(
-                                                          mainAxisSize:
-                                                              MainAxisSize.max,
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .spaceBetween,
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .end,
-                                                          children: [
-                                                            Flexible(
-                                                              flex: 1,
-                                                              child: Column(
-                                                                mainAxisSize:
-                                                                    MainAxisSize
-                                                                        .min,
-                                                                children: [
-                                                                  Text(
-                                                                    valueOrDefault<
-                                                                        String>(
-                                                                      valueOrDefault(
-                                                                              currentUserDocument?.proteinsGoal,
-                                                                              0)
-                                                                          .toString(),
-                                                                      '0',
-                                                                    ),
+                                                                Align(
+                                                                  alignment:
+                                                                      AlignmentDirectional(
+                                                                          0.0,
+                                                                          0.0),
+                                                                  child: Text(
+                                                                    'Protein',
+                                                                    maxLines: 1,
                                                                     style: FlutterFlowTheme.of(
                                                                             context)
                                                                         .bodyMedium
@@ -558,7 +489,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                                                           fontFamily:
                                                                               'SF Pro',
                                                                           fontSize:
-                                                                              16.0,
+                                                                              15.0,
                                                                           letterSpacing:
                                                                               0.0,
                                                                           fontWeight:
@@ -567,238 +498,208 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                                                               1.0,
                                                                         ),
                                                                   ),
-                                                                  Align(
-                                                                    alignment:
-                                                                        AlignmentDirectional(
-                                                                            0.0,
-                                                                            0.0),
-                                                                    child: Text(
-                                                                      'Protein',
-                                                                      maxLines:
-                                                                          1,
-                                                                      style: FlutterFlowTheme.of(
-                                                                              context)
-                                                                          .bodyMedium
-                                                                          .override(
-                                                                            fontFamily:
-                                                                                'SF Pro',
-                                                                            fontSize:
-                                                                                15.0,
-                                                                            letterSpacing:
-                                                                                0.0,
-                                                                            fontWeight:
-                                                                                FontWeight.w500,
-                                                                            lineHeight:
-                                                                                1.0,
-                                                                          ),
-                                                                    ),
-                                                                  ),
-                                                                ],
-                                                              ),
+                                                                ),
+                                                              ],
                                                             ),
-                                                            custom_widgets
-                                                                .CalorieArcProgressBar(
-                                                              width: MediaQuery.sizeOf(context).width < 400.0
-                                                                  ? (MediaQuery.sizeOf(
-                                                                              context)
-                                                                          .width *
-                                                                      0.23)
-                                                                  : (MediaQuery.sizeOf(
-                                                                              context)
-                                                                          .width *
-                                                                      0.3),
-                                                              height: null,
-                                                              carbs:
-                                                                  valueOrDefault<
-                                                                      int>(
-                                                                valueOrDefault(
-                                                                    currentUserDocument
-                                                                        ?.carbsGoal,
-                                                                    0),
-                                                                1000,
-                                                              ),
-                                                              protein:
-                                                                  valueOrDefault<
-                                                                      int>(
-                                                                valueOrDefault(
-                                                                    currentUserDocument
-                                                                        ?.proteinsGoal,
-                                                                    0),
-                                                                1000,
-                                                              ),
-                                                              kkcal:
-                                                                  valueOrDefault<
-                                                                      int>(
-                                                                valueOrDefault(
-                                                                    currentUserDocument
-                                                                        ?.kcalGoal,
-                                                                    0),
-                                                                1000,
-                                                              ),
-                                                              fats:
-                                                                  valueOrDefault<
-                                                                      int>(
-                                                                valueOrDefault(
-                                                                    currentUserDocument
-                                                                        ?.fatsGoal,
-                                                                    0),
-                                                                1000,
-                                                              ),
-                                                              text: 'kcal',
-                                                            ),
-                                                            Flexible(
-                                                              flex: 1,
-                                                              child: Column(
-                                                                mainAxisSize:
-                                                                    MainAxisSize
-                                                                        .min,
-                                                                crossAxisAlignment:
-                                                                    CrossAxisAlignment
-                                                                        .center,
-                                                                children: [
-                                                                  Text(
-                                                                    valueOrDefault<
-                                                                        String>(
-                                                                      valueOrDefault(
-                                                                              currentUserDocument?.carbsGoal,
-                                                                              0)
-                                                                          .toString(),
-                                                                      '0',
-                                                                    ),
-                                                                    style: FlutterFlowTheme.of(
+                                                          ),
+                                                          custom_widgets
+                                                              .CalorieArcProgressBar(
+                                                            width: MediaQuery.sizeOf(context).width < 400.0
+                                                                ? (MediaQuery.sizeOf(
                                                                             context)
-                                                                        .bodyMedium
-                                                                        .override(
-                                                                          fontFamily:
-                                                                              'SF Pro',
-                                                                          fontSize:
-                                                                              16.0,
-                                                                          letterSpacing:
-                                                                              0.0,
-                                                                          fontWeight:
-                                                                              FontWeight.w500,
-                                                                          lineHeight:
-                                                                              1.0,
-                                                                        ),
-                                                                  ),
-                                                                  Align(
-                                                                    alignment:
-                                                                        AlignmentDirectional(
-                                                                            0.0,
-                                                                            0.0),
-                                                                    child: Text(
-                                                                      'Carbs',
-                                                                      maxLines:
-                                                                          1,
-                                                                      style: FlutterFlowTheme.of(
-                                                                              context)
-                                                                          .bodyMedium
-                                                                          .override(
-                                                                            fontFamily:
-                                                                                'SF Pro',
-                                                                            fontSize:
-                                                                                15.0,
-                                                                            letterSpacing:
-                                                                                0.0,
-                                                                            fontWeight:
-                                                                                FontWeight.w500,
-                                                                            lineHeight:
-                                                                                1.0,
-                                                                          ),
-                                                                    ),
-                                                                  ),
-                                                                ],
-                                                              ),
+                                                                        .width *
+                                                                    0.23)
+                                                                : (MediaQuery.sizeOf(
+                                                                            context)
+                                                                        .width *
+                                                                    0.3),
+                                                            height: null,
+                                                            carbs:
+                                                                valueOrDefault<
+                                                                    int>(
+                                                              valueOrDefault(
+                                                                  currentUserDocument
+                                                                      ?.carbsGoal,
+                                                                  0),
+                                                              1000,
                                                             ),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  Padding(
-                                                    padding:
-                                                        EdgeInsetsDirectional
-                                                            .fromSTEB(0.0, 8.0,
-                                                                0.0, 0.0),
-                                                    child: Text(
-                                                      'Complete your profile (if you\'re here for macros)',
-                                                      textAlign:
-                                                          TextAlign.center,
-                                                      style:
-                                                          FlutterFlowTheme.of(
-                                                                  context)
-                                                              .bodyMedium
-                                                              .override(
-                                                                font: TextStyle(
-                                                                  fontFamily:
-                                                                      'SF Pro',
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .normal,
-                                                                  fontStyle: FlutterFlowTheme.of(
+                                                            protein:
+                                                                valueOrDefault<
+                                                                    int>(
+                                                              valueOrDefault(
+                                                                  currentUserDocument
+                                                                      ?.proteinsGoal,
+                                                                  0),
+                                                              1000,
+                                                            ),
+                                                            kkcal:
+                                                                valueOrDefault<
+                                                                    int>(
+                                                              valueOrDefault(
+                                                                  currentUserDocument
+                                                                      ?.kcalGoal,
+                                                                  0),
+                                                              1000,
+                                                            ),
+                                                            fats:
+                                                                valueOrDefault<
+                                                                    int>(
+                                                              valueOrDefault(
+                                                                  currentUserDocument
+                                                                      ?.fatsGoal,
+                                                                  0),
+                                                              1000,
+                                                            ),
+                                                            text: 'kcal',
+                                                          ),
+                                                          Flexible(
+                                                            flex: 1,
+                                                            child: Column(
+                                                              mainAxisSize:
+                                                                  MainAxisSize
+                                                                      .min,
+                                                              crossAxisAlignment:
+                                                                  CrossAxisAlignment
+                                                                      .center,
+                                                              children: [
+                                                                Text(
+                                                                  valueOrDefault<
+                                                                      String>(
+                                                                    valueOrDefault(
+                                                                            currentUserDocument?.carbsGoal,
+                                                                            0)
+                                                                        .toString(),
+                                                                    '0',
+                                                                  ),
+                                                                  style: FlutterFlowTheme.of(
                                                                           context)
                                                                       .bodyMedium
-                                                                      .fontStyle,
+                                                                      .override(
+                                                                        fontFamily:
+                                                                            'SF Pro',
+                                                                        fontSize:
+                                                                            16.0,
+                                                                        letterSpacing:
+                                                                            0.0,
+                                                                        fontWeight:
+                                                                            FontWeight.w500,
+                                                                        lineHeight:
+                                                                            1.0,
+                                                                      ),
                                                                 ),
-                                                                fontSize: 15.0,
-                                                                letterSpacing:
-                                                                    0.0,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .normal,
-                                                                fontStyle: FlutterFlowTheme.of(
+                                                                Align(
+                                                                  alignment:
+                                                                      AlignmentDirectional(
+                                                                          0.0,
+                                                                          0.0),
+                                                                  child: Text(
+                                                                    'Carbs',
+                                                                    maxLines: 1,
+                                                                    style: FlutterFlowTheme.of(
+                                                                            context)
+                                                                        .bodyMedium
+                                                                        .override(
+                                                                          fontFamily:
+                                                                              'SF Pro',
+                                                                          fontSize:
+                                                                              15.0,
+                                                                          letterSpacing:
+                                                                              0.0,
+                                                                          fontWeight:
+                                                                              FontWeight.w500,
+                                                                          lineHeight:
+                                                                              1.0,
+                                                                        ),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ),
+                                                Padding(
+                                                  padding: EdgeInsetsDirectional
+                                                      .fromSTEB(
+                                                          0.0, 8.0, 0.0, 0.0),
+                                                  child: Text(
+                                                    'Complete your profile (if you\'re here for macros)',
+                                                    textAlign: TextAlign.center,
+                                                    style: FlutterFlowTheme.of(
+                                                            context)
+                                                        .bodyMedium
+                                                        .override(
+                                                          font: TextStyle(
+                                                            fontFamily:
+                                                                'SF Pro',
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .normal,
+                                                            fontStyle:
+                                                                FlutterFlowTheme.of(
                                                                         context)
                                                                     .bodyMedium
                                                                     .fontStyle,
-                                                                lineHeight: 1.2,
-                                                              ),
-                                                    ),
+                                                          ),
+                                                          fontSize: 15.0,
+                                                          letterSpacing: 0.0,
+                                                          fontWeight:
+                                                              FontWeight.normal,
+                                                          fontStyle:
+                                                              FlutterFlowTheme.of(
+                                                                      context)
+                                                                  .bodyMedium
+                                                                  .fontStyle,
+                                                          lineHeight: 1.2,
+                                                        ),
                                                   ),
-                                                ],
-                                              ),
+                                                ),
+                                              ],
                                             ),
                                           ),
-                                          FlutterFlowIconButton(
-                                            borderRadius: 8.0,
-                                            buttonSize: 45.0,
-                                            icon: Icon(
-                                              FFIcons.kfdhjkhfiudshiuf,
-                                              color:
-                                                  FlutterFlowTheme.of(context)
-                                                      .primary,
-                                              size: 24.0,
-                                            ),
-                                            onPressed: () async {
-                                              await showModalBottomSheet(
-                                                isScrollControlled: true,
-                                                backgroundColor:
-                                                    Colors.transparent,
-                                                context: context,
-                                                builder: (context) {
-                                                  return GestureDetector(
-                                                    onTap: () {
-                                                      FocusScope.of(context)
-                                                          .unfocus();
-                                                      FocusManager
-                                                          .instance.primaryFocus
-                                                          ?.unfocus();
-                                                    },
-                                                    child: Padding(
-                                                      padding: MediaQuery
-                                                          .viewInsetsOf(
-                                                              context),
-                                                      child:
-                                                          KcalBottomSheetWidget(),
-                                                    ),
-                                                  );
-                                                },
-                                              ).then((value) =>
-                                                  safeSetState(() {}));
-                                            },
+                                        ),
+                                        FlutterFlowIconButton(
+                                          borderRadius: 8.0,
+                                          buttonSize: 45.0,
+                                          icon: Icon(
+                                            FFIcons.kfdhjkhfiudshiuf,
+                                            color: FlutterFlowTheme.of(context)
+                                                .primary,
+                                            size: 24.0,
                                           ),
-                                        ],
-                                      ),
+                                          onPressed: () async {
+                                            await showModalBottomSheet(
+                                              isScrollControlled: true,
+                                              backgroundColor:
+                                                  Colors.transparent,
+                                              context: context,
+                                              builder: (context) {
+                                                return GestureDetector(
+                                                  onTap: () {
+                                                    FocusScope.of(context)
+                                                        .unfocus();
+                                                    FocusManager
+                                                        .instance.primaryFocus
+                                                        ?.unfocus();
+                                                  },
+                                                  child: Padding(
+                                                    padding:
+                                                        MediaQuery.viewInsetsOf(
+                                                            context),
+                                                    child:
+                                                        KcalBottomSheetWidget(),
+                                                  ),
+                                                );
+                                              },
+                                            ).then(
+                                                (value) => safeSetState(() {}));
+                                          },
+                                        ),
+                                      ],
                                     ),
                                   ),
+                                ),
                                 ProfileSection(
                                   children: [
                                     Builder(
@@ -2410,274 +2311,6 @@ class _ProfileWidgetState extends State<ProfileWidget> {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _ProfileTopCards extends StatelessWidget {
-  const _ProfileTopCards({
-    required this.onChangePhoto,
-    required this.onOpenGoals,
-  });
-
-  final Future<void> Function() onChangePhoto;
-  final Future<void> Function() onOpenGoals;
-
-  @override
-  Widget build(BuildContext context) {
-    return AuthUserStreamWidget(
-      builder: (context) {
-        return LayoutBuilder(
-          builder: (context, constraints) {
-            final side = (constraints.maxWidth * 0.38).clamp(122.0, 154.0);
-            return SizedBox(
-              height: side,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  SizedBox(
-                    width: side,
-                    child: _ProfileAvatarCard(onTap: onChangePhoto),
-                  ),
-                  const SizedBox(width: 6.0),
-                  Expanded(
-                    child: _ProfileGoalsCard(onOpenGoals: onOpenGoals),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-}
-
-class _ProfileAvatarCard extends StatelessWidget {
-  const _ProfileAvatarCard({required this.onTap});
-
-  final Future<void> Function() onTap;
-
-  static const _fallbackAvatarUrl =
-      'https://firebasestorage.googleapis.com/v0/b/roast-nutri-tracker-7c67ct.firebasestorage.app/o/AppImages%2Fuser.png?alt=media&token=removed';
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(20.0),
-        onTap: onTap,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: FlutterFlowTheme.of(context).secondaryBackground,
-            borderRadius: BorderRadius.circular(20.0),
-          ),
-          child: Center(
-            child: ClipOval(
-              child: SizedBox(
-                width: 78.0,
-                height: 78.0,
-                child: CachedNetworkImage(
-                  imageUrl: valueOrDefault<String>(
-                    currentUserPhoto,
-                    _fallbackAvatarUrl,
-                  ),
-                  memCacheWidth: 156,
-                  memCacheHeight: 156,
-                  fit: BoxFit.cover,
-                  errorWidget: (context, url, error) => Image.asset(
-                    'assets/images/error_image.webp',
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ProfileGoalsCard extends StatelessWidget {
-  const _ProfileGoalsCard({required this.onOpenGoals});
-
-  final Future<void> Function() onOpenGoals;
-
-  @override
-  Widget build(BuildContext context) {
-    final user = currentUserDocument;
-    final result = CalorieGoalService.calculate(
-      heightCm: user?.height,
-      weightKg: user?.weight,
-      age: user?.age,
-      gender: user?.gender,
-      activityLevel: user?.activityLevel,
-      userGoal: user?.userGoal,
-    );
-    final kcalGoal = valueOrDefault<int>(user?.kcalGoal, 0);
-    final proteinsGoal = valueOrDefault<int>(user?.proteinsGoal, 0);
-    final fatsGoal = valueOrDefault<int>(user?.fatsGoal, 0);
-    final carbsGoal = valueOrDefault<int>(user?.carbsGoal, 0);
-    final isComplete = result.isComplete &&
-        kcalGoal > 0 &&
-        proteinsGoal > 0 &&
-        fatsGoal > 0 &&
-        carbsGoal > 0;
-
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: FlutterFlowTheme.of(context).secondaryBackground,
-        borderRadius: BorderRadius.circular(20.0),
-      ),
-      child: Stack(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(10.0, 8.0, 34.0, 8.0),
-            child: isComplete
-                ? Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        '$fatsGoal Fats',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: FlutterFlowTheme.of(context).bodyMedium.override(
-                              fontFamily: 'SF Pro',
-                              fontSize: 12.0,
-                              letterSpacing: 0.0,
-                              fontWeight: FontWeight.w600,
-                            ),
-                      ),
-                      const SizedBox(height: 4.0),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Expanded(
-                            child: _ProfileGoalStat(
-                              value: proteinsGoal.toString(),
-                              label: 'Protein',
-                            ),
-                          ),
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 4.0),
-                            child: custom_widgets.CalorieArcProgressBar(
-                              width: 82.0,
-                              height: 70.0,
-                              carbs: carbsGoal,
-                              protein: proteinsGoal,
-                              kkcal: kcalGoal,
-                              fats: fatsGoal,
-                              text: 'kcal',
-                            ),
-                          ),
-                          Expanded(
-                            child: _ProfileGoalStat(
-                              value: carbsGoal.toString(),
-                              label: 'Carbs',
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  )
-                : Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(
-                        'Complete your profile (if you\'re here for macros)',
-                        textAlign: TextAlign.center,
-                        style: FlutterFlowTheme.of(context).bodyMedium.override(
-                              fontFamily: 'SF Pro',
-                              fontSize: 13.0,
-                              letterSpacing: 0.0,
-                              lineHeight: 1.15,
-                            ),
-                      ),
-                      const SizedBox(height: 10.0),
-                      TextButton(
-                        style: TextButton.styleFrom(
-                          backgroundColor: FlutterFlowTheme.of(context).primary,
-                          foregroundColor:
-                              FlutterFlowTheme.of(context).secondaryBackground,
-                          padding: const EdgeInsets.symmetric(vertical: 8.0),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0),
-                          ),
-                        ),
-                        onPressed: onOpenGoals,
-                        child: const Text('Complete profile'),
-                      ),
-                    ],
-                  ),
-          ),
-          Align(
-            alignment: Alignment.topRight,
-            child: IconButton(
-              visualDensity: VisualDensity.compact,
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(
-                minWidth: 34.0,
-                minHeight: 34.0,
-              ),
-              icon: Icon(
-                FFIcons.kfdhjkhfiudshiuf,
-                color: FlutterFlowTheme.of(context).primary,
-                size: 21.0,
-              ),
-              onPressed: onOpenGoals,
-              tooltip: 'Calorie goals',
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ProfileGoalStat extends StatelessWidget {
-  const _ProfileGoalStat({
-    required this.value,
-    required this.label,
-  });
-
-  final String value;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Text(
-          value,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: FlutterFlowTheme.of(context).bodyMedium.override(
-                fontFamily: 'SF Pro',
-                fontSize: 13.0,
-                letterSpacing: 0.0,
-                fontWeight: FontWeight.w700,
-                lineHeight: 1.0,
-              ),
-        ),
-        Text(
-          label,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: FlutterFlowTheme.of(context).bodyMedium.override(
-                fontFamily: 'SF Pro',
-                fontSize: 11.0,
-                letterSpacing: 0.0,
-                fontWeight: FontWeight.w500,
-                lineHeight: 1.0,
-              ),
-        ),
-      ],
     );
   }
 }
