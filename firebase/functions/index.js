@@ -12,7 +12,6 @@ admin.initializeApp();
 
 const REGION = "us-central1";
 const OPENAI_SECRET = "OPENAI_API_KEY";
-const REVENUECAT_SECRET = "REVENUECAT_SECRET_KEY";
 const PREMIUM_ENTITLEMENT = "Premium";
 const RELOAD_PACK_PRODUCT_ID = "Roast_Reload_Pack";
 const RELOAD_PACK_CREDITS = {
@@ -462,7 +461,6 @@ exports.onUserDeleted = functions.auth.user().onDelete(async (user) => {
 
 exports.syncRevenueCatSubscription = functions
   .region(REGION)
-  .runWith({secrets: [REVENUECAT_SECRET]})
   .https.onCall(async (data, context) => {
     const requestId = clientRequestId(data);
     try {
@@ -536,7 +534,6 @@ exports.recordUsage = functions
 
 exports.syncReloadPackPurchase = functions
   .region(REGION)
-  .runWith({secrets: [REVENUECAT_SECRET]})
   .https.onCall(async (data, context) => {
     const requestId = clientRequestId(data);
     try {
