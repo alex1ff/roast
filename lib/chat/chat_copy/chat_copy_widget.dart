@@ -275,6 +275,7 @@ class _ChatCopyWidgetState extends State<ChatCopyWidget> {
                           0,
                           180.0,
                         ),
+                        cacheExtent: 600.0,
                         reverse: true,
                         scrollDirection: Axis.vertical,
                         itemCount: chatMessage.length,
@@ -287,18 +288,20 @@ class _ChatCopyWidgetState extends State<ChatCopyWidget> {
                             chatMessage,
                             chatMessageIndex,
                           );
-                          return MessWidget(
-                            key: ValueKey(ChatHistoryView.stableMessageKey(
-                              chatMessageItem,
-                              fallbackIndex: sourceIndex,
-                            )),
-                            mess: chatMessageItem,
-                            acton: (type, text) async {
-                              await _sendChatMessage(
-                                userMessage: text,
-                                type: type,
-                              );
-                            },
+                          return RepaintBoundary(
+                            child: MessWidget(
+                              key: ValueKey(ChatHistoryView.stableMessageKey(
+                                chatMessageItem,
+                                fallbackIndex: sourceIndex,
+                              )),
+                              mess: chatMessageItem,
+                              acton: (type, text) async {
+                                await _sendChatMessage(
+                                  userMessage: text,
+                                  type: type,
+                                );
+                              },
+                            ),
                           );
                         },
                       );

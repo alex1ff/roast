@@ -45,11 +45,11 @@ class _RequestProcessedWidgetState extends State<RequestProcessedWidget> {
           alignment: AlignmentDirectional(0.0, 0.0),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(15.0),
-            child: Image.network(
-              'https://images.unsplash.com/photo-1607434472257-d9f8e57a643d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NTYyMDF8MHwxfHNlYXJjaHwxfHxsb2FkaW5nfGVufDB8fHx8MTczOTM2NDY0MHww&ixlib=rb-4.0.3&q=80&w=1080',
+            child: Image.asset(
+              'assets/images/Roast_NutriTracker_Logo.webp',
               width: 102.0,
               height: 102.0,
-              fit: BoxFit.cover,
+              fit: BoxFit.contain,
             ),
           ),
         ),

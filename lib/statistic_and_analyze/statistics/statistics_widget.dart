@@ -268,6 +268,7 @@ class _MonthCalendarCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final days = _calendarDays(month);
+    final daySummaries = _calendarDaySummaries(monthRecords);
     final canGoNext = DateTime(month.year, month.month, 1).isBefore(
         DateTime(getCurrentTimestamp.year, getCurrentTimestamp.month, 1));
 
@@ -331,15 +332,13 @@ class _MonthCalendarCard extends StatelessWidget {
                 if (_isPlaceholderDay(day)) {
                   return const SizedBox.shrink();
                 }
-                final dayRecords = monthRecords
-                    .where((record) => _isSameDay(record.addedDate, day))
-                    .toList();
+                final summary = daySummaries[_dayKey(day)] ??
+                    const _CalendarDaySummary(count: 0, kcal: 0);
                 return _CalendarDayButton(
                   day: day,
                   isSelected: _isSameDay(day, selectedDate),
-                  hasRecords: dayRecords.isNotEmpty,
-                  kcal: dayRecords.fold<int>(
-                      0, (sum, record) => sum + record.kcal),
+                  hasRecords: summary.count > 0,
+                  kcal: summary.kcal,
                   onTap: () => onSelectDate(day),
                 );
               },
@@ -518,3 +517,35 @@ bool _isSameDay(DateTime? a, DateTime? b) {
 
 bool _isSameMonth(DateTime a, DateTime b) =>
     a.year == b.year && a.month == b.month;
+
+DateTime _dayKey(DateTime date) => DateTime(date.year, date.month, date.day);
+
+Map<DateTime, _CalendarDaySummary> _calendarDaySummaries(
+  List<AddedDishHistoryRecord> records,
+) {
+  final summaries = <DateTime, _CalendarDaySummary>{};
+  for (final record in records) {
+    final addedDate = record.addedDate;
+    if (addedDate == null) {
+      continue;
+    }
+    final key = _dayKey(addedDate);
+    final current =
+        summaries[key] ?? const _CalendarDaySummary(count: 0, kcal: 0);
+    summaries[key] = _CalendarDaySummary(
+      count: current.count + 1,
+      kcal: current.kcal + record.kcal,
+    );
+  }
+  return summaries;
+}
+
+class _CalendarDaySummary {
+  const _CalendarDaySummary({
+    required this.count,
+    required this.kcal,
+  });
+
+  final int count;
+  final int kcal;
+}

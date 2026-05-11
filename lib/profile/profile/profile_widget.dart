@@ -17,6 +17,7 @@ import '/flutter_flow/custom_functions.dart' as functions;
 import '/flutter_flow/revenue_cat_util.dart' as revenue_cat;
 import '/index.dart';
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -239,15 +240,18 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                                       decoration: BoxDecoration(
                                                         shape: BoxShape.circle,
                                                       ),
-                                                      child: Image.network(
-                                                        valueOrDefault<String>(
+                                                      child: CachedNetworkImage(
+                                                        imageUrl:
+                                                            valueOrDefault<
+                                                                String>(
                                                           currentUserPhoto,
                                                           'https://firebasestorage.googleapis.com/v0/b/roast-nutri-tracker-7c67ct.firebasestorage.app/o/AppImages%2Fuser.png?alt=media&token=removed',
                                                         ),
+                                                        memCacheWidth: 150,
+                                                        memCacheHeight: 150,
                                                         fit: BoxFit.cover,
-                                                        errorBuilder: (context,
-                                                                error,
-                                                                stackTrace) =>
+                                                        errorWidget: (context,
+                                                                url, error) =>
                                                             Image.asset(
                                                           'assets/images/error_image.webp',
                                                           fit: BoxFit.cover,
