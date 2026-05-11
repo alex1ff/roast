@@ -142,7 +142,7 @@ class _DishAddAIWidgetState extends State<DishAddAIWidget> {
                                         focusNode: _model.dishNameFocusNode,
                                         onChanged: (_) => EasyDebounce.debounce(
                                           '_model.dishNameTextController',
-                                          Duration(milliseconds: 0),
+                                          Duration(milliseconds: 200),
                                           () => safeSetState(() {}),
                                         ),
                                         autofocus: false,
@@ -257,7 +257,7 @@ class _DishAddAIWidgetState extends State<DishAddAIWidget> {
                                         focusNode: _model.restaurantFocusNode,
                                         onChanged: (_) => EasyDebounce.debounce(
                                           '_model.restaurantTextController',
-                                          Duration(milliseconds: 0),
+                                          Duration(milliseconds: 200),
                                           () => safeSetState(() {}),
                                         ),
                                         autofocus: false,
@@ -353,7 +353,7 @@ class _DishAddAIWidgetState extends State<DishAddAIWidget> {
                                         focusNode: _model.dishWeightFocusNode,
                                         onChanged: (_) => EasyDebounce.debounce(
                                           '_model.dishWeightTextController',
-                                          Duration(milliseconds: 0),
+                                          Duration(milliseconds: 200),
                                           () => safeSetState(() {}),
                                         ),
                                         autofocus: false,
