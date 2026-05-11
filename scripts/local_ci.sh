@@ -7,6 +7,16 @@ step() {
   printf '\n==> %s\n' "$1"
 }
 
+node22() {
+  local major
+  major="$(node -p "process.versions.node.split('.')[0]" 2>/dev/null || true)"
+  if [ "${major}" = "22" ]; then
+    node "$@"
+  else
+    npx --yes node@22 "$@"
+  fi
+}
+
 step "Checking font asset budget"
 actual_mb="$(du -sm assets/fonts | cut -f1)"
 echo "assets/fonts size: ${actual_mb} MB"
@@ -36,8 +46,8 @@ step "Main Firebase Functions"
   npm ci
   npm audit --omit=dev --audit-level=high
   npm run lint
-  npm run test:functions
-  node -e "require('./index.js')"
+  node22 --test test/functions.logic.test.js
+  node22 -e "require('./index.js')"
 )
 
 step "Custom Firebase Functions"
@@ -46,8 +56,8 @@ step "Custom Firebase Functions"
   npm ci
   npm audit --omit=dev --audit-level=high
   npm run lint
-  npm run test:functions
-  node -e "require('./index.js')"
+  node22 --test test/*.test.js
+  node22 -e "require('./index.js')"
 )
 
 step "Firestore rules emulator tests"
