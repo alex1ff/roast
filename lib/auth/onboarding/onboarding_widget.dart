@@ -72,7 +72,7 @@ class _OnboardingWidgetState extends State<OnboardingWidget> {
                       Stack(
                         children: [
                           Image.asset(
-                            'assets/images/ChatGPT_Image_27_._2026_.,_17_27_32.png',
+                            'assets/images/ChatGPT_Image_27_._2026_.,_17_27_32.webp',
                             width: double.infinity,
                             height: MediaQuery.sizeOf(context).height * 0.62,
                             fit: BoxFit.cover,
