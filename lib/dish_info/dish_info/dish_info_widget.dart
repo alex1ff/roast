@@ -10,6 +10,7 @@ import '/flutter_flow/flutter_flow_widgets.dart';
 import '/main_page/subscription_pop_up/subscription_pop_up_widget.dart';
 import '/main_page/subscription_pop_up_copy/subscription_pop_up_copy_widget.dart';
 import '/services/nutrition_summary.dart';
+import '/services/roast_analysis.dart';
 import '/services/roast_audio_service.dart';
 import '/services/user_account_mutations.dart';
 import '/services/usage_limit_service.dart';
@@ -1286,11 +1287,10 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
                                                                               true;
                                                                           if (_model.roast !=
                                                                               null) {
+                                                                            final roastAnalysis =
+                                                                                RoastAnalysis.fromAgentResponse(_model.roast);
                                                                             final roastText =
-                                                                                getJsonField(
-                                                                              _model.roast,
-                                                                              r'''$.roast''',
-                                                                            ).toString();
+                                                                                roastAnalysis.roastText;
                                                                             unawaited(
                                                                               UserAccountMutations.recordUsage(
                                                                                 UserUsageFeature.roast,
@@ -2509,11 +2509,12 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
 
                                                   _shouldSetState = true;
                                                   if (_model.reroas != null) {
+                                                    final roastAnalysis =
+                                                        RoastAnalysis
+                                                            .fromAgentResponse(
+                                                                _model.reroas);
                                                     final roastText =
-                                                        getJsonField(
-                                                      _model.reroas,
-                                                      r'''$.roast''',
-                                                    ).toString();
+                                                        roastAnalysis.roastText;
                                                     unawaited(
                                                       UserAccountMutations
                                                           .recordUsage(
@@ -2525,85 +2526,28 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
                                                         .update({
                                                       ...createAddedDishHistoryRecordData(
                                                         dishWeight:
-                                                            getJsonField(
-                                                          _model.reroas,
-                                                          r'''$.dish_weight''',
-                                                        ),
-                                                        kcal: getJsonField(
-                                                          _model.reroas,
-                                                          r'''$.kcal''',
-                                                        ),
-                                                        carbs: getJsonField(
-                                                          _model.reroas,
-                                                          r'''$.carbs''',
-                                                        ),
-                                                        fats: getJsonField(
-                                                          _model.reroas,
-                                                          r'''$.fats''',
-                                                        ),
-                                                        proteins: getJsonField(
-                                                          _model.reroas,
-                                                          r'''$.proteins''',
-                                                        ),
+                                                            roastAnalysis
+                                                                .dishWeight,
+                                                        kcal:
+                                                            roastAnalysis.kcal,
+                                                        carbs:
+                                                            roastAnalysis.carbs,
+                                                        fats:
+                                                            roastAnalysis.fats,
+                                                        proteins: roastAnalysis
+                                                            .proteins,
                                                         roastText: roastText,
-                                                        badge: getJsonField(
-                                                          _model.reroas,
-                                                          r'''$.primary_badge_text''',
-                                                        ).toString(),
-                                                        impact: getJsonField(
-                                                          _model.reroas,
-                                                          r'''$.goal_impact_text''',
-                                                        ).toString(),
+                                                        badge:
+                                                            roastAnalysis.badge,
+                                                        impact: roastAnalysis
+                                                            .impact,
                                                         calorieshare:
-                                                            getJsonField(
-                                                          _model.reroas,
-                                                          r'''$.daily_calorie_share_text''',
-                                                        ).toString(),
+                                                            roastAnalysis
+                                                                .calorieShare,
                                                         roastAudio: '',
                                                       ),
-                                                      ...mapToFirestore(
-                                                        {
-                                                          'main_ingredients':
-                                                              (getJsonField(
-                                                            _model.reroas,
-                                                            r'''$.main_ingredients''',
-                                                            true,
-                                                          ) as List?)
-                                                                  ?.map<String>(
-                                                                      (e) => e
-                                                                          .toString())
-                                                                  .toList()
-                                                                  .cast<
-                                                                      String>(),
-                                                          'vitamins':
-                                                              getDishPageVitaminsDataListFirestoreData(
-                                                            (getJsonField(
-                                                              _model.reroas,
-                                                              r'''$.vitaminsAndMinerals''',
-                                                              true,
-                                                            )
-                                                                        ?.toList()
-                                                                        .map<DishPageVitaminsDataStruct?>(DishPageVitaminsDataStruct
-                                                                            .maybeFromMap)
-                                                                        .toList()
-                                                                    as Iterable<
-                                                                        DishPageVitaminsDataStruct?>)
-                                                                .withoutNulls,
-                                                          ),
-                                                          'health_tips':
-                                                              (getJsonField(
-                                                            _model.reroas,
-                                                            r'''$.smart_tweaks''',
-                                                            true,
-                                                          ) as List?)
-                                                                  ?.map<String>(
-                                                                      (e) => e
-                                                                          .toString())
-                                                                  .toList()
-                                                                  .cast<
-                                                                      String>(),
-                                                        },
-                                                      ),
+                                                      ...roastAnalysis
+                                                          .nestedFirestoreData(),
                                                     });
                                                     _generateAudioForRoast(
                                                       roastReference:

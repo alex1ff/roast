@@ -9,6 +9,7 @@ import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/form_field_controller.dart';
 import '/main_page/subscription_pop_up/subscription_pop_up_widget.dart';
 import '/main_page/subscription_pop_up_copy/subscription_pop_up_copy_widget.dart';
+import '/services/roast_analysis.dart';
 import '/services/roast_audio_service.dart';
 import '/services/user_account_mutations.dart';
 import '/services/usage_limit_service.dart';
@@ -373,10 +374,11 @@ class _ChoosePersonWidgetState extends State<ChoosePersonWidget> {
 
                                       _shouldSetState = true;
                                       if (_model.roast != null) {
-                                        final roastText = getJsonField(
-                                          _model.roast,
-                                          r'''$.roast''',
-                                        ).toString();
+                                        final roastAnalysis =
+                                            RoastAnalysis.fromAgentResponse(
+                                                _model.roast);
+                                        final roastText =
+                                            roastAnalysis.roastText;
                                         unawaited(
                                           UserAccountMutations.recordUsage(
                                             UserUsageFeature.roast,
@@ -387,33 +389,16 @@ class _ChoosePersonWidgetState extends State<ChoosePersonWidget> {
                                                 .doc();
                                         final roastData = {
                                           ...createAddedDishHistoryRecordData(
-                                            dishName: getJsonField(
-                                              _model.roast,
-                                              r'''$.dish_name''',
-                                            ).toString(),
-                                            dishWeight: getJsonField(
-                                              _model.roast,
-                                              r'''$.dish_weight''',
-                                            ),
+                                            dishName: roastAnalysis.dishName,
+                                            dishWeight:
+                                                roastAnalysis.dishWeight,
                                             addedDate: getCurrentTimestamp,
                                             restaurant: widget.restaurant,
                                             image: widget.dishPhoto,
-                                            kcal: getJsonField(
-                                              _model.roast,
-                                              r'''$.kcal''',
-                                            ),
-                                            carbs: getJsonField(
-                                              _model.roast,
-                                              r'''$.carbs''',
-                                            ),
-                                            proteins: getJsonField(
-                                              _model.roast,
-                                              r'''$.proteins''',
-                                            ),
-                                            fats: getJsonField(
-                                              _model.roast,
-                                              r'''$.fats''',
-                                            ),
+                                            kcal: roastAnalysis.kcal,
+                                            carbs: roastAnalysis.carbs,
+                                            proteins: roastAnalysis.proteins,
+                                            fats: roastAnalysis.fats,
                                             user: currentUserReference,
                                             roastText: roastText,
                                             roastAudio: '',
@@ -435,57 +420,13 @@ class _ChoosePersonWidgetState extends State<ChoosePersonWidget> {
                                             roastLevel: valueOrDefault(
                                                 currentUserDocument?.roastLevel,
                                                 ''),
-                                            badge: getJsonField(
-                                              _model.roast,
-                                              r'''$.primary_badge_text''',
-                                            ).toString(),
-                                            impact: getJsonField(
-                                              _model.roast,
-                                              r'''$.goal_impact_text''',
-                                            ).toString(),
-                                            calorieshare: getJsonField(
-                                              _model.roast,
-                                              r'''$.daily_calorie_share_text''',
-                                            ).toString(),
+                                            badge: roastAnalysis.badge,
+                                            impact: roastAnalysis.impact,
+                                            calorieshare:
+                                                roastAnalysis.calorieShare,
                                           ),
-                                          ...mapToFirestore(
-                                            {
-                                              'main_ingredients': (getJsonField(
-                                                _model.roast,
-                                                r'''$.main_ingredients''',
-                                                true,
-                                              ) as List?)
-                                                  ?.map<String>(
-                                                      (e) => e.toString())
-                                                  .toList()
-                                                  .cast<String>(),
-                                              'vitamins':
-                                                  getDishPageVitaminsDataListFirestoreData(
-                                                (getJsonField(
-                                                  _model.roast,
-                                                  r'''$.vitaminsAndMinerals''',
-                                                  true,
-                                                )
-                                                            ?.toList()
-                                                            .map<DishPageVitaminsDataStruct?>(
-                                                                DishPageVitaminsDataStruct
-                                                                    .maybeFromMap)
-                                                            .toList()
-                                                        as Iterable<
-                                                            DishPageVitaminsDataStruct?>)
-                                                    .withoutNulls,
-                                              ),
-                                              'health_tips': (getJsonField(
-                                                _model.roast,
-                                                r'''$.smart_tweaks''',
-                                                true,
-                                              ) as List?)
-                                                  ?.map<String>(
-                                                      (e) => e.toString())
-                                                  .toList()
-                                                  .cast<String>(),
-                                            },
-                                          ),
+                                          ...roastAnalysis
+                                              .nestedFirestoreData(),
                                         };
                                         await addedDishHistoryRecordReference
                                             .set(roastData);
