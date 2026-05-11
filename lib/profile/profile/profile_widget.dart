@@ -16,6 +16,7 @@ import '/custom_code/widgets/index.dart' as custom_widgets;
 import '/flutter_flow/custom_functions.dart' as functions;
 import '/flutter_flow/revenue_cat_util.dart' as revenue_cat;
 import '/index.dart';
+import '/services/calorie_goal_service.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -39,6 +40,45 @@ class _ProfileWidgetState extends State<ProfileWidget> {
   late ProfileModel _model;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
+
+  Future<void> _updateProfileAndMaybeGoals({
+    double? height,
+    double? weight,
+    int? age,
+    String? gender,
+    String? activityLevel,
+    String? userGoal,
+  }) async {
+    final user = currentUserDocument;
+    final result = CalorieGoalService.calculate(
+      heightCm: height ?? user?.height,
+      weightKg: weight ?? user?.weight,
+      age: age ?? user?.age,
+      gender: gender ?? user?.gender,
+      activityLevel: activityLevel ?? user?.activityLevel,
+      userGoal: userGoal ?? user?.userGoal,
+    );
+
+    final data = createUsersRecordData(
+      height: height,
+      weight: weight,
+      age: age,
+      gender: gender,
+      activityLevel: activityLevel,
+      userGoal: userGoal,
+    );
+
+    if (result.isComplete) {
+      data.addAll(createUsersRecordData(
+        kcalGoal: result.kcalGoal,
+        proteinsGoal: result.proteinsGoal,
+        fatsGoal: result.fatsGoal,
+        carbsGoal: result.carbsGoal,
+      ));
+    }
+
+    await currentUserReference!.update(data);
+  }
 
   @override
   void initState() {
@@ -897,14 +937,8 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                                                 ?.userGoal,
                                                             ''),
                                                     onSelected: (value) async {
-                                                      unawaited(
-                                                        () async {
-                                                          await currentUserReference!
-                                                              .update(
-                                                                  createUsersRecordData(
-                                                            userGoal: value,
-                                                          ));
-                                                        }(),
+                                                      await _updateProfileAndMaybeGoals(
+                                                        userGoal: value,
                                                       );
                                                       Navigator.pop(context);
                                                     },
@@ -951,17 +985,13 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                               }
                                             },
                                             activeThumbColor:
-                                                FlutterFlowTheme.of(context)
-                                                    .primary,
+                                                profileSwitchThumbColor,
                                             activeTrackColor:
-                                                FlutterFlowTheme.of(context)
-                                                    .primary,
+                                                profileSwitchActiveTrackColor,
                                             inactiveTrackColor:
-                                                FlutterFlowTheme.of(context)
-                                                    .alternate,
+                                                profileSwitchInactiveTrackColor,
                                             inactiveThumbColor:
-                                                FlutterFlowTheme.of(context)
-                                                    .secondaryBackground,
+                                                profileSwitchThumbColor,
                                           ),
                                         ),
                                       ),
@@ -995,17 +1025,13 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                               }
                                             },
                                             activeThumbColor:
-                                                FlutterFlowTheme.of(context)
-                                                    .primary,
+                                                profileSwitchThumbColor,
                                             activeTrackColor:
-                                                FlutterFlowTheme.of(context)
-                                                    .primary,
+                                                profileSwitchActiveTrackColor,
                                             inactiveTrackColor:
-                                                FlutterFlowTheme.of(context)
-                                                    .alternate,
+                                                profileSwitchInactiveTrackColor,
                                             inactiveThumbColor:
-                                                FlutterFlowTheme.of(context)
-                                                    .secondaryBackground,
+                                                profileSwitchThumbColor,
                                           ),
                                         ),
                                       ),
@@ -1035,10 +1061,9 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                           'English',
                                         );
                                         if (_model.hPickerResult != null) {
-                                          await currentUserReference!
-                                              .update(createUsersRecordData(
+                                          await _updateProfileAndMaybeGoals(
                                             height: _model.hPickerResult,
-                                          ));
+                                          );
                                         }
 
                                         safeSetState(() {});
@@ -1161,10 +1186,9 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                           'English',
                                         );
                                         if (_model.wPickerResult != null) {
-                                          await currentUserReference!
-                                              .update(createUsersRecordData(
+                                          await _updateProfileAndMaybeGoals(
                                             weight: _model.wPickerResult,
-                                          ));
+                                          );
                                         }
 
                                         safeSetState(() {});
@@ -1280,10 +1304,9 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                           'English',
                                         );
                                         if (_model.agePicker != null) {
-                                          await currentUserReference!
-                                              .update(createUsersRecordData(
+                                          await _updateProfileAndMaybeGoals(
                                             age: _model.agePicker,
-                                          ));
+                                          );
                                         }
 
                                         safeSetState(() {});
@@ -1409,14 +1432,8 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                                             '')
                                                         : 'Male',
                                                     onSelected: (value) async {
-                                                      unawaited(
-                                                        () async {
-                                                          await currentUserReference!
-                                                              .update(
-                                                                  createUsersRecordData(
-                                                            gender: value,
-                                                          ));
-                                                        }(),
+                                                      await _updateProfileAndMaybeGoals(
+                                                        gender: value,
                                                       );
                                                       Navigator.pop(context);
                                                     },
@@ -1540,15 +1557,8 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                                                 ?.activityLevel,
                                                             ''),
                                                     onSelected: (value) async {
-                                                      unawaited(
-                                                        () async {
-                                                          await currentUserReference!
-                                                              .update(
-                                                                  createUsersRecordData(
-                                                            activityLevel:
-                                                                value,
-                                                          ));
-                                                        }(),
+                                                      await _updateProfileAndMaybeGoals(
+                                                        activityLevel: value,
                                                       );
                                                       Navigator.pop(context);
                                                     },
@@ -1699,16 +1709,13 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                                 }
                                               },
                                               activeThumbColor:
-                                                  FlutterFlowTheme.of(context)
-                                                      .secondaryBackground,
+                                                  profileSwitchThumbColor,
                                               activeTrackColor:
-                                                  Color(0xFF34C759),
+                                                  profileSwitchActiveTrackColor,
                                               inactiveTrackColor:
-                                                  FlutterFlowTheme.of(context)
-                                                      .alternate,
+                                                  profileSwitchInactiveTrackColor,
                                               inactiveThumbColor:
-                                                  FlutterFlowTheme.of(context)
-                                                      .secondaryBackground,
+                                                  profileSwitchThumbColor,
                                             ),
                                           ),
                                         ],
@@ -1767,16 +1774,13 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                                 }
                                               },
                                               activeThumbColor:
-                                                  FlutterFlowTheme.of(context)
-                                                      .primary,
+                                                  profileSwitchThumbColor,
                                               activeTrackColor:
-                                                  Color(0xFF34C759),
+                                                  profileSwitchActiveTrackColor,
                                               inactiveTrackColor:
-                                                  FlutterFlowTheme.of(context)
-                                                      .alternate,
+                                                  profileSwitchInactiveTrackColor,
                                               inactiveThumbColor:
-                                                  FlutterFlowTheme.of(context)
-                                                      .secondaryBackground,
+                                                  profileSwitchThumbColor,
                                             ),
                                           ),
                                         ],
@@ -1836,16 +1840,13 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                                 }
                                               },
                                               activeThumbColor:
-                                                  FlutterFlowTheme.of(context)
-                                                      .primary,
+                                                  profileSwitchThumbColor,
                                               activeTrackColor:
-                                                  Color(0xFF34C759),
+                                                  profileSwitchActiveTrackColor,
                                               inactiveTrackColor:
-                                                  FlutterFlowTheme.of(context)
-                                                      .alternate,
+                                                  profileSwitchInactiveTrackColor,
                                               inactiveThumbColor:
-                                                  FlutterFlowTheme.of(context)
-                                                      .secondaryBackground,
+                                                  profileSwitchThumbColor,
                                             ),
                                           ),
                                         ],
@@ -1905,16 +1906,13 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                                 }
                                               },
                                               activeThumbColor:
-                                                  FlutterFlowTheme.of(context)
-                                                      .primary,
+                                                  profileSwitchThumbColor,
                                               activeTrackColor:
-                                                  Color(0xFF34C759),
+                                                  profileSwitchActiveTrackColor,
                                               inactiveTrackColor:
-                                                  FlutterFlowTheme.of(context)
-                                                      .alternate,
+                                                  profileSwitchInactiveTrackColor,
                                               inactiveThumbColor:
-                                                  FlutterFlowTheme.of(context)
-                                                      .secondaryBackground,
+                                                  profileSwitchThumbColor,
                                             ),
                                           ),
                                         ],

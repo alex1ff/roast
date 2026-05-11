@@ -66,34 +66,31 @@ class _ChoosePersonWidgetState extends State<ChoosePersonWidget> {
     super.dispose();
   }
 
-  void _generateAudioForRoast({
+  Future<String?> _generateAudioForRoast({
     required DocumentReference roastReference,
     required String roastText,
     required String? voiceId,
-  }) {
-    unawaited(
-      () async {
-        final audioUrl = await RoastAudioService.generateAndAttach(
-          roastReference: roastReference,
-          roastText: roastText,
-          voiceId: voiceId,
-        );
-        if (audioUrl == null || audioUrl.isEmpty) {
-          return;
-        }
-
-        if (!mounted) {
-          return;
-        }
-        _model.soundPlayer ??= AudioPlayer();
-        if (_model.soundPlayer!.playing) {
-          await _model.soundPlayer!.stop();
-        }
-        _model.soundPlayer!.setVolume(1.0);
-        await _model.soundPlayer!.setUrl(audioUrl);
-        await _model.soundPlayer!.play();
-      }(),
+  }) async {
+    final audioUrl = await RoastAudioService.generateAndAttach(
+      roastReference: roastReference,
+      roastText: roastText,
+      voiceId: voiceId,
     );
+    if (audioUrl == null || audioUrl.isEmpty) {
+      return null;
+    }
+
+    if (!mounted) {
+      return audioUrl;
+    }
+    _model.soundPlayer ??= AudioPlayer();
+    if (_model.soundPlayer!.playing) {
+      await _model.soundPlayer!.stop();
+    }
+    _model.soundPlayer!.setVolume(1.0);
+    await _model.soundPlayer!.setUrl(audioUrl);
+    await _model.soundPlayer!.play();
+    return audioUrl;
   }
 
   @override
@@ -298,7 +295,7 @@ class _ChoosePersonWidgetState extends State<ChoosePersonWidget> {
                                   roastData,
                                   addedDishHistoryRecordReference,
                                 );
-                                _generateAudioForRoast(
+                                final audioUrl = await _generateAudioForRoast(
                                   roastReference:
                                       addedDishHistoryRecordReference,
                                   roastText: roastText,
@@ -329,6 +326,23 @@ class _ChoosePersonWidgetState extends State<ChoosePersonWidget> {
                                     ),
                                   },
                                 );
+                                if (audioUrl == null && mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'Roast text is ready, but audio failed. Try re-roast to retry.',
+                                        style: TextStyle(
+                                          color: FlutterFlowTheme.of(context)
+                                              .primaryText,
+                                        ),
+                                      ),
+                                      duration: Duration(milliseconds: 4000),
+                                      backgroundColor:
+                                          FlutterFlowTheme.of(context)
+                                              .secondary,
+                                    ),
+                                  );
+                                }
 
                                 if (_shouldSetState) safeSetState(() {});
                                 return;

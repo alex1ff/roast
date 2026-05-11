@@ -16,12 +16,31 @@ class ChatHistoryView {
 
   static String stableMessageKey(
     AIChatStruct message, {
-    required int fallbackIndex,
+    int? fallbackIndex,
+    String? textOverride,
   }) {
-    final timestamp =
-        message.date?.microsecondsSinceEpoch.toRadixString(36) ?? 'nodate';
+    final timestamp = message.date?.microsecondsSinceEpoch.toRadixString(36);
     final role = _sanitize(message.role.isEmpty ? 'unknown' : message.role);
-    return 'chat_${timestamp}_${role}_$fallbackIndex';
+    final textHash =
+        _hashFNV1a(_normalizeText(textOverride ?? message.message));
+
+    if (timestamp == null) {
+      return 'chat_nodate_${role}_$textHash';
+    }
+
+    return 'chat_${timestamp}_${role}_$textHash';
+  }
+
+  static String _normalizeText(String value) =>
+      value.replaceAll(RegExp(r'\s+'), ' ').trim();
+
+  static String _hashFNV1a(String input) {
+    int hash = 0x811C9DC5;
+    for (final codeUnit in input.codeUnits) {
+      hash ^= codeUnit;
+      hash = (hash * 0x01000193) & 0xFFFFFFFF;
+    }
+    return hash.toRadixString(16);
   }
 
   static String _sanitize(String value) =>

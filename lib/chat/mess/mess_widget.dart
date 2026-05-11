@@ -3,6 +3,7 @@ import '/backend/schema/structs/index.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
+import '/services/chat_history_view.dart';
 import '/custom_code/widgets/index.dart' as custom_widgets;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:expandable/expandable.dart';
@@ -132,6 +133,8 @@ class _MessWidgetState extends State<MessWidget> {
                             ],
                           );
                         } else if (widget.mess?.isFirst == true) {
+                          final firstMessageText =
+                              'Got your ${widget.mess?.dish}: ${widget.mess?.kkal.toString()} kcal. Want damage control, goal check, or a smarter next move?';
                           return Column(
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -139,11 +142,11 @@ class _MessWidgetState extends State<MessWidget> {
                               custom_widgets.AnimateText(
                                 width: double.infinity,
                                 height: 25.0,
-                                text:
-                                    'Got your ${widget.mess?.dish}: ${widget.mess?.kkal.toString()} kcal. Want damage control, goal check, or a smarter next move?',
-                                messageKey: widget
-                                    .mess!.date!.microsecondsSinceEpoch
-                                    .toString(),
+                                text: firstMessageText,
+                                messageKey: ChatHistoryView.stableMessageKey(
+                                  widget.mess!,
+                                  textOverride: firstMessageText,
+                                ),
                                 charDelayMs: 20,
                               ),
                               Stack(
@@ -642,16 +645,18 @@ class _MessWidgetState extends State<MessWidget> {
                             ].divide(SizedBox(height: 6.0)),
                           );
                         } else {
+                          final messageText = valueOrDefault<String>(
+                            widget.mess?.message,
+                            '-',
+                          );
                           return custom_widgets.AnimateText(
                             width: double.infinity,
                             height: 25.0,
-                            text: valueOrDefault<String>(
-                              widget.mess?.message,
-                              '-',
+                            text: messageText,
+                            messageKey: ChatHistoryView.stableMessageKey(
+                              widget.mess!,
+                              textOverride: messageText,
                             ),
-                            messageKey: widget
-                                .mess!.date!.microsecondsSinceEpoch
-                                .toString(),
                             charDelayMs: 20,
                           );
                         }

@@ -83,18 +83,31 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
     super.dispose();
   }
 
-  void _generateAudioForRoast({
+  Future<String?> _generateAudioForRoast({
     required DocumentReference roastReference,
     required String roastText,
     required String voiceId,
-  }) {
-    unawaited(
-      RoastAudioService.generateAndAttach(
-        roastReference: roastReference,
-        roastText: roastText,
-        voiceId: voiceId,
-      ),
+  }) async {
+    final audioUrl = await RoastAudioService.generateAndAttach(
+      roastReference: roastReference,
+      roastText: roastText,
+      voiceId: voiceId,
     );
+    if (audioUrl == null || audioUrl.isEmpty) {
+      return null;
+    }
+
+    if (!mounted) {
+      return audioUrl;
+    }
+    _model.soundPlayer2 ??= AudioPlayer();
+    if (_model.soundPlayer2!.playing) {
+      await _model.soundPlayer2!.stop();
+    }
+    _model.soundPlayer2!.setVolume(1.0);
+    await _model.soundPlayer2!.setUrl(audioUrl);
+    await _model.soundPlayer2!.play();
+    return audioUrl;
   }
 
   @override
@@ -1069,7 +1082,7 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
                                                                               Padding(
                                                                                 padding: EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 0.0),
                                                                                 child: Text(
-                                                                                  'Audio is being prepared',
+                                                                                  'Audio unavailable. Re-roast to retry.',
                                                                                   style: FlutterFlowTheme.of(context).bodyMedium.override(
                                                                                         fontFamily: 'SF Pro',
                                                                                         color: FlutterFlowTheme.of(context).secondaryText,
@@ -1252,12 +1265,28 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
                                                                               roastText: roastText,
                                                                               roastAudio: '',
                                                                             ));
-                                                                            _generateAudioForRoast(
+                                                                            final audioUrl =
+                                                                                await _generateAudioForRoast(
                                                                               roastReference: widget.dish!,
                                                                               roastText: roastText,
                                                                               voiceId: stackAddedDishHistoryRecord.roastVoiceId,
                                                                             );
                                                                             Navigator.pop(context);
+                                                                            if (audioUrl == null &&
+                                                                                mounted) {
+                                                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                                                SnackBar(
+                                                                                  content: Text(
+                                                                                    'Roast text is ready, but audio failed. Try re-roast to retry.',
+                                                                                    style: TextStyle(
+                                                                                      color: FlutterFlowTheme.of(context).primaryText,
+                                                                                    ),
+                                                                                  ),
+                                                                                  duration: Duration(milliseconds: 4000),
+                                                                                  backgroundColor: FlutterFlowTheme.of(context).secondary,
+                                                                                ),
+                                                                              );
+                                                                            }
                                                                             safeSetState(() {});
                                                                             return;
                                                                           }
@@ -2097,7 +2126,8 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
                                                       ...roastAnalysis
                                                           .nestedFirestoreData(),
                                                     });
-                                                    _generateAudioForRoast(
+                                                    final audioUrl =
+                                                        await _generateAudioForRoast(
                                                       roastReference:
                                                           stackAddedDishHistoryRecord
                                                               .reference,
@@ -2107,6 +2137,30 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
                                                               .roastVoiceId,
                                                     );
                                                     Navigator.pop(context);
+                                                    if (audioUrl == null &&
+                                                        mounted) {
+                                                      ScaffoldMessenger.of(
+                                                              context)
+                                                          .showSnackBar(
+                                                        SnackBar(
+                                                          content: Text(
+                                                            'Roast text is ready, but audio failed. Try re-roast to retry.',
+                                                            style: TextStyle(
+                                                              color: FlutterFlowTheme
+                                                                      .of(context)
+                                                                  .primaryText,
+                                                            ),
+                                                          ),
+                                                          duration: Duration(
+                                                              milliseconds:
+                                                                  4000),
+                                                          backgroundColor:
+                                                              FlutterFlowTheme.of(
+                                                                      context)
+                                                                  .secondary,
+                                                        ),
+                                                      );
+                                                    }
                                                     _model.editMode = false;
                                                     safeSetState(() {});
                                                   } else {

@@ -6,8 +6,6 @@ export '/auth/sign_up/sign_up_widget.dart' show SignUpWidget;
 export '/auth/onboarding/onboarding_widget.dart' show OnboardingWidget;
 export '/profile/profile/profile_widget.dart' show ProfileWidget;
 export '/dish_info/dish_info/dish_info_widget.dart' show DishInfoWidget;
-export '/statistic_and_analyze/statistics/statistics_widget.dart'
-    show StatisticsWidget;
 export '/subscription_page/subscription_page_widget.dart'
     show SubscriptionPageWidget;
 export '/auth/poli/poli_widget.dart' show PoliWidget;

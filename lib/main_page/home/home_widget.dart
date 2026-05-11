@@ -1,5 +1,6 @@
 import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
+import '/components/kcal_bottom_sheet/kcal_bottom_sheet_widget.dart';
 import '/components/nav_bar/nav_bar_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -9,12 +10,12 @@ import '/main_page/widgets/dish_history_card.dart';
 import '/services/nutrition_summary.dart';
 import '/services/user_account_mutations.dart';
 import '/custom_code/actions/index.dart' as actions;
-import '/custom_code/widgets/index.dart' as custom_widgets;
 import '/flutter_flow/revenue_cat_util.dart' as revenue_cat;
 import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
+import 'home_calendar.dart';
 import 'home_model.dart';
 export 'home_model.dart';
 
@@ -39,7 +40,9 @@ class _HomeWidgetState extends State<HomeWidget> {
     _model = createModel(context, () => HomeModel());
 
     SchedulerBinding.instance.addPostFrameCallback((_) async {
-      FFAppState().selectedDate = getCurrentTimestamp;
+      FFAppState().selectedDate ??= getCurrentTimestamp;
+      final selectedDate = FFAppState().selectedDate ?? getCurrentTimestamp;
+      _model.visibleMonth = DateTime(selectedDate.year, selectedDate.month, 1);
       safeSetState(() {});
       await actions.lockOrientation();
       if (revenue_cat.activeEntitlementIds.contains(FFAppConstants.Premium) &&
@@ -60,8 +63,16 @@ class _HomeWidgetState extends State<HomeWidget> {
   Widget build(BuildContext context) {
     context.watch<FFAppState>();
     final selectedDate = FFAppState().selectedDate ?? getCurrentTimestamp;
+    final visibleMonth = _model.visibleMonth ??
+        DateTime(selectedDate.year, selectedDate.month, 1);
     final selectedDayStart = NutritionSummary.startOfDay(selectedDate);
     final selectedDayEnd = NutritionSummary.endOfDay(selectedDate);
+    final queryStart = _model.isCalendarExpanded
+        ? DateTime(visibleMonth.year, visibleMonth.month, 1)
+        : selectedDayStart;
+    final queryEnd = _model.isCalendarExpanded
+        ? DateTime(visibleMonth.year, visibleMonth.month + 1, 1)
+        : selectedDayEnd;
 
     return GestureDetector(
       onTap: () {
@@ -84,11 +95,11 @@ class _HomeWidgetState extends State<HomeWidget> {
                       )
                       .where(
                         'addedDate',
-                        isGreaterThanOrEqualTo: selectedDayStart,
+                        isGreaterThanOrEqualTo: queryStart,
                       )
                       .where(
                         'addedDate',
-                        isLessThan: selectedDayEnd,
+                        isLessThan: queryEnd,
                       )
                       .orderBy('addedDate', descending: true),
                 ),
@@ -107,7 +118,17 @@ class _HomeWidgetState extends State<HomeWidget> {
                     );
                   }
 
-                  final records = snapshot.data!;
+                  final queriedRecords = snapshot.data!;
+                  final records = _model.isCalendarExpanded
+                      ? queriedRecords
+                          .where((record) => isSameHomeCalendarDay(
+                                record.addedDate,
+                                selectedDate,
+                              ))
+                          .toList()
+                      : queriedRecords;
+                  final monthRecords =
+                      _model.isCalendarExpanded ? queriedRecords : records;
                   final summary =
                       NutritionSummary.fromAddedDishHistoryRecords(records);
 
@@ -117,6 +138,9 @@ class _HomeWidgetState extends State<HomeWidget> {
                           currentUserDocument?.measurementOz, false);
                       return _HomeScrollView(
                         selectedDate: selectedDate,
+                        visibleMonth: visibleMonth,
+                        isCalendarExpanded: _model.isCalendarExpanded,
+                        monthRecords: monthRecords,
                         records: records,
                         summary: summary,
                         useOunces: useOunces,
@@ -136,6 +160,10 @@ class _HomeWidgetState extends State<HomeWidget> {
                           currentUserDocument?.carbsGoal,
                           0,
                         ),
+                        onToggleCalendar: _toggleCalendarExpanded,
+                        onChangeMonth: _changeCalendarMonth,
+                        onSelectDate: _selectCalendarDate,
+                        onOpenCalorieGoal: _openCalorieGoalSheet,
                       );
                     },
                   );
@@ -152,11 +180,66 @@ class _HomeWidgetState extends State<HomeWidget> {
       ),
     );
   }
+
+  void _toggleCalendarExpanded() {
+    _model.isCalendarExpanded = !_model.isCalendarExpanded;
+    final selectedDate = FFAppState().selectedDate ?? getCurrentTimestamp;
+    _model.visibleMonth = DateTime(selectedDate.year, selectedDate.month, 1);
+    safeSetState(() {});
+  }
+
+  void _selectCalendarDate(DateTime day) {
+    FFAppState().selectedDate = day;
+    _model.visibleMonth = DateTime(day.year, day.month, 1);
+    safeSetState(() {});
+  }
+
+  void _changeCalendarMonth(int delta) {
+    final currentMonth = _model.visibleMonth ??
+        DateTime(getCurrentTimestamp.year, getCurrentTimestamp.month, 1);
+    final nextMonth =
+        DateTime(currentMonth.year, currentMonth.month + delta, 1);
+    final currentCalendarMonth =
+        DateTime(getCurrentTimestamp.year, getCurrentTimestamp.month, 1);
+    if (nextMonth.isAfter(currentCalendarMonth)) {
+      return;
+    }
+
+    _model.visibleMonth = nextMonth;
+    FFAppState().selectedDate =
+        isSameHomeCalendarMonth(nextMonth, getCurrentTimestamp)
+            ? getCurrentTimestamp
+            : nextMonth;
+    safeSetState(() {});
+  }
+
+  Future<void> _openCalorieGoalSheet() async {
+    await showModalBottomSheet(
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      context: context,
+      builder: (context) {
+        return GestureDetector(
+          onTap: () {
+            FocusScope.of(context).unfocus();
+            FocusManager.instance.primaryFocus?.unfocus();
+          },
+          child: Padding(
+            padding: MediaQuery.viewInsetsOf(context),
+            child: const KcalBottomSheetWidget(),
+          ),
+        );
+      },
+    ).then((value) => safeSetState(() {}));
+  }
 }
 
 class _HomeScrollView extends StatelessWidget {
   const _HomeScrollView({
     required this.selectedDate,
+    required this.visibleMonth,
+    required this.isCalendarExpanded,
+    required this.monthRecords,
     required this.records,
     required this.summary,
     required this.useOunces,
@@ -164,9 +247,16 @@ class _HomeScrollView extends StatelessWidget {
     required this.proteinsGoal,
     required this.fatsGoal,
     required this.carbsGoal,
+    required this.onToggleCalendar,
+    required this.onChangeMonth,
+    required this.onSelectDate,
+    required this.onOpenCalorieGoal,
   });
 
   final DateTime selectedDate;
+  final DateTime visibleMonth;
+  final bool isCalendarExpanded;
+  final List<AddedDishHistoryRecord> monthRecords;
   final List<AddedDishHistoryRecord> records;
   final NutritionSummary summary;
   final bool useOunces;
@@ -174,6 +264,10 @@ class _HomeScrollView extends StatelessWidget {
   final int proteinsGoal;
   final int fatsGoal;
   final int carbsGoal;
+  final VoidCallback onToggleCalendar;
+  final ValueChanged<int> onChangeMonth;
+  final ValueChanged<DateTime> onSelectDate;
+  final VoidCallback onOpenCalorieGoal;
 
   @override
   Widget build(BuildContext context) {
@@ -186,7 +280,15 @@ class _HomeScrollView extends StatelessWidget {
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(6.0, 55.0, 6.0, 0.0),
               sliver: SliverToBoxAdapter(
-                child: _HomeHeader(selectedDate: selectedDate),
+                child: _HomeHeader(
+                  selectedDate: selectedDate,
+                  visibleMonth: visibleMonth,
+                  isCalendarExpanded: isCalendarExpanded,
+                  monthRecords: monthRecords,
+                  onChangeMonth: onChangeMonth,
+                  onSelectDate: onSelectDate,
+                  onToggleCalendar: onToggleCalendar,
+                ),
               ),
             ),
             SliverPadding(
@@ -199,6 +301,7 @@ class _HomeScrollView extends StatelessWidget {
                   proteinsGoal: proteinsGoal,
                   fatsGoal: fatsGoal,
                   carbsGoal: carbsGoal,
+                  onOpenCalorieGoal: onOpenCalorieGoal,
                 ),
               ),
             ),
@@ -242,9 +345,23 @@ class _HomeScrollView extends StatelessWidget {
 }
 
 class _HomeHeader extends StatelessWidget {
-  const _HomeHeader({required this.selectedDate});
+  const _HomeHeader({
+    required this.selectedDate,
+    required this.visibleMonth,
+    required this.isCalendarExpanded,
+    required this.monthRecords,
+    required this.onChangeMonth,
+    required this.onSelectDate,
+    required this.onToggleCalendar,
+  });
 
   final DateTime selectedDate;
+  final DateTime visibleMonth;
+  final bool isCalendarExpanded;
+  final List<AddedDishHistoryRecord> monthRecords;
+  final ValueChanged<int> onChangeMonth;
+  final ValueChanged<DateTime> onSelectDate;
+  final VoidCallback onToggleCalendar;
 
   @override
   Widget build(BuildContext context) {
@@ -265,14 +382,14 @@ class _HomeHeader extends StatelessWidget {
               ),
         ),
         const SizedBox(height: 16.0),
-        SizedBox(
-          width: double.infinity,
-          height: 55.0,
-          child: custom_widgets.HorizontalCalendar(
-            width: double.infinity,
-            height: 55.0,
-            currentTimee: selectedDate,
-          ),
+        HomeCalendarCard(
+          month: visibleMonth,
+          selectedDate: selectedDate,
+          monthRecords: monthRecords,
+          isExpanded: isCalendarExpanded,
+          onChangeMonth: onChangeMonth,
+          onSelectDate: onSelectDate,
+          onToggleExpanded: onToggleCalendar,
         ),
         const SizedBox(height: 24.0),
         Align(
@@ -301,6 +418,7 @@ class _DailyGoalSection extends StatelessWidget {
     required this.proteinsGoal,
     required this.fatsGoal,
     required this.carbsGoal,
+    required this.onOpenCalorieGoal,
   });
 
   final NutritionSummary summary;
@@ -309,6 +427,7 @@ class _DailyGoalSection extends StatelessWidget {
   final int proteinsGoal;
   final int fatsGoal;
   final int carbsGoal;
+  final VoidCallback onOpenCalorieGoal;
 
   @override
   Widget build(BuildContext context) {
@@ -318,6 +437,7 @@ class _DailyGoalSection extends StatelessWidget {
         _KcalGoalCard(
           value: summary.kcal,
           goal: kcalGoal,
+          onTap: onOpenCalorieGoal,
         ),
         const SizedBox(height: 8.0),
         Row(
@@ -363,10 +483,12 @@ class _KcalGoalCard extends StatelessWidget {
   const _KcalGoalCard({
     required this.value,
     required this.goal,
+    required this.onTap,
   });
 
   final int value;
   final int goal;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -378,59 +500,69 @@ class _KcalGoalCard extends StatelessWidget {
             ? '$remaining kcal left'
             : '${remaining.abs()} kcal over';
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: FlutterFlowTheme.of(context).secondaryBackground,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
         borderRadius: BorderRadius.circular(16.0),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        onTap: onTap,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: FlutterFlowTheme.of(context).secondaryBackground,
+            borderRadius: BorderRadius.circular(16.0),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Calories',
+                      style: FlutterFlowTheme.of(context).bodyMedium.override(
+                            fontFamily: 'SF Pro',
+                            color: FlutterFlowTheme.of(context).secondaryText,
+                            fontSize: 16.0,
+                            letterSpacing: 0.0,
+                            fontWeight: FontWeight.w500,
+                          ),
+                    ),
+                    Flexible(
+                      child: Text(
+                        helperText,
+                        textAlign: TextAlign.end,
+                        style: FlutterFlowTheme.of(context).bodyMedium.override(
+                              fontFamily: 'SF Pro',
+                              color: remaining < 0
+                                  ? const Color(0xFFF19656)
+                                  : FlutterFlowTheme.of(context).secondaryText,
+                              fontSize: 14.0,
+                              letterSpacing: 0.0,
+                              fontWeight: FontWeight.w600,
+                            ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12.0),
                 Text(
-                  'Calories',
+                  goal > 0 ? '$value / $goal kcal' : '$value kcal',
                   style: FlutterFlowTheme.of(context).bodyMedium.override(
                         fontFamily: 'SF Pro',
-                        color: FlutterFlowTheme.of(context).secondaryText,
-                        fontSize: 16.0,
+                        fontSize: 30.0,
                         letterSpacing: 0.0,
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w700,
                       ),
                 ),
-                Text(
-                  helperText,
-                  style: FlutterFlowTheme.of(context).bodyMedium.override(
-                        fontFamily: 'SF Pro',
-                        color: remaining < 0
-                            ? const Color(0xFFF19656)
-                            : FlutterFlowTheme.of(context).secondaryText,
-                        fontSize: 14.0,
-                        letterSpacing: 0.0,
-                        fontWeight: FontWeight.w600,
-                      ),
+                const SizedBox(height: 14.0),
+                _ProgressBar(
+                  progress: progress,
+                  color: FlutterFlowTheme.of(context).primary,
                 ),
               ],
             ),
-            const SizedBox(height: 12.0),
-            Text(
-              goal > 0 ? '$value / $goal kcal' : '$value kcal',
-              style: FlutterFlowTheme.of(context).bodyMedium.override(
-                    fontFamily: 'SF Pro',
-                    fontSize: 30.0,
-                    letterSpacing: 0.0,
-                    fontWeight: FontWeight.w700,
-                  ),
-            ),
-            const SizedBox(height: 14.0),
-            _ProgressBar(
-              progress: progress,
-              color: FlutterFlowTheme.of(context).primary,
-            ),
-          ],
+          ),
         ),
       ),
     );

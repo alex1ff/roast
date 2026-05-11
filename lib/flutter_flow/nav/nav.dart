@@ -128,9 +128,9 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           ),
         ),
         FFRoute(
-          name: StatisticsWidget.routeName,
-          path: StatisticsWidget.routePath,
-          builder: (context, params) => StatisticsWidget(),
+          name: 'Statistics',
+          path: '/statistics',
+          builder: (context, params) => HomeWidget(),
         ),
         FFRoute(
           name: SubscriptionPageWidget.routeName,

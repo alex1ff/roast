@@ -46,5 +46,31 @@ void main() {
       expect(audioUrl, isNull);
       expect(persisted, false);
     });
+
+    test('returns null when TTS times out', () async {
+      var persisted = false;
+
+      final audioUrl = await RoastAudioService.generateAndAttach(
+        roastText: 'roast text',
+        voiceId: 'voice_1',
+        timeout: const Duration(milliseconds: 1),
+        textToSpeechRequest: ({text, voiceId}) async {
+          await Future<void>.delayed(const Duration(milliseconds: 20));
+          return const ApiCallResponse(
+            {
+              'result': {'audiopath': 'https://example.com/audio.mp3'},
+            },
+            {},
+            200,
+          );
+        },
+        updateRoastAudio: (_) async {
+          persisted = true;
+        },
+      );
+
+      expect(audioUrl, isNull);
+      expect(persisted, false);
+    });
   });
 }

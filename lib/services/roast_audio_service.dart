@@ -15,12 +15,15 @@ typedef RoastAudioUpdater = Future<void> Function(String audioUrl);
 class RoastAudioService {
   const RoastAudioService._();
 
+  static const Duration defaultTimeout = Duration(seconds: 25);
+
   static Future<String?> generateAndAttach({
     DocumentReference? roastReference,
     required String roastText,
     required String? voiceId,
     TextToSpeechRequest? textToSpeechRequest,
     RoastAudioUpdater? updateRoastAudio,
+    Duration timeout = defaultTimeout,
   }) async {
     try {
       return await AppPerformanceMonitor.trace<String?>(
@@ -37,7 +40,7 @@ class RoastAudioService {
           final audioResult = await request(
             text: roastText,
             voiceId: voiceId,
-          );
+          ).timeout(timeout);
           final audioUrl = TextToSpeechCall.audio(audioResult.jsonBody ?? '');
           if (audioUrl == null || audioUrl.isEmpty) {
             return null;

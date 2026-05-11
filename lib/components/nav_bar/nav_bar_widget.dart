@@ -30,8 +30,6 @@ class _NavBarWidgetState extends State<NavBarWidget> {
   void initState() {
     super.initState();
     _model = createModel(context, () => NavBarModel());
-
-    WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
 
   @override
@@ -67,7 +65,7 @@ class _NavBarWidgetState extends State<NavBarWidget> {
                 highlightColor: Colors.transparent,
                 onTap: () async {
                   if (widget.activePage != 'Chat') {
-                    context.pushNamed(
+                    context.goNamed(
                       ChatCopyWidget.routeName,
                       extra: <String, dynamic>{
                         '__transition_info__': TransitionInfo(
@@ -120,7 +118,7 @@ class _NavBarWidgetState extends State<NavBarWidget> {
                 highlightColor: Colors.transparent,
                 onTap: () async {
                   if (widget.activePage != 'Add') {
-                    context.pushNamed(
+                    context.goNamed(
                       DishAddAIWidget.routeName,
                       extra: <String, dynamic>{
                         '__transition_info__': TransitionInfo(
@@ -173,7 +171,7 @@ class _NavBarWidgetState extends State<NavBarWidget> {
                 highlightColor: Colors.transparent,
                 onTap: () async {
                   if (widget.activePage != 'Home') {
-                    context.pushNamed(
+                    context.goNamed(
                       HomeWidget.routeName,
                       extra: <String, dynamic>{
                         '__transition_info__': TransitionInfo(
@@ -225,62 +223,8 @@ class _NavBarWidgetState extends State<NavBarWidget> {
                 hoverColor: Colors.transparent,
                 highlightColor: Colors.transparent,
                 onTap: () async {
-                  if (widget.activePage != 'Stats') {
-                    context.pushNamed(
-                      StatisticsWidget.routeName,
-                      extra: <String, dynamic>{
-                        '__transition_info__': TransitionInfo(
-                          hasTransition: true,
-                          transitionType: PageTransitionType.fade,
-                          duration: Duration(milliseconds: 0),
-                        ),
-                      },
-                    );
-                  }
-                },
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 30.0,
-                      height: 30.0,
-                      decoration: BoxDecoration(
-                        color: FlutterFlowTheme.of(context).secondaryBackground,
-                      ),
-                      child: Icon(
-                        FFIcons.kcalendar,
-                        color: widget.activePage == 'Stats'
-                            ? FlutterFlowTheme.of(context).primary
-                            : FlutterFlowTheme.of(context).primaryText,
-                        size: 21.0,
-                      ),
-                    ),
-                    Text(
-                      'Stats',
-                      textAlign: TextAlign.center,
-                      style: FlutterFlowTheme.of(context).bodyMedium.override(
-                            fontFamily: 'SF Pro',
-                            color: widget.activePage == 'Stats'
-                                ? FlutterFlowTheme.of(context).primary
-                                : FlutterFlowTheme.of(context).primaryText,
-                            fontSize: 13.0,
-                            letterSpacing: 0.0,
-                            fontWeight: FontWeight.w500,
-                          ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Expanded(
-              child: InkWell(
-                splashColor: Colors.transparent,
-                focusColor: Colors.transparent,
-                hoverColor: Colors.transparent,
-                highlightColor: Colors.transparent,
-                onTap: () async {
                   if (widget.activePage != 'Profile') {
-                    context.pushNamed(
+                    context.goNamed(
                       ProfileWidget.routeName,
                       extra: <String, dynamic>{
                         '__transition_info__': TransitionInfo(

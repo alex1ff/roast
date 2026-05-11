@@ -1,6 +1,10 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import 'package:flutter/material.dart';
 
+const Color profileSwitchThumbColor = Colors.white;
+const Color profileSwitchActiveTrackColor = Color(0xFF34C759);
+const Color profileSwitchInactiveTrackColor = Color(0xFFE5E5EA);
+
 class ProfileSection extends StatelessWidget {
   const ProfileSection({
     super.key,

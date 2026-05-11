@@ -31,8 +31,6 @@ class _NavBarCopyWidgetState extends State<NavBarCopyWidget> {
   void initState() {
     super.initState();
     _model = createModel(context, () => NavBarCopyModel());
-
-    WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
 
   @override
@@ -102,18 +100,6 @@ class _NavBarCopyWidgetState extends State<NavBarCopyWidget> {
               activeAsset: 'assets/images/ChatOn.png',
               inactiveAsset: 'assets/images/ChatOff.png',
             ),
-            _NavBarItem(
-              activePage: widget.activePage,
-              pageKey: 'Stats',
-              routeName: StatisticsWidget.routeName,
-              label: 'Stats',
-              activeAsset:
-                  'assets/images/Property_1=30,_Property_2=calendar-2,_Property_3=green.svg',
-              inactiveAsset:
-                  'assets/images/Property_1=24,_Property_2=calendar-2.webp',
-              activeAssetIsSvg: true,
-              textAlign: TextAlign.center,
-            ),
           ],
         ),
       ),
@@ -131,7 +117,6 @@ class _NavBarItem extends StatelessWidget {
     required this.inactiveAsset,
     this.activeAssetIsSvg = false,
     this.topPadding = 0.0,
-    this.textAlign,
   });
 
   final String? activePage;
@@ -142,7 +127,6 @@ class _NavBarItem extends StatelessWidget {
   final String inactiveAsset;
   final bool activeAssetIsSvg;
   final double topPadding;
-  final TextAlign? textAlign;
 
   bool get isActive => activePage == pageKey;
 
@@ -157,7 +141,7 @@ class _NavBarItem extends StatelessWidget {
         if (isActive) {
           return;
         }
-        context.pushNamed(
+        context.goNamed(
           routeName,
           extra: <String, dynamic>{
             '__transition_info__': const TransitionInfo(
@@ -179,7 +163,6 @@ class _NavBarItem extends StatelessWidget {
             padding: const EdgeInsetsDirectional.fromSTEB(0.0, 3.0, 0.0, 0.0),
             child: Text(
               label,
-              textAlign: textAlign,
               style: FlutterFlowTheme.of(context).bodyMedium.override(
                     font: TextStyle(
                       fontFamily: 'SF Pro',
