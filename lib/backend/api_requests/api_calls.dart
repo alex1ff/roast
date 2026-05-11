@@ -2,6 +2,7 @@ import 'dart:async';
 
 import '/flutter_flow/flutter_flow_util.dart';
 import 'api_manager.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 export 'api_manager.dart' show ApiCallResponse;
 
@@ -12,6 +13,16 @@ class TextToSpeechCall {
     String? text = '',
     String? voiceId = '',
   }) async {
+    final idToken = await FirebaseAuth.instance.currentUser?.getIdToken();
+    if (idToken == null || idToken.isEmpty) {
+      return ApiCallResponse(
+        null,
+        {},
+        401,
+        exception: StateError('TextToSpeech requires authentication.'),
+      );
+    }
+
     final ffApiRequestBody = '''
 {
   "data": {
@@ -27,7 +38,9 @@ class TextToSpeechCall {
           apiUrl:
               'https://us-central1-roast-nutri-tracker-7c67ct.cloudfunctions.net/textToSpeech',
           callType: ApiCallType.POST,
-          headers: {},
+          headers: {
+            'Authorization': 'Bearer $idToken',
+          },
           params: {},
           body: ffApiRequestBody,
           bodyType: BodyType.JSON,

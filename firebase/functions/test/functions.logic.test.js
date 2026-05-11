@@ -128,6 +128,17 @@ describe("Functions business logic", () => {
     );
   });
 
+  it("builds daily AI rate limit usage and rejects exhausted limits", () => {
+    assert.deepEqual(
+      _test.buildDailyRateLimitUsage({calls: 2}, 3),
+      {calls: 3},
+    );
+    assert.throws(
+      () => _test.buildDailyRateLimitUsage({calls: 3}, 3),
+      /Daily AI request limit exceeded/,
+    );
+  });
+
   it("finds only unsynced reload pack purchases", () => {
     const purchases = _test.reloadPurchasesAfter(
       {

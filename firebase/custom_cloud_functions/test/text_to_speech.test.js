@@ -31,6 +31,76 @@ describe("textToSpeech helpers", () => {
     assert.equal(_test.textValue(null), "");
   });
 
+  it("sanitizes supported voice settings and rejects invalid values", () => {
+    assert.deepEqual(
+      _test.sanitizeVoiceSettings({
+        stability: 0.5,
+        similarity_boost: 1,
+        style: 0,
+        use_speaker_boost: true,
+        ignored: "value",
+      }),
+      {
+        stability: 0.5,
+        similarity_boost: 1,
+        style: 0,
+        use_speaker_boost: true,
+      },
+    );
+    assert.equal(_test.sanitizeVoiceSettings({ignored: "value"}), undefined);
+    assert.throws(
+      () => _test.sanitizeVoiceSettings({stability: 2}),
+      /Invalid voice_settings.stability/,
+    );
+  });
+
+  it("validates voice ids against format and allowlist", async () => {
+    await assert.rejects(
+      () => _test.verifyVoiceId("bad id", {
+        verifyVoiceId: async () => true,
+      }),
+      /Unsupported voiceid/,
+    );
+    await assert.rejects(
+      () => _test.verifyVoiceId("voice_1", {
+        verifyVoiceId: async () => false,
+      }),
+      /Voice is not allowlisted/,
+    );
+    await assert.doesNotReject(
+      () => _test.verifyVoiceId("voice_1", {
+        allowedVoiceIds: new Set(["voice_1"]),
+      }),
+    );
+  });
+
+  it("builds quota usage and rejects exhausted daily limits", () => {
+    assert.deepEqual(
+      _test.buildTtsQuotaUsage(
+        {calls: 1, chars: 9},
+        10,
+        {dailyCallLimit: 3, dailyCharLimit: 20},
+      ),
+      {calls: 2, chars: 19},
+    );
+    assert.throws(
+      () => _test.buildTtsQuotaUsage(
+        {calls: 3, chars: 9},
+        1,
+        {dailyCallLimit: 3, dailyCharLimit: 20},
+      ),
+      /Text-to-speech daily limit exceeded/,
+    );
+    assert.throws(
+      () => _test.buildTtsQuotaUsage(
+        {calls: 1, chars: 19},
+        2,
+        {dailyCallLimit: 3, dailyCharLimit: 20},
+      ),
+      /Text-to-speech daily limit exceeded/,
+    );
+  });
+
   it("synthesizes speech with mocked provider and storage clients", async () => {
     const saved = {};
     const fakeFetch = async (url, options) => {
@@ -72,9 +142,11 @@ describe("textToSpeech helpers", () => {
         elevenLabsKey: "test-key",
         bucketName: "test-bucket",
         fetchImpl: fakeFetch,
+        skipQuota: true,
         storageClient: fakeStorage,
         now: () => 123,
         uuidFactory: () => ids.shift(),
+        verifyVoiceId: async () => true,
       },
     );
 
@@ -111,12 +183,55 @@ describe("textToSpeech helpers", () => {
           elevenLabsKey: "test-key",
           bucketName: "test-bucket",
           maxTextChars: 5,
+          skipQuota: true,
+          verifyVoiceId: async () => true,
           fetchImpl: async () => {
             throw new Error("fetch should not run");
           },
         },
       ),
       /Text is too long/,
+    );
+  });
+
+  it("rejects unsupported model and output format before provider calls", async () => {
+    await assert.rejects(
+      () => _test.synthesizeSpeech(
+        {
+          text: "hello",
+          voiceid: "voice_1",
+          modelid: "other_model",
+        },
+        {
+          elevenLabsKey: "test-key",
+          bucketName: "test-bucket",
+          skipQuota: true,
+          verifyVoiceId: async () => true,
+          fetchImpl: async () => {
+            throw new Error("fetch should not run");
+          },
+        },
+      ),
+      /Unsupported modelid/,
+    );
+    await assert.rejects(
+      () => _test.synthesizeSpeech(
+        {
+          text: "hello",
+          voiceid: "voice_1",
+          outputformat: "pcm_24000",
+        },
+        {
+          elevenLabsKey: "test-key",
+          bucketName: "test-bucket",
+          skipQuota: true,
+          verifyVoiceId: async () => true,
+          fetchImpl: async () => {
+            throw new Error("fetch should not run");
+          },
+        },
+      ),
+      /Unsupported outputformat/,
     );
   });
 
@@ -130,6 +245,8 @@ describe("textToSpeech helpers", () => {
         {
           elevenLabsKey: "test-key",
           bucketName: "test-bucket",
+          skipQuota: true,
+          verifyVoiceId: async () => true,
           fetchImpl: async () => ({
             ok: false,
             status: 429,

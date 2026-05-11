@@ -1,6 +1,6 @@
 # Firebase Functions Runbook
 
-Date: 2026-05-10
+Date: 2026-05-11
 
 ## Current Source Status
 
@@ -21,13 +21,21 @@ The repository also includes the deployed `custom_cloud_functions` codebase:
 
 | Function | Trigger | Status |
 | --- | --- | --- |
-| `textToSpeech` | callable/HTTP callable protocol | Calls ElevenLabs, writes audio to Firebase Storage `tts/`, returns `result.audiopath`; ElevenLabs key from env/runtime config only. |
+| `textToSpeech` | callable/HTTP callable protocol | Requires Firebase auth; validates voice/model/output controls, enforces per-user TTS daily quota, calls ElevenLabs, writes audio to Firebase Storage `tts/`, returns `result.audiopath`; ElevenLabs key from env/runtime config only. |
 
 The local source now matches all callable/HTTP function names used by the
 Flutter client. Deployment parity still requires provisioning runtime config /
 secrets in Firebase before deploy.
 
 ## Local Setup
+
+Preferred full local check:
+
+```sh
+./scripts/local_ci.sh
+```
+
+Manual function checks:
 
 ```sh
 cd firebase/functions
@@ -120,6 +128,10 @@ AI callable wrapper:
 - Secrets are read from `OPENAI_API_KEY`, `openai.api_key`, or `openai.key`.
 - Agent configs are checked in at `firebase/functions/agent_configs.js` with
   provider keys stripped.
+- Before provider calls, each authenticated uid is rate-limited server-side in
+  `users/{uid}/private_usage/ai_{agent}_YYYYMMDD`.
+- Default daily limits: `AI_DAILY_ROAST_CALL_LIMIT=80` and
+  `AI_DAILY_CHAT_CALL_LIMIT=200`.
 - Backend logs must not include prompts, image URLs, OpenAI request bodies, or
   provider responses.
 
@@ -134,6 +146,7 @@ Share functions:
 TTS HTTP/callable wrapper:
 
 - Timeout: 90 seconds.
+- Client sends the Firebase ID token in the `Authorization: Bearer ...` header.
 - Timeout result: `ApiCallResponse` status `408` with `TimeoutException`.
 - UI must treat non-success TTS responses as user-visible failures.
 - `textToSpeech` is deployed from `firebase/custom_cloud_functions` so its
@@ -143,6 +156,16 @@ TTS HTTP/callable wrapper:
 - Storage bucket is read from `TTS_BUCKET`, `FIREBASE_STORAGE_BUCKET`,
   `firebase.storageBucket`, then falls back to the app bucket.
 - Text payloads are capped by `TTS_MAX_TEXT_CHARS`, default 4000 characters.
+- `modelid` is allowlisted to `eleven_multilingual_v2`.
+- `outputformat` is allowlisted to `mp3_44100_128`.
+- `voiceid` must match a safe id pattern and either be present in the
+  Firestore `persons` collection or in `TTS_ALLOWED_VOICE_IDS`.
+- `voice_settings` passthrough is sanitized to numeric `0..1` values for
+  `stability`, `similarity_boost`, `style`, plus boolean
+  `use_speaker_boost`.
+- Per-user quota defaults: `TTS_DAILY_CALL_LIMIT=50` and
+  `TTS_DAILY_CHAR_LIMIT=50000`. Usage is stored server-side under
+  `users/{uid}/private_usage/tts_YYYYMMDD`.
 
 ## Secrets And Configuration
 
@@ -151,9 +174,9 @@ required secrets:
 
 | Area | Expected secret/config |
 | --- | --- |
-| OpenAI/LangChain providers | API keys and model/provider selection. |
+| OpenAI/LangChain providers | `OPENAI_API_KEY`, optional `AI_DAILY_ROAST_CALL_LIMIT`, `AI_DAILY_CHAT_CALL_LIMIT`. |
 | Anthropic / Google GenAI | API keys if providers are enabled. |
-| ElevenLabs or TTS provider | API key, voice/model allowlist, output storage path. |
+| ElevenLabs or TTS provider | `ELEVENLABS_API_KEY`, optional `TTS_BUCKET`, `TTS_MAX_TEXT_CHARS`, `TTS_ALLOWED_VOICE_IDS`, `TTS_DAILY_CALL_LIMIT`, `TTS_DAILY_CHAR_LIMIT`. |
 | Firebase Admin | Project service account or emulator credentials. |
 | RevenueCat | `REVENUECAT_SECRET_KEY`; optional `revenuecat.secret_key` / `revenuecat.api_key` runtime config fallback. |
 | Billing/webhooks | Provider webhook secret and entitlement/product mapping. |
@@ -183,9 +206,9 @@ flutter build apk --release \
   `firebase/custom_cloud_functions`.
 - Firestore rules tests pass in the demo emulator.
 - Deployed callable names match Flutter client calls.
-- AI functions enforce auth. TTS remains compatible with the currently deployed
-  unauthenticated callable HTTP contract; add quota/payload-size controls before
-  a production hardening deploy.
+- AI functions enforce auth. TTS enforces auth, payload-size controls,
+  model/output/voice controls, and per-user daily quota while preserving the
+  callable HTTP response contract expected by the Flutter client.
 - Timeout/error responses stay compatible with the Flutter client.
 - Protected subscription/limit mutations use backend-validated writes, not
   direct client Firestore writes.

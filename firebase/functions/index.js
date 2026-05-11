@@ -19,6 +19,10 @@ const RELOAD_PACK_CREDITS = {
   extra_photo: 21,
   extra_nophoto: 7,
 };
+const AI_DAILY_CALL_LIMITS = {
+  roast: 80,
+  aIAssistent: 200,
+};
 const USAGE_FEATURES = {
   roast: {
     countField: "count_limited",
@@ -83,6 +87,67 @@ function toDate(value) {
 
 function normalizeCount(value) {
   return Number.isInteger(value) && value > 0 ? value : 0;
+}
+
+function positiveInt(value, fallback) {
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+function aiDailyLimit(agentName, options = {}) {
+  const envName = agentName === "roast" ?
+    "AI_DAILY_ROAST_CALL_LIMIT" :
+    "AI_DAILY_CHAT_CALL_LIMIT";
+  return positiveInt(
+    options.dailyLimit ?? process.env[envName],
+    AI_DAILY_CALL_LIMITS[agentName] || 100,
+  );
+}
+
+function usageDateKey(nowMs) {
+  return new Date(nowMs).toISOString().slice(0, 10).replace(/-/g, "");
+}
+
+function buildDailyRateLimitUsage(currentUsage, limit) {
+  const calls = normalizeCount(currentUsage?.calls);
+  if (calls >= limit) {
+    throw new CallableError(
+      "resource-exhausted",
+      "Daily AI request limit exceeded.",
+    );
+  }
+  return {calls: calls + 1};
+}
+
+async function consumeAiRateLimit(uid, agentName, options = {}) {
+  const firestore = options.firestore || admin.firestore();
+  const nowMs = options.nowMs ?? Date.now();
+  const dateKey = usageDateKey(nowMs);
+  const safeAgentName = agentName.replace(/[^A-Za-z0-9_-]/g, "_");
+  const usageRef = firestore.doc(
+    `users/${uid}/private_usage/ai_${safeAgentName}_${dateKey}`,
+  );
+  const limit = aiDailyLimit(agentName, options);
+
+  return firestore.runTransaction(async (transaction) => {
+    const snapshot = await transaction.get(usageRef);
+    const nextUsage = buildDailyRateLimitUsage(
+      snapshot.exists ? snapshot.data() : {},
+      limit,
+    );
+
+    transaction.set(
+      usageRef,
+      {
+        calls: admin.firestore.FieldValue.increment(1),
+        date_key: dateKey,
+        updated_at: admin.firestore.FieldValue.serverTimestamp(),
+      },
+      {merge: true},
+    );
+
+    return nextUsage;
+  });
 }
 
 function planForProductIdentifier(productIdentifier) {
@@ -429,7 +494,8 @@ function aiCallable(agentName) {
     .https.onCall(async (data, context) => {
       const requestId = clientRequestId(data);
       try {
-        requireAuth(context);
+        const uid = requireAuth(context);
+        await consumeAiRateLimit(uid, agentName);
         return await runOpenAiAgent(agentName, data);
       } catch (error) {
         throw toHttpsError(error, agentName, requestId);
@@ -595,8 +661,10 @@ exports.syncReloadPackPurchase = functions
   });
 
 exports._test = {
+  buildDailyRateLimitUsage,
   buildUsageUpdate,
   clientRequestId,
+  consumeAiRateLimit,
   extractOpenAiOutputText,
   fallbackSubscriptionEnd,
   getSystemMessage,
