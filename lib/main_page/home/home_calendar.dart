@@ -110,6 +110,7 @@ class HomeCalendarCard extends StatelessWidget {
                 return _CalendarDayButton(
                   day: day,
                   isSelected: isSameHomeCalendarDay(day, selectedDate),
+                  isToday: isSameHomeCalendarDay(day, getCurrentTimestamp),
                   hasRecords: summary.count > 0,
                   kcal: summary.kcal,
                   onTap: () => onSelectDate(day),
@@ -139,9 +140,7 @@ List<DateTime> _calendarDays(DateTime month) {
 }
 
 List<DateTime> _selectedWeekDays(DateTime selectedDate) {
-  final monday =
-      DateTime(selectedDate.year, selectedDate.month, selectedDate.day)
-          .subtract(Duration(days: selectedDate.weekday - 1));
+  final monday = homeCalendarWeekStart(selectedDate);
   return List.generate(7, (index) => monday.add(Duration(days: index)));
 }
 
@@ -159,6 +158,14 @@ bool isSameHomeCalendarMonth(DateTime a, DateTime b) =>
 
 DateTime homeCalendarDayKey(DateTime date) =>
     DateTime(date.year, date.month, date.day);
+
+DateTime homeCalendarWeekStart(DateTime date) {
+  final day = homeCalendarDayKey(date);
+  return day.subtract(Duration(days: day.weekday - 1));
+}
+
+DateTime homeCalendarWeekEnd(DateTime date) =>
+    homeCalendarWeekStart(date).add(const Duration(days: 7));
 
 Map<DateTime, _CalendarDaySummary> _calendarDaySummaries(
   List<AddedDishHistoryRecord> records,
@@ -213,6 +220,7 @@ class _CalendarDayButton extends StatelessWidget {
   const _CalendarDayButton({
     required this.day,
     required this.isSelected,
+    required this.isToday,
     required this.hasRecords,
     required this.kcal,
     required this.onTap,
@@ -220,6 +228,7 @@ class _CalendarDayButton extends StatelessWidget {
 
   final DateTime day;
   final bool isSelected;
+  final bool isToday;
   final bool hasRecords;
   final int kcal;
   final VoidCallback onTap;
@@ -233,6 +242,11 @@ class _CalendarDayButton extends StatelessWidget {
             : const Color(0xFFF2F2F7);
     final foreground =
         isSelected ? Colors.white : FlutterFlowTheme.of(context).primaryText;
+    final borderColor = isToday && !isSelected
+        ? FlutterFlowTheme.of(context).primary
+        : hasRecords && !isSelected
+            ? const Color(0xFF49928C)
+            : Colors.transparent;
 
     return InkWell(
       borderRadius: BorderRadius.circular(12.0),
@@ -242,9 +256,8 @@ class _CalendarDayButton extends StatelessWidget {
           color: background,
           borderRadius: BorderRadius.circular(12.0),
           border: Border.all(
-            color: hasRecords && !isSelected
-                ? const Color(0xFF49928C)
-                : Colors.transparent,
+            color: borderColor,
+            width: isToday && !isSelected ? 1.5 : 1.0,
           ),
         ),
         child: Center(

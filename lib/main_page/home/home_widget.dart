@@ -65,14 +65,14 @@ class _HomeWidgetState extends State<HomeWidget> {
     final selectedDate = FFAppState().selectedDate ?? getCurrentTimestamp;
     final visibleMonth = _model.visibleMonth ??
         DateTime(selectedDate.year, selectedDate.month, 1);
-    final selectedDayStart = NutritionSummary.startOfDay(selectedDate);
-    final selectedDayEnd = NutritionSummary.endOfDay(selectedDate);
+    final collapsedWeekStart = homeCalendarWeekStart(selectedDate);
+    final collapsedWeekEnd = homeCalendarWeekEnd(selectedDate);
     final queryStart = _model.isCalendarExpanded
         ? DateTime(visibleMonth.year, visibleMonth.month, 1)
-        : selectedDayStart;
+        : collapsedWeekStart;
     final queryEnd = _model.isCalendarExpanded
         ? DateTime(visibleMonth.year, visibleMonth.month + 1, 1)
-        : selectedDayEnd;
+        : collapsedWeekEnd;
 
     return GestureDetector(
       onTap: () {
@@ -119,16 +119,13 @@ class _HomeWidgetState extends State<HomeWidget> {
                   }
 
                   final queriedRecords = snapshot.data!;
-                  final records = _model.isCalendarExpanded
-                      ? queriedRecords
-                          .where((record) => isSameHomeCalendarDay(
-                                record.addedDate,
-                                selectedDate,
-                              ))
-                          .toList()
-                      : queriedRecords;
-                  final monthRecords =
-                      _model.isCalendarExpanded ? queriedRecords : records;
+                  final records = queriedRecords
+                      .where((record) => isSameHomeCalendarDay(
+                            record.addedDate,
+                            selectedDate,
+                          ))
+                      .toList();
+                  final monthRecords = queriedRecords;
                   final summary =
                       NutritionSummary.fromAddedDishHistoryRecords(records);
 
