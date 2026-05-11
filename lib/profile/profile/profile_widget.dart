@@ -2534,48 +2534,54 @@ class _ProfileGoalsCard extends StatelessWidget {
       child: Stack(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(12.0, 10.0, 38.0, 10.0),
+            padding: const EdgeInsets.fromLTRB(10.0, 8.0, 34.0, 8.0),
             child: isComplete
                 ? Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      _ProfileGoalLine(
-                        label: 'Kcal',
-                        value: '$kcalGoal kcal',
-                        progress: 1.0,
-                        color: FlutterFlowTheme.of(context).primary,
+                      Text(
+                        '$fatsGoal Fats',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: FlutterFlowTheme.of(context).bodyMedium.override(
+                              fontFamily: 'SF Pro',
+                              fontSize: 12.0,
+                              letterSpacing: 0.0,
+                              fontWeight: FontWeight.w600,
+                            ),
                       ),
-                      _ProfileGoalLine(
-                        label: 'Protein',
-                        value: '$proteinsGoal g',
-                        progress: _macroProgress(
-                          grams: proteinsGoal,
-                          caloriesPerGram: 4,
-                          kcalGoal: kcalGoal,
-                        ),
-                        color: const Color(0xFF49928C),
+                      const SizedBox(height: 4.0),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Expanded(
+                            child: _ProfileGoalStat(
+                              value: proteinsGoal.toString(),
+                              label: 'Protein',
+                            ),
+                          ),
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 4.0),
+                            child: custom_widgets.CalorieArcProgressBar(
+                              width: 82.0,
+                              height: 70.0,
+                              carbs: carbsGoal,
+                              protein: proteinsGoal,
+                              kkcal: kcalGoal,
+                              fats: fatsGoal,
+                              text: 'kcal',
+                            ),
+                          ),
+                          Expanded(
+                            child: _ProfileGoalStat(
+                              value: carbsGoal.toString(),
+                              label: 'Carbs',
+                            ),
+                          ),
+                        ],
                       ),
-                      _ProfileGoalLine(
-                        label: 'Fats',
-                        value: '$fatsGoal g',
-                        progress: _macroProgress(
-                          grams: fatsGoal,
-                          caloriesPerGram: 9,
-                          kcalGoal: kcalGoal,
-                        ),
-                        color: const Color(0xFFF19656),
-                      ),
-                      _ProfileGoalLine(
-                        label: 'Carbs',
-                        value: '$carbsGoal g',
-                        progress: _macroProgress(
-                          grams: carbsGoal,
-                          caloriesPerGram: 4,
-                          kcalGoal: kcalGoal,
-                        ),
-                        color: const Color(0xFF9F4284),
-                      ),
-                    ].divide(const SizedBox(height: 5.0)),
+                    ],
                   )
                 : Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -2630,76 +2636,46 @@ class _ProfileGoalsCard extends StatelessWidget {
       ),
     );
   }
-
-  static double _macroProgress({
-    required int grams,
-    required int caloriesPerGram,
-    required int kcalGoal,
-  }) {
-    if (kcalGoal <= 0) {
-      return 0.0;
-    }
-    return ((grams * caloriesPerGram) / kcalGoal).clamp(0.0, 1.0).toDouble();
-  }
 }
 
-class _ProfileGoalLine extends StatelessWidget {
-  const _ProfileGoalLine({
-    required this.label,
+class _ProfileGoalStat extends StatelessWidget {
+  const _ProfileGoalStat({
     required this.value,
-    required this.progress,
-    required this.color,
+    required this.label,
   });
 
-  final String label;
   final String value;
-  final double progress;
-  final Color color;
+  final String label;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: FlutterFlowTheme.of(context).bodyMedium.override(
-                      fontFamily: 'SF Pro',
-                      color: FlutterFlowTheme.of(context).secondaryText,
-                      fontSize: 11.0,
-                      letterSpacing: 0.0,
-                      fontWeight: FontWeight.w600,
-                    ),
+        Text(
+          value,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: FlutterFlowTheme.of(context).bodyMedium.override(
+                fontFamily: 'SF Pro',
+                fontSize: 13.0,
+                letterSpacing: 0.0,
+                fontWeight: FontWeight.w700,
+                lineHeight: 1.0,
               ),
-            ),
-            Text(
-              value,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: FlutterFlowTheme.of(context).bodyMedium.override(
-                    fontFamily: 'SF Pro',
-                    fontSize: 12.0,
-                    letterSpacing: 0.0,
-                    fontWeight: FontWeight.w700,
-                  ),
-            ),
-          ],
         ),
-        const SizedBox(height: 3.0),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(999.0),
-          child: LinearProgressIndicator(
-            minHeight: 5.0,
-            value: progress,
-            backgroundColor: const Color(0xFFE5E7EB),
-            valueColor: AlwaysStoppedAnimation<Color>(color),
-          ),
+        Text(
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: FlutterFlowTheme.of(context).bodyMedium.override(
+                fontFamily: 'SF Pro',
+                fontSize: 11.0,
+                letterSpacing: 0.0,
+                fontWeight: FontWeight.w500,
+                lineHeight: 1.0,
+              ),
         ),
       ],
     );
