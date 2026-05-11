@@ -3,7 +3,6 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'nav_bar_copy_model.dart';
 export 'nav_bar_copy_model.dart';
 
@@ -109,7 +108,8 @@ class _NavBarCopyWidgetState extends State<NavBarCopyWidget> {
                       child: Text(
                         'Profile',
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
-                              font: GoogleFonts.montserrat(
+                              font: TextStyle(
+                                fontFamily: 'SF Pro',
                                 fontWeight: FlutterFlowTheme.of(context)
                                     .bodyMedium
                                     .fontWeight,
@@ -183,7 +183,8 @@ class _NavBarCopyWidgetState extends State<NavBarCopyWidget> {
                           'Add Dish',
                           style:
                               FlutterFlowTheme.of(context).bodyMedium.override(
-                                    font: GoogleFonts.montserrat(
+                                    font: TextStyle(
+                                      fontFamily: 'SF Pro',
                                       fontWeight: FlutterFlowTheme.of(context)
                                           .bodyMedium
                                           .fontWeight,
@@ -255,7 +256,8 @@ class _NavBarCopyWidgetState extends State<NavBarCopyWidget> {
                       child: Text(
                         'Home',
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
-                              font: GoogleFonts.montserrat(
+                              font: TextStyle(
+                                fontFamily: 'SF Pro',
                                 fontWeight: FlutterFlowTheme.of(context)
                                     .bodyMedium
                                     .fontWeight,
@@ -326,7 +328,8 @@ class _NavBarCopyWidgetState extends State<NavBarCopyWidget> {
                       child: Text(
                         'Chat',
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
-                              font: GoogleFonts.montserrat(
+                              font: TextStyle(
+                                fontFamily: 'SF Pro',
                                 fontWeight: FlutterFlowTheme.of(context)
                                     .bodyMedium
                                     .fontWeight,
@@ -398,7 +401,8 @@ class _NavBarCopyWidgetState extends State<NavBarCopyWidget> {
                         'Stats',
                         textAlign: TextAlign.center,
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
-                              font: GoogleFonts.montserrat(
+                              font: TextStyle(
+                                fontFamily: 'SF Pro',
                                 fontWeight: FlutterFlowTheme.of(context)
                                     .bodyMedium
                                     .fontWeight,

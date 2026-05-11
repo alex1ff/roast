@@ -1,16 +1,10 @@
 // Automatic FlutterFlow imports
-import '/backend/backend.dart';
-import '/backend/schema/structs/index.dart';
-import '/backend/schema/enums/enums.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
-import '/flutter_flow/flutter_flow_util.dart';
-import 'index.dart'; // Imports other custom actions
-import '/flutter_flow/custom_functions.dart'; // Imports custom functions
-import 'package:flutter/material.dart';
+// Imports other custom actions
+// Imports custom functions
 // Begin custom action code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
 
-import 'index.dart'; // Imports other custom actions
+// Imports other custom actions
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:share_plus/share_plus.dart';
@@ -30,13 +24,15 @@ Future shareDishToSocial(
   }
 
   if (attachment != null) {
-    await Share.shareXFiles(
-      [attachment],
-      text: message.isNotEmpty ? message : null,
-      subject: formattedText ?? 'Присоединяйся',
+    await SharePlus.instance.share(
+      ShareParams(
+        files: [attachment],
+        text: message.isNotEmpty ? message : null,
+        subject: formattedText ?? 'Присоединяйся',
+      ),
     );
   } else if (message.isNotEmpty) {
-    await Share.share(message);
+    await SharePlus.instance.share(ShareParams(text: message));
   }
 }
 

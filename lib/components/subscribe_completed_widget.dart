@@ -2,7 +2,6 @@ import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 import 'subscribe_completed_model.dart';
 export 'subscribe_completed_model.dart';
@@ -83,7 +82,8 @@ class _SubscribeCompletedWidgetState extends State<SubscribeCompletedWidget> {
                 iconPadding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
                 color: FlutterFlowTheme.of(context).primary,
                 textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                      font: GoogleFonts.poppins(
+                      font: TextStyle(
+                        fontFamily: 'SF Pro',
                         fontWeight: FontWeight.normal,
                         fontStyle:
                             FlutterFlowTheme.of(context).titleSmall.fontStyle,

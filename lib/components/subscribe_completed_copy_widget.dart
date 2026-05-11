@@ -3,7 +3,6 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 import 'subscribe_completed_copy_model.dart';
 export 'subscribe_completed_copy_model.dart';
@@ -90,7 +89,8 @@ class _SubscribeCompletedCopyWidgetState
                 iconPadding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
                 color: FlutterFlowTheme.of(context).primary,
                 textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                      font: GoogleFonts.poppins(
+                      font: TextStyle(
+                        fontFamily: 'SF Pro',
                         fontWeight: FontWeight.normal,
                         fontStyle:
                             FlutterFlowTheme.of(context).titleSmall.fontStyle,

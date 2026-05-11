@@ -42,8 +42,22 @@ Future initialize(
       }
       configuration = PurchasesConfiguration(webKey);
     } else if (Platform.isIOS) {
+      if (appStoreKey.isEmpty) {
+        print(
+          'RevenueCat iOS support requires an App Store API key. '
+          'RevenueCat features will be disabled.',
+        );
+        return;
+      }
       configuration = PurchasesConfiguration(appStoreKey);
     } else if (Platform.isAndroid) {
+      if (playStoreKey.isEmpty) {
+        print(
+          'RevenueCat Android support requires a Play Store API key. '
+          'RevenueCat features will be disabled.',
+        );
+        return;
+      }
       configuration = PurchasesConfiguration(playStoreKey);
     } else {
       print("RevenueCat is not supported on this platform.");
@@ -80,8 +94,9 @@ Future<bool> purchasePackage(String package) async {
     if (revenueCatPackage == null) {
       return false;
     }
-    // v9.0+: purchasePackage returns PurchaseResult instead of CustomerInfo
-    final result = await Purchases.purchasePackage(revenueCatPackage);
+    final result = await Purchases.purchase(
+      PurchaseParams.package(revenueCatPackage),
+    );
     customerInfo = result.customerInfo;
     return true;
   } catch (_) {

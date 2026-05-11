@@ -20,7 +20,6 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'profile_model.dart';
 export 'profile_model.dart';
 
@@ -586,8 +585,9 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                                             context)
                                                         .bodyMedium
                                                         .override(
-                                                          font: GoogleFonts
-                                                              .montserrat(
+                                                          font: TextStyle(
+                                                            fontFamily:
+                                                                'SF Pro',
                                                             fontWeight:
                                                                 FontWeight
                                                                     .normal,
@@ -1129,7 +1129,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                                         ));
                                                       }
                                                     },
-                                                    activeColor:
+                                                    activeThumbColor:
                                                         FlutterFlowTheme.of(
                                                                 context)
                                                             .primary,
@@ -1235,7 +1235,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                                         ));
                                                       }
                                                     },
-                                                    activeColor:
+                                                    activeThumbColor:
                                                         FlutterFlowTheme.of(
                                                                 context)
                                                             .primary,
@@ -1697,10 +1697,10 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                                       options:
                                                           FFAppConstants.gender,
                                                       initialValue: valueOrDefault(
-                                                                      currentUserDocument
-                                                                          ?.gender,
-                                                                      '') !=
-                                                                  ''
+                                                                  currentUserDocument
+                                                                      ?.gender,
+                                                                  '') !=
+                                                              ''
                                                           ? valueOrDefault(
                                                               currentUserDocument
                                                                   ?.gender,
@@ -1771,10 +1771,10 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                                         .override(
                                                           fontFamily: 'SF Pro',
                                                           color: valueOrDefault(
-                                                                          currentUserDocument
-                                                                              ?.gender,
-                                                                          '') ==
-                                                                      ''
+                                                                      currentUserDocument
+                                                                          ?.gender,
+                                                                      '') ==
+                                                                  ''
                                                               ? Color(
                                                                   0xFF9B9A9D)
                                                               : FlutterFlowTheme
@@ -1912,24 +1912,25 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                                       ),
                                                       textAlign: TextAlign.end,
                                                       maxLines: 1,
-                                                      style:
-                                                          FlutterFlowTheme.of(
-                                                                  context)
-                                                              .bodyMedium
-                                                              .override(
-                                                                fontFamily:
-                                                                    'SF Pro',
-                                                                color: valueOrDefault(currentUserDocument?.activityLevel, '') ==
-                                                                            ''
-                                                                    ? Color(
-                                                                        0xFF9B9A9D)
-                                                                    : FlutterFlowTheme.of(
-                                                                            context)
-                                                                        .primaryText,
-                                                                fontSize: 16.0,
-                                                                letterSpacing:
-                                                                    0.0,
-                                                              ),
+                                                      style: FlutterFlowTheme
+                                                              .of(context)
+                                                          .bodyMedium
+                                                          .override(
+                                                            fontFamily:
+                                                                'SF Pro',
+                                                            color: valueOrDefault(
+                                                                        currentUserDocument
+                                                                            ?.activityLevel,
+                                                                        '') ==
+                                                                    ''
+                                                                ? Color(
+                                                                    0xFF9B9A9D)
+                                                                : FlutterFlowTheme.of(
+                                                                        context)
+                                                                    .primaryText,
+                                                            fontSize: 16.0,
+                                                            letterSpacing: 0.0,
+                                                          ),
                                                     ),
                                                   ),
                                                 ),
@@ -1994,9 +1995,8 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                                   Switch.adaptive(
                                                 value: _model.switchValue3!,
                                                 onChanged: (newValue) async {
-                                                  safeSetState(() =>
-                                                      _model.switchValue3 =
-                                                          newValue);
+                                                  safeSetState(() => _model
+                                                      .switchValue3 = newValue);
                                                   if (newValue) {
                                                     HapticFeedback
                                                         .heavyImpact();
@@ -2017,7 +2017,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                                     ));
                                                   }
                                                 },
-                                                activeColor:
+                                                activeThumbColor:
                                                     FlutterFlowTheme.of(context)
                                                         .secondaryBackground,
                                                 activeTrackColor:
@@ -2072,9 +2072,8 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                                   Switch.adaptive(
                                                 value: _model.switchValue4!,
                                                 onChanged: (newValue) async {
-                                                  safeSetState(() =>
-                                                      _model.switchValue4 =
-                                                          newValue);
+                                                  safeSetState(() => _model
+                                                      .switchValue4 = newValue);
                                                   if (newValue) {
                                                     await currentUserReference!
                                                         .update(
@@ -2094,7 +2093,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                                     ));
                                                   }
                                                 },
-                                                activeColor:
+                                                activeThumbColor:
                                                     FlutterFlowTheme.of(context)
                                                         .primary,
                                                 activeTrackColor:
@@ -2149,9 +2148,8 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                                   Switch.adaptive(
                                                 value: _model.switchValue5!,
                                                 onChanged: (newValue) async {
-                                                  safeSetState(() =>
-                                                      _model.switchValue5 =
-                                                          newValue);
+                                                  safeSetState(() => _model
+                                                      .switchValue5 = newValue);
                                                   if (newValue) {
                                                     HapticFeedback
                                                         .heavyImpact();
@@ -2172,7 +2170,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                                     ));
                                                   }
                                                 },
-                                                activeColor:
+                                                activeThumbColor:
                                                     FlutterFlowTheme.of(context)
                                                         .primary,
                                                 activeTrackColor:
@@ -2227,9 +2225,8 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                                   Switch.adaptive(
                                                 value: _model.switchValue6!,
                                                 onChanged: (newValue) async {
-                                                  safeSetState(() =>
-                                                      _model.switchValue6 =
-                                                          newValue);
+                                                  safeSetState(() => _model
+                                                      .switchValue6 = newValue);
                                                   if (newValue) {
                                                     HapticFeedback
                                                         .heavyImpact();
@@ -2250,7 +2247,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                                     ));
                                                   }
                                                 },
-                                                activeColor:
+                                                activeThumbColor:
                                                     FlutterFlowTheme.of(context)
                                                         .primary,
                                                 activeTrackColor:

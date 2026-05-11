@@ -9,10 +9,10 @@ import 'dart:async';
 import '/custom_code/actions/index.dart' as actions;
 import '/flutter_flow/custom_functions.dart' as functions;
 import '/index.dart';
+import '/services/nutrition_summary.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'statistics_model.dart';
 export 'statistics_model.dart';
@@ -312,8 +312,9 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
                                                                 .headlineMedium
                                                                 .override(
                                                                   font:
-                                                                      GoogleFonts
-                                                                          .inter(
+                                                                      TextStyle(
+                                                                    fontFamily:
+                                                                        'SF Pro',
                                                                     fontWeight:
                                                                         FontWeight
                                                                             .normal,
@@ -729,11 +730,17 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
                                                                           .max,
                                                                   children: [
                                                                     Text(
-                                                                      valueOrDefault<bool>(
-                                                                              currentUserDocument?.measurementOz,
-                                                                              false)
-                                                                          ? '${functions.gToOz(dailyDishListItem.dishWeight).toString()} oz (${dailyDishListItem.dishWeight.toString()}g)'
-                                                                          : '${dailyDishListItem.dishWeight.toString()} g',
+                                                                      NutritionSummary
+                                                                          .formatGrams(
+                                                                        dailyDishListItem
+                                                                            .dishWeight,
+                                                                        useOunces:
+                                                                            valueOrDefault<bool>(
+                                                                          currentUserDocument
+                                                                              ?.measurementOz,
+                                                                          false,
+                                                                        ),
+                                                                      ),
                                                                       style: FlutterFlowTheme.of(
                                                                               context)
                                                                           .bodyMedium
@@ -824,9 +831,10 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
                                                                               0.0),
                                                                           child:
                                                                               Text(
-                                                                            valueOrDefault<bool>(currentUserDocument?.measurementOz, false)
-                                                                                ? '${functions.gToOz(dailyDishListItem.proteins).toString()} oz (${dailyDishListItem.proteins.toString()}g)'
-                                                                                : '${dailyDishListItem.proteins.toString()} g',
+                                                                            NutritionSummary.formatGrams(
+                                                                              dailyDishListItem.proteins,
+                                                                              useOunces: valueOrDefault<bool>(currentUserDocument?.measurementOz, false),
+                                                                            ),
                                                                             style: FlutterFlowTheme.of(context).bodyMedium.override(
                                                                                   fontFamily: 'SF Pro',
                                                                                   fontSize: 16.0,
@@ -862,9 +870,10 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
                                                                               0.0),
                                                                           child:
                                                                               Text(
-                                                                            valueOrDefault<bool>(currentUserDocument?.measurementOz, false)
-                                                                                ? '${functions.gToOz(dailyDishListItem.fats).toString()} oz (${dailyDishListItem.fats.toString()}g)'
-                                                                                : '${dailyDishListItem.fats.toString()} g',
+                                                                            NutritionSummary.formatGrams(
+                                                                              dailyDishListItem.fats,
+                                                                              useOunces: valueOrDefault<bool>(currentUserDocument?.measurementOz, false),
+                                                                            ),
                                                                             style: FlutterFlowTheme.of(context).bodyMedium.override(
                                                                                   fontFamily: 'SF Pro',
                                                                                   fontSize: 16.0,
@@ -900,9 +909,10 @@ class _StatisticsWidgetState extends State<StatisticsWidget> {
                                                                               0.0),
                                                                           child:
                                                                               Text(
-                                                                            valueOrDefault<bool>(currentUserDocument?.measurementOz, false)
-                                                                                ? '${functions.gToOz(dailyDishListItem.carbs).toString()} oz (${dailyDishListItem.carbs.toString()}g)'
-                                                                                : '${dailyDishListItem.carbs.toString()} g',
+                                                                            NutritionSummary.formatGrams(
+                                                                              dailyDishListItem.carbs,
+                                                                              useOunces: valueOrDefault<bool>(currentUserDocument?.measurementOz, false),
+                                                                            ),
                                                                             style: FlutterFlowTheme.of(context).bodyMedium.override(
                                                                                   fontFamily: 'SF Pro',
                                                                                   fontSize: 16.0,

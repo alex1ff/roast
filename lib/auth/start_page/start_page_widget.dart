@@ -4,7 +4,6 @@ import '/flutter_flow/flutter_flow_widgets.dart';
 import '/custom_code/actions/index.dart' as actions;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'start_page_model.dart';
 export 'start_page_model.dart';
 
@@ -81,7 +80,8 @@ class _StartPageWidgetState extends State<StartPageWidget> {
               Text(
                 'EAT OUT',
                 style: FlutterFlowTheme.of(context).bodyMedium.override(
-                      font: GoogleFonts.montserrat(
+                      font: TextStyle(
+                        fontFamily: 'SF Pro',
                         fontWeight:
                             FlutterFlowTheme.of(context).bodyMedium.fontWeight,
                         fontStyle:
@@ -101,7 +101,8 @@ class _StartPageWidgetState extends State<StartPageWidget> {
                 child: Text(
                   'Nutritracker',
                   style: FlutterFlowTheme.of(context).bodyMedium.override(
-                        font: GoogleFonts.montserrat(
+                        font: TextStyle(
+                          fontFamily: 'SF Pro',
                           fontWeight: FlutterFlowTheme.of(context)
                               .bodyMedium
                               .fontWeight,
@@ -124,7 +125,8 @@ class _StartPageWidgetState extends State<StartPageWidget> {
                   'Your Personal AI-powered\nNutrition Guide at\nEvery Restaurant Table',
                   textAlign: TextAlign.center,
                   style: FlutterFlowTheme.of(context).bodyMedium.override(
-                        font: GoogleFonts.montserrat(
+                        font: TextStyle(
+                          fontFamily: 'SF Pro',
                           fontWeight: FontWeight.w500,
                           fontStyle:
                               FlutterFlowTheme.of(context).bodyMedium.fontStyle,
@@ -156,7 +158,8 @@ class _StartPageWidgetState extends State<StartPageWidget> {
                         EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
                     color: FlutterFlowTheme.of(context).primary,
                     textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                          font: GoogleFonts.poppins(
+                          font: TextStyle(
+                            fontFamily: 'SF Pro',
                             fontWeight: FontWeight.normal,
                             fontStyle: FlutterFlowTheme.of(context)
                                 .titleSmall

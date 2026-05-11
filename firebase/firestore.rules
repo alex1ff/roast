@@ -1,29 +1,98 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /users/{document} {
-      allow create: if true;
-      allow read: if true;
-      allow write: if true;
-      allow delete: if true;
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isUserReference(ref) {
+      return ref == /databases/$(database)/documents/users/$(request.auth.uid);
+    }
+
+    function protectedUserFields() {
+      return [
+        'dateSubStart',
+        'dateSubEnd',
+        'SubPlan',
+        'extra_chat',
+        'extra_photo',
+        'extra_nophoto',
+        'count_limited',
+        'count_limited_chat'
+      ];
+    }
+
+    function protectedUserCreateFields() {
+      return [
+        'dateSubStart',
+        'dateSubEnd',
+        'SubPlan',
+        'extra_chat',
+        'extra_photo',
+        'extra_nophoto',
+        'count_limited',
+        'count_limited_chat'
+      ];
+    }
+
+    function changedUserKeys() {
+      return request.resource.data.diff(resource.data).affectedKeys();
+    }
+
+    function userCreateDoesNotSetProtectedFields() {
+      return !request.resource.data.keys().hasAny(protectedUserCreateFields());
+    }
+
+    function userKeepsUid(userId) {
+      return request.resource.data.get('uid', userId) == resource.data.get('uid', userId)
+        && request.resource.data.get('uid', userId) == userId;
+    }
+
+    function userUpdateDoesNotChangeBillingFields(userId) {
+      return !changedUserKeys().hasAny(protectedUserFields())
+        && userKeepsUid(userId);
+    }
+
+    match /users/{userId} {
+      allow create: if isOwner(userId)
+        && (!('uid' in request.resource.data) || request.resource.data.uid == userId)
+        && userCreateDoesNotSetProtectedFields();
+      allow read, delete: if isOwner(userId);
+      allow update: if isOwner(userId)
+        && userUpdateDoesNotChangeBillingFields(userId);
     }
 
     match /AddedDishHistory/{document} {
-      allow create: if true;
-      allow read: if true;
-      allow write: if true;
-      allow delete: if true;
+      allow create: if isSignedIn()
+        && request.resource.data.user is path
+        && isUserReference(request.resource.data.user);
+      allow read, delete: if isSignedIn()
+        && resource.data.user is path
+        && isUserReference(resource.data.user);
+      allow update: if isSignedIn()
+        && resource.data.user is path
+        && isUserReference(resource.data.user)
+        && request.resource.data.user is path
+        && request.resource.data.user == resource.data.user;
     }
 
     match /Referal/{document} {
-      allow create: if true;
-      allow read: if true;
-      allow write: if true;
-      allow delete: if true;
+      allow create: if isSignedIn()
+        && (!('user' in request.resource.data) || isUserReference(request.resource.data.user))
+        && (!('uid' in request.resource.data) || request.resource.data.uid == request.auth.uid);
+      allow read, update, delete: if isSignedIn()
+        && (
+          (resource.data.user is path && isUserReference(resource.data.user))
+          || resource.data.uid == request.auth.uid
+          || resource.data.invited_by == request.auth.uid
+        );
     }
 
     match /persons/{document} {
-      allow create: if true;
       allow read: if true;
       allow write: if false;
       allow delete: if false;

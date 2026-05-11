@@ -12,7 +12,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'log_in_model.dart';
 export 'log_in_model.dart';
 
@@ -240,7 +239,8 @@ class _LogInWidgetState extends State<LogInWidget>
                                 style: FlutterFlowTheme.of(context)
                                     .bodyMedium
                                     .override(
-                                      font: GoogleFonts.outfit(
+                                      font: TextStyle(
+                                        fontFamily: 'SF Pro',
                                         fontWeight: FontWeight.bold,
                                         fontStyle: FlutterFlowTheme.of(context)
                                             .bodyMedium
@@ -493,7 +493,8 @@ class _LogInWidgetState extends State<LogInWidget>
                                   textStyle: FlutterFlowTheme.of(context)
                                       .titleSmall
                                       .override(
-                                        font: GoogleFonts.poppins(
+                                        font: TextStyle(
+                                          fontFamily: 'SF Pro',
                                           fontWeight:
                                               FlutterFlowTheme.of(context)
                                                   .titleSmall
@@ -528,7 +529,8 @@ class _LogInWidgetState extends State<LogInWidget>
                                 style: FlutterFlowTheme.of(context)
                                     .bodyMedium
                                     .override(
-                                      font: GoogleFonts.outfit(
+                                      font: TextStyle(
+                                        fontFamily: 'SF Pro',
                                         fontWeight: FontWeight.normal,
                                         fontStyle: FlutterFlowTheme.of(context)
                                             .bodyMedium

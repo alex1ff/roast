@@ -1,5 +1,6 @@
 // ignore_for_file: constant_identifier_names, depend_on_referenced_packages, prefer_final_fields
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:core';
 import 'dart:io';
@@ -14,6 +15,9 @@ import 'package:http/browser_client.dart'
     if (dart.library.io) 'browser_client_stub.dart';
 
 import '/flutter_flow/uploaded_file.dart';
+import '/services/error_reporter.dart';
+import '/services/performance_monitor.dart';
+import '/services/request_context.dart';
 
 import 'get_streamed_response.dart';
 
@@ -507,6 +511,7 @@ class ApiManager {
     bool isStreamingApi = false,
     ApiCallOptions? options,
     http.Client? client,
+    String? requestId,
   }) async {
     final callOptions = options ??
         ApiCallOptions(
@@ -524,90 +529,126 @@ class ApiManager {
           cache: cache,
           isStreamingApi: isStreamingApi,
         );
-    // Modify for your specific needs if this differs from your API.
-    if (_accessToken != null) {
-      headers[HttpHeaders.authorizationHeader] = 'Bearer $_accessToken';
-    }
-    if (!apiUrl.startsWith('http')) {
-      apiUrl = 'https://$apiUrl';
-    }
+    final resolvedRequestId = requestId ??
+        AppRequestContext.newRequestId(
+          prefix:
+              callOptions.callName.isEmpty ? 'api_call' : callOptions.callName,
+        );
+    return AppPerformanceMonitor.trace<ApiCallResponse>(
+      name: 'api_call',
+      attributes: {
+        'call': callOptions.callName.isEmpty ? 'unknown' : callOptions.callName,
+        'method': callOptions.callType.name,
+        'request_id': resolvedRequestId,
+      },
+      resultAttributes: (result) => {
+        'status': result.succeeded ? 'success' : 'error',
+        'status_code': result.statusCode.toString(),
+      },
+      action: () async {
+        final requestHeaders = Map<String, dynamic>.from(callOptions.headers);
+        requestHeaders[clientRequestIdHeader] = resolvedRequestId;
 
-    // If we've already made this exact call before and caching is on,
-    // return the cached result.
-    if (cache && _apiCache.containsKey(callOptions)) {
-      return _apiCache[callOptions]!;
-    }
+        // Modify for your specific needs if this differs from your API.
+        if (_accessToken != null) {
+          requestHeaders[HttpHeaders.authorizationHeader] =
+              'Bearer $_accessToken';
+        }
+        var requestUrl = callOptions.apiUrl;
+        if (!requestUrl.startsWith('http')) {
+          requestUrl = 'https://$requestUrl';
+        }
 
-    ApiCallResponse result;
-    try {
-      switch (callType) {
-        case ApiCallType.GET:
-          result = await urlRequest(
-            callType,
-            apiUrl,
-            headers,
-            params,
-            returnBody,
-            decodeUtf8,
-            isStreamingApi,
-            client: client,
-          );
-          break;
-        case ApiCallType.DELETE:
-          result = alwaysAllowBody
-              ? await requestWithBody(
-                  callType,
-                  apiUrl,
-                  headers,
-                  params,
-                  body,
-                  bodyType,
-                  returnBody,
-                  encodeBodyUtf8,
-                  decodeUtf8,
-                  alwaysAllowBody,
-                  isStreamingApi,
-                  client: client,
-                )
-              : await urlRequest(
-                  callType,
-                  apiUrl,
-                  headers,
-                  params,
-                  returnBody,
-                  decodeUtf8,
-                  isStreamingApi,
-                  client: client,
-                );
-          break;
-        case ApiCallType.POST:
-        case ApiCallType.PUT:
-        case ApiCallType.PATCH:
-          result = await requestWithBody(
-            callType,
-            apiUrl,
-            headers,
-            params,
-            body,
-            bodyType,
-            returnBody,
-            encodeBodyUtf8,
-            decodeUtf8,
-            alwaysAllowBody,
-            isStreamingApi,
-            client: client,
-          );
-          break;
-      }
+        // If we've already made this exact call before and caching is on,
+        // return the cached result.
+        if (callOptions.cache && _apiCache.containsKey(callOptions)) {
+          return _apiCache[callOptions]!;
+        }
 
-      // If caching is on, cache the result (if present).
-      if (cache) {
-        _apiCache[callOptions] = result;
-      }
-    } catch (e) {
-      result = ApiCallResponse(null, {}, -1, exception: e);
-    }
+        ApiCallResponse result;
+        try {
+          switch (callOptions.callType) {
+            case ApiCallType.GET:
+              result = await urlRequest(
+                callOptions.callType,
+                requestUrl,
+                requestHeaders,
+                callOptions.params,
+                callOptions.returnBody,
+                callOptions.decodeUtf8,
+                callOptions.isStreamingApi,
+                client: client,
+              );
+              break;
+            case ApiCallType.DELETE:
+              result = callOptions.alwaysAllowBody
+                  ? await requestWithBody(
+                      callOptions.callType,
+                      requestUrl,
+                      requestHeaders,
+                      callOptions.params,
+                      callOptions.body,
+                      callOptions.bodyType,
+                      callOptions.returnBody,
+                      callOptions.encodeBodyUtf8,
+                      callOptions.decodeUtf8,
+                      callOptions.alwaysAllowBody,
+                      callOptions.isStreamingApi,
+                      client: client,
+                    )
+                  : await urlRequest(
+                      callOptions.callType,
+                      requestUrl,
+                      requestHeaders,
+                      callOptions.params,
+                      callOptions.returnBody,
+                      callOptions.decodeUtf8,
+                      callOptions.isStreamingApi,
+                      client: client,
+                    );
+              break;
+            case ApiCallType.POST:
+            case ApiCallType.PUT:
+            case ApiCallType.PATCH:
+              result = await requestWithBody(
+                callOptions.callType,
+                requestUrl,
+                requestHeaders,
+                callOptions.params,
+                callOptions.body,
+                callOptions.bodyType,
+                callOptions.returnBody,
+                callOptions.encodeBodyUtf8,
+                callOptions.decodeUtf8,
+                callOptions.alwaysAllowBody,
+                callOptions.isStreamingApi,
+                client: client,
+              );
+              break;
+          }
 
-    return result;
+          // If caching is on, cache the result (if present).
+          if (callOptions.cache) {
+            _apiCache[callOptions] = result;
+          }
+        } catch (e) {
+          unawaited(AppErrorReporter.report(
+            area: 'api_call',
+            message: 'exception',
+            error: e,
+            attributes: {
+              'call': callOptions.callName.isEmpty
+                  ? 'unknown'
+                  : callOptions.callName,
+              'method': callOptions.callType.name,
+              'request_id': resolvedRequestId,
+            },
+          ));
+          result = ApiCallResponse(null, {}, -1, exception: e);
+        }
+
+        return result;
+      },
+    );
   }
 }

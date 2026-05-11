@@ -1,6 +1,5 @@
 import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
-import '/backend/schema/enums/enums.dart';
 import '/components/nav_bar/nav_bar_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -8,12 +7,12 @@ import '/flutter_flow/flutter_flow_widgets.dart';
 import '/main_page/empty_list_copy/empty_list_copy_widget.dart';
 import '/custom_code/actions/index.dart' as actions;
 import '/custom_code/widgets/index.dart' as custom_widgets;
-import '/flutter_flow/custom_functions.dart' as functions;
 import '/flutter_flow/revenue_cat_util.dart' as revenue_cat;
 import '/index.dart';
+import '/services/nutrition_summary.dart';
+import '/services/user_account_mutations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:provider/provider.dart';
 import 'home_model.dart';
@@ -46,20 +45,9 @@ class _HomeWidgetState extends State<HomeWidget> {
       await actions.lockOrientation();
       if ((revenue_cat.activeEntitlementIds.contains(FFAppConstants.Premium) ==
               true) &&
+          (currentUserDocument?.dateSubEnd != null) &&
           (currentUserDocument!.dateSubEnd! < getCurrentTimestamp)) {
-        await currentUserReference!.update({
-          ...createUsersRecordData(
-            dateSubEnd: currentUserDocument?.subPlan == SubPlan.yearly
-                ? functions.oneYearFromNow()
-                : functions.oneMonthFromNow(),
-          ),
-          ...mapToFirestore(
-            {
-              'count_limited_chat': FieldValue.delete(),
-              'count_limited': FieldValue.delete(),
-            },
-          ),
-        });
+        await UserAccountMutations.syncRevenueCatSubscription();
       }
     });
 
@@ -76,6 +64,9 @@ class _HomeWidgetState extends State<HomeWidget> {
   @override
   Widget build(BuildContext context) {
     context.watch<FFAppState>();
+    final selectedDate = FFAppState().selectedDate ?? getCurrentTimestamp;
+    final selectedDayStart = NutritionSummary.startOfDay(selectedDate);
+    final selectedDayEnd = NutritionSummary.endOfDay(selectedDate);
 
     return GestureDetector(
       onTap: () {
@@ -164,10 +155,23 @@ class _HomeWidgetState extends State<HomeWidget> {
                                     StreamBuilder<List<AddedDishHistoryRecord>>(
                                   stream: queryAddedDishHistoryRecord(
                                     queryBuilder: (addedDishHistoryRecord) =>
-                                        addedDishHistoryRecord.where(
-                                      'user',
-                                      isEqualTo: currentUserReference,
-                                    ),
+                                        addedDishHistoryRecord
+                                            .where(
+                                              'user',
+                                              isEqualTo: currentUserReference,
+                                            )
+                                            .where(
+                                              'addedDate',
+                                              isGreaterThanOrEqualTo:
+                                                  selectedDayStart,
+                                            )
+                                            .where(
+                                              'addedDate',
+                                              isLessThan: selectedDayEnd,
+                                            )
+                                            .orderBy(
+                                              'addedDate',
+                                            ),
                                   ),
                                   builder: (context, snapshot) {
                                     // Customize what your widget looks like when it's loading.
@@ -189,6 +193,10 @@ class _HomeWidgetState extends State<HomeWidget> {
                                     List<AddedDishHistoryRecord>
                                         containerAddedDishHistoryRecordList =
                                         snapshot.data!;
+                                    final nutritionSummary = NutritionSummary
+                                        .fromAddedDishHistoryRecords(
+                                      containerAddedDishHistoryRecordList,
+                                    );
 
                                     return Container(
                                       decoration: BoxDecoration(),
@@ -245,8 +253,10 @@ class _HomeWidgetState extends State<HomeWidget> {
                                                                           context)
                                                                       .bodyMedium
                                                                       .override(
-                                                                        font: GoogleFonts
-                                                                            .montserrat(
+                                                                        font:
+                                                                            TextStyle(
+                                                                          fontFamily:
+                                                                              'SF Pro',
                                                                           fontWeight: FlutterFlowTheme.of(context)
                                                                               .bodyMedium
                                                                               .fontWeight,
@@ -274,35 +284,17 @@ class _HomeWidgetState extends State<HomeWidget> {
                                                                           Text(
                                                                     valueOrDefault<
                                                                         String>(
-                                                                      valueOrDefault<bool>(
-                                                                              currentUserDocument?.measurementOz,
-                                                                              false)
-                                                                          ? '${functions.gToOz(functions.sumProteins(containerAddedDishHistoryRecordList.where((e) => dateTimeFormat(
-                                                                                "yMd",
-                                                                                e.addedDate,
-                                                                                locale: FFLocalizations.of(context).languageCode,
-                                                                              ) == dateTimeFormat(
-                                                                                "yMd",
-                                                                                FFAppState().selectedDate,
-                                                                                locale: FFLocalizations.of(context).languageCode,
-                                                                              )).toList())).toString()} oz (${functions.sumProteins(containerAddedDishHistoryRecordList.where((e) => dateTimeFormat(
-                                                                                "yMd",
-                                                                                e.addedDate,
-                                                                                locale: FFLocalizations.of(context).languageCode,
-                                                                              ) == dateTimeFormat(
-                                                                                "yMd",
-                                                                                FFAppState().selectedDate,
-                                                                                locale: FFLocalizations.of(context).languageCode,
-                                                                              )).toList()).toString()}g)'
-                                                                          : '${functions.sumProteins(containerAddedDishHistoryRecordList.where((e) => dateTimeFormat(
-                                                                                "yMd",
-                                                                                e.addedDate,
-                                                                                locale: FFLocalizations.of(context).languageCode,
-                                                                              ) == dateTimeFormat(
-                                                                                "yMd",
-                                                                                FFAppState().selectedDate,
-                                                                                locale: FFLocalizations.of(context).languageCode,
-                                                                              )).toList()).toString()} g',
+                                                                      NutritionSummary
+                                                                          .formatGrams(
+                                                                        nutritionSummary
+                                                                            .proteins,
+                                                                        useOunces:
+                                                                            valueOrDefault<bool>(
+                                                                          currentUserDocument
+                                                                              ?.measurementOz,
+                                                                          false,
+                                                                        ),
+                                                                      ),
                                                                       '0',
                                                                     ),
                                                                     style: FlutterFlowTheme.of(
@@ -310,7 +302,9 @@ class _HomeWidgetState extends State<HomeWidget> {
                                                                         .bodyMedium
                                                                         .override(
                                                                           font:
-                                                                              GoogleFonts.montserrat(
+                                                                              TextStyle(
+                                                                            fontFamily:
+                                                                                'SF Pro',
                                                                             fontWeight:
                                                                                 FlutterFlowTheme.of(context).bodyMedium.fontWeight,
                                                                             fontStyle:
@@ -347,21 +341,12 @@ class _HomeWidgetState extends State<HomeWidget> {
                                                                   percent:
                                                                       valueOrDefault<
                                                                           double>(
-                                                                    functions.progressBar(
-                                                                        functions.sumProteins(containerAddedDishHistoryRecordList
-                                                                            .where((e) =>
-                                                                                dateTimeFormat(
-                                                                                  "yMd",
-                                                                                  e.addedDate,
-                                                                                  locale: FFLocalizations.of(context).languageCode,
-                                                                                ) ==
-                                                                                dateTimeFormat(
-                                                                                  "yMd",
-                                                                                  FFAppState().selectedDate,
-                                                                                  locale: FFLocalizations.of(context).languageCode,
-                                                                                ))
-                                                                            .toList()),
-                                                                        valueOrDefault(currentUserDocument?.proteinsGoal, 0)),
+                                                                    NutritionSummary.progress(
+                                                                        value: nutritionSummary
+                                                                            .proteins,
+                                                                        goal: valueOrDefault(
+                                                                            currentUserDocument?.proteinsGoal,
+                                                                            0)),
                                                                     0.0,
                                                                   ),
                                                                   lineHeight:
@@ -415,7 +400,9 @@ class _HomeWidgetState extends State<HomeWidget> {
                                                                         .bodyMedium
                                                                         .override(
                                                                           font:
-                                                                              GoogleFonts.montserrat(
+                                                                              TextStyle(
+                                                                            fontFamily:
+                                                                                'SF Pro',
                                                                             fontWeight:
                                                                                 FlutterFlowTheme.of(context).bodyMedium.fontWeight,
                                                                             fontStyle:
@@ -441,34 +428,16 @@ class _HomeWidgetState extends State<HomeWidget> {
                                                                             Text(
                                                                       valueOrDefault<
                                                                           String>(
-                                                                        valueOrDefault<bool>(currentUserDocument?.measurementOz,
-                                                                                false)
-                                                                            ? '${functions.gToOz(functions.sumFats(containerAddedDishHistoryRecordList.where((e) => dateTimeFormat(
-                                                                                  "yMd",
-                                                                                  e.addedDate,
-                                                                                  locale: FFLocalizations.of(context).languageCode,
-                                                                                ) == dateTimeFormat(
-                                                                                  "yMd",
-                                                                                  FFAppState().selectedDate,
-                                                                                  locale: FFLocalizations.of(context).languageCode,
-                                                                                )).toList())).toString()} oz (${functions.sumFats(containerAddedDishHistoryRecordList.where((e) => dateTimeFormat(
-                                                                                  "yMd",
-                                                                                  e.addedDate,
-                                                                                  locale: FFLocalizations.of(context).languageCode,
-                                                                                ) == dateTimeFormat(
-                                                                                  "yMd",
-                                                                                  FFAppState().selectedDate,
-                                                                                  locale: FFLocalizations.of(context).languageCode,
-                                                                                )).toList()).toString()}g)'
-                                                                            : '${functions.sumFats(containerAddedDishHistoryRecordList.where((e) => dateTimeFormat(
-                                                                                  "yMd",
-                                                                                  e.addedDate,
-                                                                                  locale: FFLocalizations.of(context).languageCode,
-                                                                                ) == dateTimeFormat(
-                                                                                  "yMd",
-                                                                                  FFAppState().selectedDate,
-                                                                                  locale: FFLocalizations.of(context).languageCode,
-                                                                                )).toList()).toString()} g',
+                                                                        NutritionSummary
+                                                                            .formatGrams(
+                                                                          nutritionSummary
+                                                                              .fats,
+                                                                          useOunces:
+                                                                              valueOrDefault<bool>(
+                                                                            currentUserDocument?.measurementOz,
+                                                                            false,
+                                                                          ),
+                                                                        ),
                                                                         '0',
                                                                       ),
                                                                       style: FlutterFlowTheme.of(
@@ -476,7 +445,8 @@ class _HomeWidgetState extends State<HomeWidget> {
                                                                           .bodyMedium
                                                                           .override(
                                                                             font:
-                                                                                GoogleFonts.montserrat(
+                                                                                TextStyle(
+                                                                              fontFamily: 'SF Pro',
                                                                               fontWeight: FlutterFlowTheme.of(context).bodyMedium.fontWeight,
                                                                               fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
                                                                             ),
@@ -509,21 +479,12 @@ class _HomeWidgetState extends State<HomeWidget> {
                                                                     percent:
                                                                         valueOrDefault<
                                                                             double>(
-                                                                      functions.progressBar(
-                                                                          functions.sumFats(containerAddedDishHistoryRecordList
-                                                                              .where((e) =>
-                                                                                  dateTimeFormat(
-                                                                                    "yMd",
-                                                                                    e.addedDate,
-                                                                                    locale: FFLocalizations.of(context).languageCode,
-                                                                                  ) ==
-                                                                                  dateTimeFormat(
-                                                                                    "yMd",
-                                                                                    FFAppState().selectedDate,
-                                                                                    locale: FFLocalizations.of(context).languageCode,
-                                                                                  ))
-                                                                              .toList()),
-                                                                          valueOrDefault(currentUserDocument?.fatsGoal, 0)),
+                                                                      NutritionSummary.progress(
+                                                                          value: nutritionSummary
+                                                                              .fats,
+                                                                          goal: valueOrDefault(
+                                                                              currentUserDocument?.fatsGoal,
+                                                                              0)),
                                                                       0.0,
                                                                     ),
                                                                     lineHeight:
@@ -578,7 +539,9 @@ class _HomeWidgetState extends State<HomeWidget> {
                                                                         .bodyMedium
                                                                         .override(
                                                                           font:
-                                                                              GoogleFonts.montserrat(
+                                                                              TextStyle(
+                                                                            fontFamily:
+                                                                                'SF Pro',
                                                                             fontWeight:
                                                                                 FlutterFlowTheme.of(context).bodyMedium.fontWeight,
                                                                             fontStyle:
@@ -604,34 +567,16 @@ class _HomeWidgetState extends State<HomeWidget> {
                                                                             Text(
                                                                       valueOrDefault<
                                                                           String>(
-                                                                        valueOrDefault<bool>(currentUserDocument?.measurementOz,
-                                                                                false)
-                                                                            ? '${functions.gToOz(functions.sumCarbs(containerAddedDishHistoryRecordList.where((e) => dateTimeFormat(
-                                                                                  "yMd",
-                                                                                  e.addedDate,
-                                                                                  locale: FFLocalizations.of(context).languageCode,
-                                                                                ) == dateTimeFormat(
-                                                                                  "yMd",
-                                                                                  FFAppState().selectedDate,
-                                                                                  locale: FFLocalizations.of(context).languageCode,
-                                                                                )).toList())).toString()} oz (${functions.sumCarbs(containerAddedDishHistoryRecordList.where((e) => dateTimeFormat(
-                                                                                  "yMd",
-                                                                                  e.addedDate,
-                                                                                  locale: FFLocalizations.of(context).languageCode,
-                                                                                ) == dateTimeFormat(
-                                                                                  "yMd",
-                                                                                  FFAppState().selectedDate,
-                                                                                  locale: FFLocalizations.of(context).languageCode,
-                                                                                )).toList()).toString()}g)'
-                                                                            : '${functions.sumCarbs(containerAddedDishHistoryRecordList.where((e) => dateTimeFormat(
-                                                                                  "yMd",
-                                                                                  e.addedDate,
-                                                                                  locale: FFLocalizations.of(context).languageCode,
-                                                                                ) == dateTimeFormat(
-                                                                                  "yMd",
-                                                                                  FFAppState().selectedDate,
-                                                                                  locale: FFLocalizations.of(context).languageCode,
-                                                                                )).toList()).toString()} g',
+                                                                        NutritionSummary
+                                                                            .formatGrams(
+                                                                          nutritionSummary
+                                                                              .carbs,
+                                                                          useOunces:
+                                                                              valueOrDefault<bool>(
+                                                                            currentUserDocument?.measurementOz,
+                                                                            false,
+                                                                          ),
+                                                                        ),
                                                                         '0',
                                                                       ),
                                                                       style: FlutterFlowTheme.of(
@@ -639,7 +584,8 @@ class _HomeWidgetState extends State<HomeWidget> {
                                                                           .bodyMedium
                                                                           .override(
                                                                             font:
-                                                                                GoogleFonts.montserrat(
+                                                                                TextStyle(
+                                                                              fontFamily: 'SF Pro',
                                                                               fontWeight: FlutterFlowTheme.of(context).bodyMedium.fontWeight,
                                                                               fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
                                                                             ),
@@ -672,21 +618,12 @@ class _HomeWidgetState extends State<HomeWidget> {
                                                                     percent:
                                                                         valueOrDefault<
                                                                             double>(
-                                                                      functions.progressBar(
-                                                                          functions.sumCarbs(containerAddedDishHistoryRecordList
-                                                                              .where((e) =>
-                                                                                  dateTimeFormat(
-                                                                                    "yMd",
-                                                                                    e.addedDate,
-                                                                                    locale: FFLocalizations.of(context).languageCode,
-                                                                                  ) ==
-                                                                                  dateTimeFormat(
-                                                                                    "yMd",
-                                                                                    FFAppState().selectedDate,
-                                                                                    locale: FFLocalizations.of(context).languageCode,
-                                                                                  ))
-                                                                              .toList()),
-                                                                          valueOrDefault(currentUserDocument?.carbsGoal, 0)),
+                                                                      NutritionSummary.progress(
+                                                                          value: nutritionSummary
+                                                                              .carbs,
+                                                                          goal: valueOrDefault(
+                                                                              currentUserDocument?.carbsGoal,
+                                                                              0)),
                                                                       0.0,
                                                                     ),
                                                                     lineHeight:
@@ -754,21 +691,13 @@ class _HomeWidgetState extends State<HomeWidget> {
                                                                 percent:
                                                                     valueOrDefault<
                                                                         double>(
-                                                                  functions.progressBar(
-                                                                      functions.sumKcal(containerAddedDishHistoryRecordList
-                                                                          .where((e) =>
-                                                                              dateTimeFormat(
-                                                                                "yMd",
-                                                                                e.addedDate,
-                                                                                locale: FFLocalizations.of(context).languageCode,
-                                                                              ) ==
-                                                                              dateTimeFormat(
-                                                                                "yMd",
-                                                                                FFAppState().selectedDate,
-                                                                                locale: FFLocalizations.of(context).languageCode,
-                                                                              ))
-                                                                          .toList()),
-                                                                      valueOrDefault(currentUserDocument?.kcalGoal, 0)),
+                                                                  NutritionSummary.progress(
+                                                                      value: nutritionSummary
+                                                                          .kcal,
+                                                                      goal: valueOrDefault(
+                                                                          currentUserDocument
+                                                                              ?.kcalGoal,
+                                                                          0)),
                                                                   0.0,
                                                                 ),
                                                                 radius: 60.0,
@@ -799,19 +728,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                                                                                   0,
                                                                                 ) -
                                                                                 valueOrDefault<int>(
-                                                                                  functions.sumKcal(containerAddedDishHistoryRecordList
-                                                                                      .where((e) =>
-                                                                                          dateTimeFormat(
-                                                                                            "yMMMd",
-                                                                                            e.addedDate,
-                                                                                            locale: FFLocalizations.of(context).languageCode,
-                                                                                          ) ==
-                                                                                          dateTimeFormat(
-                                                                                            "yMMMd",
-                                                                                            FFAppState().selectedDate,
-                                                                                            locale: FFLocalizations.of(context).languageCode,
-                                                                                          ))
-                                                                                      .toList()),
+                                                                                  nutritionSummary.kcal,
                                                                                   0,
                                                                                 )) <
                                                                             0
@@ -820,19 +737,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                                                                                       0,
                                                                                     ) -
                                                                                     valueOrDefault<int>(
-                                                                                      functions.sumKcal(containerAddedDishHistoryRecordList
-                                                                                          .where((e) =>
-                                                                                              dateTimeFormat(
-                                                                                                "yMMMd",
-                                                                                                e.addedDate,
-                                                                                                locale: FFLocalizations.of(context).languageCode,
-                                                                                              ) ==
-                                                                                              dateTimeFormat(
-                                                                                                "yMMMd",
-                                                                                                FFAppState().selectedDate,
-                                                                                                locale: FFLocalizations.of(context).languageCode,
-                                                                                              ))
-                                                                                          .toList()),
+                                                                                      nutritionSummary.kcal,
                                                                                       0,
                                                                                     )) *
                                                                                 (-1))
@@ -842,19 +747,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                                                                                   0,
                                                                                 ) -
                                                                                 valueOrDefault<int>(
-                                                                                  functions.sumKcal(containerAddedDishHistoryRecordList
-                                                                                      .where((e) =>
-                                                                                          dateTimeFormat(
-                                                                                            "yMMMd",
-                                                                                            e.addedDate,
-                                                                                            locale: FFLocalizations.of(context).languageCode,
-                                                                                          ) ==
-                                                                                          dateTimeFormat(
-                                                                                            "yMMMd",
-                                                                                            FFAppState().selectedDate,
-                                                                                            locale: FFLocalizations.of(context).languageCode,
-                                                                                          ))
-                                                                                      .toList()),
+                                                                                  nutritionSummary.kcal,
                                                                                   0,
                                                                                 ))
                                                                             .toString(),
@@ -872,19 +765,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                                                                                         0,
                                                                                       ) -
                                                                                       valueOrDefault<int>(
-                                                                                        functions.sumKcal(containerAddedDishHistoryRecordList
-                                                                                            .where((e) =>
-                                                                                                dateTimeFormat(
-                                                                                                  "yMMMd",
-                                                                                                  e.addedDate,
-                                                                                                  locale: FFLocalizations.of(context).languageCode,
-                                                                                                ) ==
-                                                                                                dateTimeFormat(
-                                                                                                  "yMMMd",
-                                                                                                  FFAppState().selectedDate,
-                                                                                                  locale: FFLocalizations.of(context).languageCode,
-                                                                                                ))
-                                                                                            .toList()),
+                                                                                        nutritionSummary.kcal,
                                                                                         0,
                                                                                       )) <
                                                                                   0
@@ -916,19 +797,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                                                                                     0,
                                                                                   ) -
                                                                                   valueOrDefault<int>(
-                                                                                    functions.sumKcal(containerAddedDishHistoryRecordList
-                                                                                        .where((e) =>
-                                                                                            dateTimeFormat(
-                                                                                              "yMMMd",
-                                                                                              e.addedDate,
-                                                                                              locale: FFLocalizations.of(context).languageCode,
-                                                                                            ) ==
-                                                                                            dateTimeFormat(
-                                                                                              "yMMMd",
-                                                                                              FFAppState().selectedDate,
-                                                                                              locale: FFLocalizations.of(context).languageCode,
-                                                                                            ))
-                                                                                        .toList()),
+                                                                                    nutritionSummary.kcal,
                                                                                     0,
                                                                                   )) <
                                                                               0
@@ -971,24 +840,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                                             child: Builder(
                                               builder: (context) {
                                                 final dailyDishList =
-                                                    containerAddedDishHistoryRecordList
-                                                        .where((e) =>
-                                                            dateTimeFormat(
-                                                              "yMd",
-                                                              e.addedDate,
-                                                              locale: FFLocalizations
-                                                                      .of(context)
-                                                                  .languageCode,
-                                                            ) ==
-                                                            dateTimeFormat(
-                                                              "yMd",
-                                                              FFAppState()
-                                                                  .selectedDate,
-                                                              locale: FFLocalizations
-                                                                      .of(context)
-                                                                  .languageCode,
-                                                            ))
-                                                        .toList();
+                                                    containerAddedDishHistoryRecordList;
                                                 if (dailyDishList.isEmpty) {
                                                   return Center(
                                                     child: EmptyListCopyWidget(
@@ -1015,22 +867,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                                                         dailyDishList[
                                                             dailyDishListIndex];
                                                     return Visibility(
-                                                      visible: dateTimeFormat(
-                                                            "yMd",
-                                                            dailyDishListItem
-                                                                .addedDate,
-                                                            locale: FFLocalizations
-                                                                    .of(context)
-                                                                .languageCode,
-                                                          ) ==
-                                                          dateTimeFormat(
-                                                            "yMd",
-                                                            FFAppState()
-                                                                .selectedDate,
-                                                            locale: FFLocalizations
-                                                                    .of(context)
-                                                                .languageCode,
-                                                          ),
+                                                      visible: true,
                                                       child:
                                                           AuthUserStreamWidget(
                                                         builder: (context) =>
@@ -1157,7 +994,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                                                                               mainAxisSize: MainAxisSize.max,
                                                                               children: [
                                                                                 Text(
-                                                                                  valueOrDefault<bool>(currentUserDocument?.measurementOz, false) ? '${functions.gToOz(dailyDishListItem.dishWeight).toString()} oz (${dailyDishListItem.dishWeight.toString()}g)' : '${dailyDishListItem.dishWeight.toString()} g',
+                                                                                  NutritionSummary.formatGrams(dailyDishListItem.dishWeight, useOunces: valueOrDefault<bool>(currentUserDocument?.measurementOz, false)),
                                                                                   style: FlutterFlowTheme.of(context).bodyMedium.override(
                                                                                         fontFamily: 'SF Pro',
                                                                                         fontSize: 16.0,
@@ -1208,7 +1045,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                                                                                     Padding(
                                                                                       padding: EdgeInsetsDirectional.fromSTEB(4.0, 0.0, 0.0, 0.0),
                                                                                       child: Text(
-                                                                                        valueOrDefault<bool>(currentUserDocument?.measurementOz, false) ? '${functions.gToOz(dailyDishListItem.proteins).toString()} oz (${dailyDishListItem.proteins.toString()}g)' : '${dailyDishListItem.proteins.toString()} g',
+                                                                                        NutritionSummary.formatGrams(dailyDishListItem.proteins, useOunces: valueOrDefault<bool>(currentUserDocument?.measurementOz, false)),
                                                                                         style: FlutterFlowTheme.of(context).bodyMedium.override(
                                                                                               fontFamily: 'SF Pro',
                                                                                               fontSize: 16.0,
@@ -1232,7 +1069,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                                                                                     Padding(
                                                                                       padding: EdgeInsetsDirectional.fromSTEB(4.0, 0.0, 0.0, 0.0),
                                                                                       child: Text(
-                                                                                        valueOrDefault<bool>(currentUserDocument?.measurementOz, false) ? '${functions.gToOz(dailyDishListItem.fats).toString()} oz (${dailyDishListItem.fats.toString()}g)' : '${dailyDishListItem.fats.toString()} g',
+                                                                                        NutritionSummary.formatGrams(dailyDishListItem.fats, useOunces: valueOrDefault<bool>(currentUserDocument?.measurementOz, false)),
                                                                                         style: FlutterFlowTheme.of(context).bodyMedium.override(
                                                                                               fontFamily: 'SF Pro',
                                                                                               fontSize: 16.0,
@@ -1256,7 +1093,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                                                                                     Padding(
                                                                                       padding: EdgeInsetsDirectional.fromSTEB(4.0, 0.0, 0.0, 0.0),
                                                                                       child: Text(
-                                                                                        valueOrDefault<bool>(currentUserDocument?.measurementOz, false) ? '${functions.gToOz(dailyDishListItem.carbs).toString()} oz (${dailyDishListItem.carbs.toString()}g)' : '${dailyDishListItem.carbs.toString()} g',
+                                                                                        NutritionSummary.formatGrams(dailyDishListItem.carbs, useOunces: valueOrDefault<bool>(currentUserDocument?.measurementOz, false)),
                                                                                         style: FlutterFlowTheme.of(context).bodyMedium.override(
                                                                                               fontFamily: 'SF Pro',
                                                                                               fontSize: 16.0,
@@ -1337,7 +1174,8 @@ class _HomeWidgetState extends State<HomeWidget> {
                               textStyle: FlutterFlowTheme.of(context)
                                   .titleSmall
                                   .override(
-                                    font: GoogleFonts.poppins(
+                                    font: TextStyle(
+                                      fontFamily: 'SF Pro',
                                       fontWeight: FontWeight.w600,
                                       fontStyle: FlutterFlowTheme.of(context)
                                           .titleSmall

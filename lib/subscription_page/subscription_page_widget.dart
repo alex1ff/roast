@@ -1,14 +1,10 @@
-import '/auth/firebase_auth/auth_util.dart';
-import '/backend/backend.dart';
-import '/backend/schema/enums/enums.dart';
 import '/components/subscribe_completed_widget.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:async';
+import '/services/user_account_mutations.dart';
 import '/custom_code/actions/index.dart' as actions;
-import '/flutter_flow/custom_functions.dart' as functions;
 import '/flutter_flow/revenue_cat_util.dart' as revenue_cat;
 import '/index.dart';
 import 'package:flutter/gestures.dart';
@@ -373,27 +369,32 @@ class _SubscriptionPageWidgetState extends State<SubscriptionPageWidget> {
                                           .purchasePackage('roast_99_1year');
                                       _shouldSetState = true;
                                       if (_model.yearly!) {
-                                        unawaited(
-                                          () async {
-                                            await currentUserReference!.update({
-                                              ...createUsersRecordData(
-                                                dateSubStart:
-                                                    getCurrentTimestamp,
-                                                dateSubEnd:
-                                                    functions.oneYearFromNow(),
-                                                subPlan: SubPlan.yearly,
+                                        final subscriptionSync =
+                                            await UserAccountMutations
+                                                .syncRevenueCatSubscription();
+                                        if (!subscriptionSync.success) {
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                'Purchase completed, but subscription sync failed. Please try again.',
+                                                style: TextStyle(
+                                                  color: FlutterFlowTheme.of(
+                                                          context)
+                                                      .primaryText,
+                                                ),
                                               ),
-                                              ...mapToFirestore(
-                                                {
-                                                  'count_limited':
-                                                      FieldValue.delete(),
-                                                  'count_limited_chat':
-                                                      FieldValue.delete(),
-                                                },
-                                              ),
-                                            });
-                                          }(),
-                                        );
+                                              duration:
+                                                  Duration(milliseconds: 4000),
+                                              backgroundColor:
+                                                  FlutterFlowTheme.of(context)
+                                                      .secondary,
+                                            ),
+                                          );
+                                          if (_shouldSetState)
+                                            safeSetState(() {});
+                                          return;
+                                        }
                                         await showModalBottomSheet(
                                           isScrollControlled: true,
                                           backgroundColor: Colors.transparent,
@@ -432,27 +433,32 @@ class _SubscriptionPageWidgetState extends State<SubscriptionPageWidget> {
                                           .purchasePackage('roast_9_1Month');
                                       _shouldSetState = true;
                                       if (_model.monthly!) {
-                                        unawaited(
-                                          () async {
-                                            await currentUserReference!.update({
-                                              ...createUsersRecordData(
-                                                dateSubStart:
-                                                    getCurrentTimestamp,
-                                                dateSubEnd:
-                                                    functions.oneMonthFromNow(),
-                                                subPlan: SubPlan.monthly,
+                                        final subscriptionSync =
+                                            await UserAccountMutations
+                                                .syncRevenueCatSubscription();
+                                        if (!subscriptionSync.success) {
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                'Purchase completed, but subscription sync failed. Please try again.',
+                                                style: TextStyle(
+                                                  color: FlutterFlowTheme.of(
+                                                          context)
+                                                      .primaryText,
+                                                ),
                                               ),
-                                              ...mapToFirestore(
-                                                {
-                                                  'count_limited':
-                                                      FieldValue.delete(),
-                                                  'count_limited_chat':
-                                                      FieldValue.delete(),
-                                                },
-                                              ),
-                                            });
-                                          }(),
-                                        );
+                                              duration:
+                                                  Duration(milliseconds: 4000),
+                                              backgroundColor:
+                                                  FlutterFlowTheme.of(context)
+                                                      .secondary,
+                                            ),
+                                          );
+                                          if (_shouldSetState)
+                                            safeSetState(() {});
+                                          return;
+                                        }
                                         await showModalBottomSheet(
                                           isScrollControlled: true,
                                           backgroundColor: Colors.transparent,
@@ -482,13 +488,9 @@ class _SubscriptionPageWidgetState extends State<SubscriptionPageWidget> {
                                           safeSetState(() {});
                                         return;
                                       } else {
-                                        if (_shouldSetState)
-                                          safeSetState(() {});
                                         return;
                                       }
                                     }
-
-                                    if (_shouldSetState) safeSetState(() {});
                                   },
                                   text: 'Subcribe now',
                                   options: FFButtonOptions(

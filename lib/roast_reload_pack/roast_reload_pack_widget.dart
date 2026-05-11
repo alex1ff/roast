@@ -1,11 +1,9 @@
-import '/auth/firebase_auth/auth_util.dart';
-import '/backend/backend.dart';
 import '/components/subscribe_completed_copy_widget.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:async';
+import '/services/user_account_mutations.dart';
 import '/custom_code/actions/index.dart' as actions;
 import '/flutter_flow/revenue_cat_util.dart' as revenue_cat;
 import '/index.dart';
@@ -202,21 +200,34 @@ class _RoastReloadPackWidgetState extends State<RoastReloadPackWidget> {
                                     0.0, 32.0, 0.0, 0.0),
                                 child: FFButtonWidget(
                                   onPressed: () async {
-                                    var _shouldSetState = false;
                                     _model.reload = await revenue_cat
                                         .purchasePackage('Roast_Reload_Pack');
-                                    _shouldSetState = true;
                                     if (_model.reload!) {
-                                      unawaited(
-                                        () async {
-                                          await currentUserReference!
-                                              .update(createUsersRecordData(
-                                            extraChat: 25,
-                                            extraPhoto: 21,
-                                            extraNophoto: 7,
-                                          ));
-                                        }(),
-                                      );
+                                      final reloadSync =
+                                          await UserAccountMutations
+                                              .syncReloadPackPurchase();
+                                      if (!reloadSync.success) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              'Purchase completed, but reload pack sync failed. Please try again.',
+                                              style: TextStyle(
+                                                color:
+                                                    FlutterFlowTheme.of(context)
+                                                        .primaryText,
+                                              ),
+                                            ),
+                                            duration:
+                                                Duration(milliseconds: 4000),
+                                            backgroundColor:
+                                                FlutterFlowTheme.of(context)
+                                                    .secondary,
+                                          ),
+                                        );
+                                        safeSetState(() {});
+                                        return;
+                                      }
                                       await showModalBottomSheet(
                                         isScrollControlled: true,
                                         backgroundColor: Colors.transparent,
@@ -238,14 +249,10 @@ class _RoastReloadPackWidgetState extends State<RoastReloadPackWidget> {
                                         },
                                       ).then((value) => safeSetState(() {}));
 
-                                      if (_shouldSetState) safeSetState(() {});
                                       return;
                                     } else {
-                                      if (_shouldSetState) safeSetState(() {});
                                       return;
                                     }
-
-                                    if (_shouldSetState) safeSetState(() {});
                                   },
                                   text: 'Get Roast Reload Pack',
                                   options: FFButtonOptions(

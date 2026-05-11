@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:provider/provider.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -11,10 +14,18 @@ import 'backend/firebase/firebase_config.dart';
 import 'flutter_flow/flutter_flow_util.dart';
 import 'flutter_flow/internationalization.dart';
 import 'flutter_flow/revenue_cat_util.dart' as revenue_cat;
+import 'services/error_reporter.dart';
+import 'services/performance_monitor.dart';
 
+const _revenueCatAppStoreKey =
+    String.fromEnvironment('REVENUECAT_APPSTORE_API_KEY');
+const _revenueCatPlayStoreKey =
+    String.fromEnvironment('REVENUECAT_PLAYSTORE_API_KEY');
+const _revenueCatWebKey = String.fromEnvironment('REVENUECAT_WEB_API_KEY');
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  AppErrorReporter.installGlobalHandlers();
   GoRouter.optionURLReflectsImperativeAPIs = true;
   usePathUrlStrategy();
 
@@ -23,17 +34,35 @@ void main() async {
   final appState = FFAppState(); // Initialize FFAppState
   await appState.initializePersistedState();
 
-  await revenue_cat.initialize(
-    "appl_CRQXxTGBsBRSaHVqIfPgqnbkoqR",
-    "",
-    debugLogEnabled: true,
-    loadDataAfterLaunch: true,
-  );
-
   runApp(ChangeNotifierProvider(
     create: (context) => appState,
     child: MyApp(),
   ));
+
+  unawaited(_initializeRevenueCat());
+}
+
+Future<void> _initializeRevenueCat() async {
+  await AppPerformanceMonitor.trace<void>(
+    name: 'revenuecat_init',
+    attributes: const {
+      'load_data_after_launch': 'true',
+    },
+    action: () => revenue_cat.initialize(
+      _revenueCatAppStoreKey,
+      _revenueCatPlayStoreKey,
+      webKey: _revenueCatWebKey,
+      debugLogEnabled: kDebugMode,
+      loadDataAfterLaunch: true,
+    ),
+  );
+
+  if (currentUserUid.isNotEmpty) {
+    await AppPerformanceMonitor.trace<void>(
+      name: 'revenuecat_login',
+      action: () => revenue_cat.login(currentUserUid),
+    );
+  }
 }
 
 class MyApp extends StatefulWidget {
@@ -53,13 +82,17 @@ class MyAppScrollBehavior extends MaterialScrollBehavior {
       };
 }
 
-class _MyAppState extends State<MyApp> {
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   Locale? _locale;
 
   ThemeMode _themeMode = ThemeMode.system;
 
   late AppStateNotifier _appStateNotifier;
   late GoRouter _router;
+  late final StreamSubscription<dynamic> _authUserSub;
+  late final StreamSubscription<BaseAuthUser> _userSub;
+  late final StreamSubscription<dynamic> _jwtTokenSub;
+
   String getRoute([RouteMatch? routeMatch]) {
     final RouteMatch lastMatch =
         routeMatch ?? _router.routerDelegate.currentConfiguration.last;
@@ -75,21 +108,21 @@ class _MyAppState extends State<MyApp> {
           .toList();
   late Stream<BaseAuthUser> userStream;
 
-  final authUserSub = authenticatedUserStream.listen((user) {
-    revenue_cat.login(user?.uid);
-  });
-
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
 
     _appStateNotifier = AppStateNotifier.instance;
     _router = createRouter(_appStateNotifier);
-    userStream = roastNutriTrackerFirebaseUserStream()
-      ..listen((user) {
-        _appStateNotifier.update(user);
-      });
-    jwtTokenStream.listen((_) {});
+    _authUserSub = authenticatedUserStream.listen((user) {
+      unawaited(revenue_cat.login(user?.uid));
+    });
+    userStream = roastNutriTrackerFirebaseUserStream();
+    _userSub = userStream.listen((user) {
+      _appStateNotifier.update(user);
+    });
+    _jwtTokenSub = jwtTokenStream.listen((_) {});
     Future.delayed(
       Duration(milliseconds: 1000),
       () => _appStateNotifier.stopShowingSplashImage(),
@@ -97,8 +130,22 @@ class _MyAppState extends State<MyApp> {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached ||
+        state == AppLifecycleState.hidden) {
+      unawaited(FFAppState().flushChatHistoryPersistence());
+    }
+  }
+
+  @override
   void dispose() {
-    authUserSub.cancel();
+    unawaited(FFAppState().flushChatHistoryPersistence());
+    WidgetsBinding.instance.removeObserver(this);
+    _authUserSub.cancel();
+    _userSub.cancel();
+    _jwtTokenSub.cancel();
 
     super.dispose();
   }

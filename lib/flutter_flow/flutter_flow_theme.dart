@@ -1,7 +1,6 @@
 // ignore_for_file: overridden_fields, annotate_overrides
 
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 abstract class FlutterFlowTheme {
   static FlutterFlowTheme of(BuildContext context) {
@@ -328,7 +327,8 @@ class ThemeTypography extends Typography {
         fontSize: 12.0,
       );
   String get customTextStyle1Family => 'Primary Family';
-  TextStyle get customTextStyle1 => GoogleFonts.roboto(
+  TextStyle get customTextStyle1 => TextStyle(
+        fontFamily: 'SF Pro',
         color: Colors.black,
         fontSize: 16.0,
       );
@@ -400,9 +400,11 @@ extension TextStyleHelper on TextStyle {
     String? package,
   }) {
     if (useGoogleFonts && fontFamily != null) {
-      font = GoogleFonts.getFont(fontFamily,
-          fontWeight: fontWeight ?? this.fontWeight,
-          fontStyle: fontStyle ?? this.fontStyle);
+      font = TextStyle(
+        fontFamily: 'SF Pro',
+        fontWeight: fontWeight ?? this.fontWeight,
+        fontStyle: fontStyle ?? this.fontStyle,
+      );
     }
 
     return font != null

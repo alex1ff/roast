@@ -2,7 +2,6 @@ import '/auth/firebase_auth/auth_util.dart';
 import '/backend/ai_agents/ai_agent.dart';
 import '/backend/api_requests/api_calls.dart';
 import '/backend/backend.dart';
-import '/backend/schema/enums/enums.dart';
 import '/components/loading_animation/loading_animation_widget.dart';
 import '/flutter_flow/flutter_flow_drop_down.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -11,6 +10,8 @@ import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/form_field_controller.dart';
 import '/main_page/subscription_pop_up/subscription_pop_up_widget.dart';
 import '/main_page/subscription_pop_up_copy/subscription_pop_up_copy_widget.dart';
+import '/services/user_account_mutations.dart';
+import '/services/usage_limit_service.dart';
 import 'dart:async';
 import '/flutter_flow/custom_functions.dart' as functions;
 import '/flutter_flow/revenue_cat_util.dart' as revenue_cat;
@@ -196,14 +197,10 @@ class _ChoosePersonWidgetState extends State<ChoosePersonWidget> {
                               safeSetState(
                                   () => _model.checkboxValue = newValue!);
                             },
-                            side: (FlutterFlowTheme.of(context).alternate !=
-                                    null)
-                                ? BorderSide(
-                                    width: 2,
-                                    color:
-                                        FlutterFlowTheme.of(context).alternate,
-                                  )
-                                : null,
+                            side: BorderSide(
+                              width: 2,
+                              color: FlutterFlowTheme.of(context).alternate,
+                            ),
                             activeColor: FlutterFlowTheme.of(context).primary,
                             checkColor: FlutterFlowTheme.of(context).info,
                           ),
@@ -232,29 +229,16 @@ class _ChoosePersonWidgetState extends State<ChoosePersonWidget> {
                                 var _shouldSetState = false;
                                 await Future.wait([
                                   Future(() async {
-                                    if (((revenue_cat.activeEntitlementIds
-                                                    .contains(FFAppConstants
-                                                        .Premium) ==
-                                                true) &&
-                                            (valueOrDefault(
-                                                    currentUserDocument
-                                                        ?.countLimited,
-                                                    0) <
-                                                (currentUserDocument?.subPlan ==
-                                                        SubPlan.monthly
-                                                    ? FFAppConstants
-                                                        .countlimitedM
-                                                    : FFAppConstants
-                                                        .countlimitedY))) ||
-                                        (valueOrDefault(
-                                                currentUserDocument
-                                                    ?.countLimited,
-                                                0) <
-                                            FFAppConstants.limitedNoSub) ||
-                                        (valueOrDefault(
-                                                currentUserDocument?.extraPhoto,
-                                                0) >
-                                            0)) {
+                                    if (UsageLimitService.canUseRoast(
+                                      hasPremium: revenue_cat
+                                          .activeEntitlementIds
+                                          .contains(FFAppConstants.Premium),
+                                      usedCount:
+                                          currentUserDocument?.countLimited,
+                                      subPlan: currentUserDocument?.subPlan,
+                                      extraPhoto:
+                                          currentUserDocument?.extraPhoto,
+                                    )) {
                                       showDialog(
                                         barrierColor:
                                             FlutterFlowTheme.of(context)
@@ -370,16 +354,9 @@ class _ChoosePersonWidgetState extends State<ChoosePersonWidget> {
 
                                         _shouldSetState = true;
                                         unawaited(
-                                          () async {
-                                            await currentUserReference!.update({
-                                              ...mapToFirestore(
-                                                {
-                                                  'count_limited':
-                                                      FieldValue.increment(1),
-                                                },
-                                              ),
-                                            });
-                                          }(),
+                                          UserAccountMutations.recordUsage(
+                                            UserUsageFeature.roast,
+                                          ),
                                         );
                                         if ((_model.audioResultt?.succeeded ??
                                             true)) {
@@ -688,19 +665,16 @@ class _ChoosePersonWidgetState extends State<ChoosePersonWidget> {
                                         ),
                                       );
                                     } else {
-                                      if ((revenue_cat.activeEntitlementIds
-                                                  .contains(
-                                                      FFAppConstants.Premium) ==
-                                              true) &&
-                                          (valueOrDefault(
-                                                  currentUserDocument
-                                                      ?.countLimited,
-                                                  0) >=
-                                              (currentUserDocument?.subPlan ==
-                                                      SubPlan.monthly
-                                                  ? FFAppConstants.countlimitedM
-                                                  : FFAppConstants
-                                                      .countlimitedY))) {
+                                      if (UsageLimitService.roastDecision(
+                                        hasPremium: revenue_cat
+                                            .activeEntitlementIds
+                                            .contains(FFAppConstants.Premium),
+                                        usedCount:
+                                            currentUserDocument?.countLimited,
+                                        subPlan: currentUserDocument?.subPlan,
+                                        extraPhoto:
+                                            currentUserDocument?.extraPhoto,
+                                      ).premiumIncludedQuotaReached) {
                                         await showDialog(
                                           context: context,
                                           builder: (dialogContext) {

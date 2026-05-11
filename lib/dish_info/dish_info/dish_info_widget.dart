@@ -2,7 +2,6 @@ import '/auth/firebase_auth/auth_util.dart';
 import '/backend/ai_agents/ai_agent.dart';
 import '/backend/api_requests/api_calls.dart';
 import '/backend/backend.dart';
-import '/backend/schema/enums/enums.dart';
 import '/components/loading_animation/loading_animation_widget.dart';
 import '/flutter_flow/flutter_flow_expanded_image_view.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
@@ -11,6 +10,9 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/main_page/subscription_pop_up/subscription_pop_up_widget.dart';
 import '/main_page/subscription_pop_up_copy/subscription_pop_up_copy_widget.dart';
+import '/services/nutrition_summary.dart';
+import '/services/user_account_mutations.dart';
+import '/services/usage_limit_service.dart';
 import 'dart:async';
 import '/custom_code/actions/index.dart' as actions;
 import '/custom_code/widgets/index.dart' as custom_widgets;
@@ -173,8 +175,8 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
                                                       CrossAxisAlignment.start,
                                                   children: [
                                                     if (stackAddedDishHistoryRecord
-                                                                .image !=
-                                                            '')
+                                                            .image !=
+                                                        '')
                                                       Padding(
                                                         padding:
                                                             EdgeInsetsDirectional
@@ -246,7 +248,7 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
                                                                   builder:
                                                                       (context) =>
                                                                           Text(
-                                                                    '${stackAddedDishHistoryRecord.dishName} • ${valueOrDefault<bool>(currentUserDocument?.measurementOz, false) ? '${functions.gToOz(stackAddedDishHistoryRecord.dishWeight).toString()} oz (${stackAddedDishHistoryRecord.dishWeight.toString()}g)' : '${stackAddedDishHistoryRecord.dishWeight.toString()} g'} • ${stackAddedDishHistoryRecord.kcal.toString()} kcal/dish',
+                                                                    '${stackAddedDishHistoryRecord.dishName} • ${NutritionSummary.formatGrams(stackAddedDishHistoryRecord.dishWeight, useOunces: valueOrDefault<bool>(currentUserDocument?.measurementOz, false))} • ${stackAddedDishHistoryRecord.kcal.toString()} kcal/dish',
                                                                     maxLines: 2,
                                                                     style: FlutterFlowTheme.of(
                                                                             context)
@@ -1111,10 +1113,18 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
                                                                           () async {
                                                                         var _shouldSetState =
                                                                             false;
-                                                                        if (((revenue_cat.activeEntitlementIds.contains(FFAppConstants.Premium) == true) && (valueOrDefault(currentUserDocument?.countLimited, 0) < (currentUserDocument?.subPlan == SubPlan.monthly ? FFAppConstants.countlimitedM : FFAppConstants.countlimitedY))) ||
-                                                                            (valueOrDefault(currentUserDocument?.countLimited, 0) <
-                                                                                FFAppConstants.limitedNoSub) ||
-                                                                            (valueOrDefault(currentUserDocument?.extraPhoto, 0) > 0)) {
+                                                                        if (UsageLimitService
+                                                                            .canUseRoast(
+                                                                          hasPremium: revenue_cat
+                                                                              .activeEntitlementIds
+                                                                              .contains(FFAppConstants.Premium),
+                                                                          usedCount:
+                                                                              currentUserDocument?.countLimited,
+                                                                          subPlan:
+                                                                              currentUserDocument?.subPlan,
+                                                                          extraPhoto:
+                                                                              currentUserDocument?.extraPhoto,
+                                                                        )) {
                                                                           showDialog(
                                                                             context:
                                                                                 context,
@@ -1244,15 +1254,9 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
                                                                             _shouldSetState =
                                                                                 true;
                                                                             unawaited(
-                                                                              () async {
-                                                                                await currentUserReference!.update({
-                                                                                  ...mapToFirestore(
-                                                                                    {
-                                                                                      'count_limited': FieldValue.increment(1),
-                                                                                    },
-                                                                                  ),
-                                                                                });
-                                                                              }(),
+                                                                              UserAccountMutations.recordUsage(
+                                                                                UserUsageFeature.roast,
+                                                                              ),
                                                                             );
                                                                             if ((_model.audioResultt2?.succeeded ??
                                                                                 true)) {
@@ -1303,8 +1307,17 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
                                                                             ),
                                                                           );
                                                                         } else {
-                                                                          if ((revenue_cat.activeEntitlementIds.contains(FFAppConstants.Premium) == true) &&
-                                                                              (valueOrDefault(currentUserDocument?.countLimited, 0) > (currentUserDocument?.subPlan == SubPlan.monthly ? FFAppConstants.countlimitedM : FFAppConstants.countlimitedY))) {
+                                                                          if (UsageLimitService
+                                                                              .roastDecision(
+                                                                            hasPremium:
+                                                                                revenue_cat.activeEntitlementIds.contains(FFAppConstants.Premium),
+                                                                            usedCount:
+                                                                                currentUserDocument?.countLimited,
+                                                                            subPlan:
+                                                                                currentUserDocument?.subPlan,
+                                                                            extraPhoto:
+                                                                                currentUserDocument?.extraPhoto,
+                                                                          ).premiumIncludedQuotaReached) {
                                                                             await showDialog(
                                                                               context: context,
                                                                               builder: (dialogContext) {
@@ -1327,8 +1340,6 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
                                                                               },
                                                                             );
 
-                                                                            if (_shouldSetState)
-                                                                              safeSetState(() {});
                                                                             return;
                                                                           } else {
                                                                             await showDialog(
@@ -1353,8 +1364,6 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
                                                                               },
                                                                             );
 
-                                                                            if (_shouldSetState)
-                                                                              safeSetState(() {});
                                                                             return;
                                                                           }
                                                                         }
@@ -2320,35 +2329,20 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
                                               showLoadingIndicator: true,
                                               onPressed: () async {
                                                 var _shouldSetState = false;
-                                                if (((revenue_cat
-                                                                .activeEntitlementIds
-                                                                .contains(
-                                                                    FFAppConstants
-                                                                        .Premium) ==
-                                                            true) &&
-                                                        (valueOrDefault(
-                                                                currentUserDocument
-                                                                    ?.countLimited,
-                                                                0) <
-                                                            (currentUserDocument
-                                                                        ?.subPlan ==
-                                                                    SubPlan
-                                                                        .monthly
-                                                                ? FFAppConstants
-                                                                    .countlimitedM
-                                                                : FFAppConstants
-                                                                    .countlimitedY))) ||
-                                                    (valueOrDefault(
-                                                            currentUserDocument
-                                                                ?.countLimited,
-                                                            0) <
-                                                        FFAppConstants
-                                                            .limitedNoSub) ||
-                                                    (valueOrDefault(
-                                                            currentUserDocument
-                                                                ?.extraPhoto,
-                                                            0) >
-                                                        0)) {
+                                                if (UsageLimitService
+                                                    .canUseRoast(
+                                                  hasPremium: revenue_cat
+                                                      .activeEntitlementIds
+                                                      .contains(FFAppConstants
+                                                          .Premium),
+                                                  usedCount: currentUserDocument
+                                                      ?.countLimited,
+                                                  subPlan: currentUserDocument
+                                                      ?.subPlan,
+                                                  extraPhoto:
+                                                      currentUserDocument
+                                                          ?.extraPhoto,
+                                                )) {
                                                   showDialog(
                                                     context: context,
                                                     builder: (dialogContext) {
@@ -2523,19 +2517,11 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
                                                             ) !=
                                                             '') {
                                                       unawaited(
-                                                        () async {
-                                                          await currentUserReference!
-                                                              .update({
-                                                            ...mapToFirestore(
-                                                              {
-                                                                'count_limited':
-                                                                    FieldValue
-                                                                        .increment(
-                                                                            1),
-                                                              },
-                                                            ),
-                                                          });
-                                                        }(),
+                                                        UserAccountMutations
+                                                            .recordUsage(
+                                                          UserUsageFeature
+                                                              .roast,
+                                                        ),
                                                       );
                                                       unawaited(
                                                         () async {
@@ -2685,23 +2671,21 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
                                                     );
                                                   }
                                                 } else {
-                                                  if ((revenue_cat.activeEntitlementIds
-                                                              .contains(
-                                                                  FFAppConstants
-                                                                      .Premium) ==
-                                                          true) &&
-                                                      (valueOrDefault(
-                                                              currentUserDocument
-                                                                  ?.countLimited,
-                                                              0) >
-                                                          (currentUserDocument
-                                                                      ?.subPlan ==
-                                                                  SubPlan
-                                                                      .monthly
-                                                              ? FFAppConstants
-                                                                  .countlimitedM
-                                                              : FFAppConstants
-                                                                  .countlimitedY))) {
+                                                  if (UsageLimitService
+                                                      .roastDecision(
+                                                    hasPremium: revenue_cat
+                                                        .activeEntitlementIds
+                                                        .contains(FFAppConstants
+                                                            .Premium),
+                                                    usedCount:
+                                                        currentUserDocument
+                                                            ?.countLimited,
+                                                    subPlan: currentUserDocument
+                                                        ?.subPlan,
+                                                    extraPhoto:
+                                                        currentUserDocument
+                                                            ?.extraPhoto,
+                                                  ).premiumIncludedQuotaReached) {
                                                     await showDialog(
                                                       context: context,
                                                       builder: (dialogContext) {
@@ -2742,8 +2726,6 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
                                                       },
                                                     );
 
-                                                    if (_shouldSetState)
-                                                      safeSetState(() {});
                                                     return;
                                                   } else {
                                                     await showDialog(
@@ -2786,8 +2768,6 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
                                                       },
                                                     );
 
-                                                    if (_shouldSetState)
-                                                      safeSetState(() {});
                                                     return;
                                                   }
                                                 }

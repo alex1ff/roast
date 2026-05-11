@@ -1,7 +1,6 @@
 import '/auth/firebase_auth/auth_util.dart';
 import '/backend/ai_agents/ai_agent.dart';
 import '/backend/backend.dart';
-import '/backend/schema/enums/enums.dart';
 import '/chat/mess/mess_widget.dart';
 import '/components/nav_bar/nav_bar_widget.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
@@ -9,17 +8,19 @@ import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/main_page/subscription_pop_up/subscription_pop_up_widget.dart';
 import '/main_page/subscription_pop_up_copy/subscription_pop_up_copy_widget.dart';
+import '/services/chat_controller.dart';
+import '/services/chat_history_view.dart';
+import '/services/user_account_mutations.dart';
+import '/services/usage_limit_service.dart';
 import 'dart:async';
 import '/custom_code/actions/index.dart' as actions;
 import '/flutter_flow/custom_functions.dart' as functions;
 import '/flutter_flow/revenue_cat_util.dart' as revenue_cat;
-import 'package:collection/collection.dart';
 import 'package:easy_debounce/easy_debounce.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'chat_copy_model.dart';
 export 'chat_copy_model.dart';
@@ -58,27 +59,8 @@ class _ChatCopyWidgetState extends State<ChatCopyWidget> {
           await actions.lockOrientation();
         }(),
       );
+      unawaited(_loadRecentDishHistory());
       if (FFAppState().chathistory.isNotEmpty) {
-        unawaited(
-          () async {
-            _model.hist = await queryAddedDishHistoryRecordOnce(
-              queryBuilder: (addedDishHistoryRecord) => addedDishHistoryRecord
-                  .where(
-                    'user',
-                    isEqualTo: currentUserReference,
-                  )
-                  .where(
-                    'addedDate',
-                    isLessThan: getCurrentTimestamp,
-                  )
-                  .where(
-                    'addedDate',
-                    isGreaterThan:
-                        functions.dateFilterMinusWeek(getCurrentTimestamp),
-                  ),
-            );
-          }(),
-        );
         if (widget.dish != null) {
           _model.dish = widget.dish;
           _model.string = functions.dishString(widget.dish!);
@@ -154,6 +136,109 @@ class _ChatCopyWidgetState extends State<ChatCopyWidget> {
     super.dispose();
   }
 
+  String get _chatThreadId {
+    final uid = currentUserUid;
+    return uid.isEmpty ? 'nutritional_helper_guest' : 'nutritional_helper_$uid';
+  }
+
+  Future<List<AddedDishHistoryRecord>> _loadRecentDishHistory() async {
+    final existingHistory = _model.hist;
+    if (existingHistory != null) {
+      return existingHistory;
+    }
+
+    final history = await queryAddedDishHistoryRecordOnce(
+      queryBuilder: (addedDishHistoryRecord) => addedDishHistoryRecord
+          .where(
+            'user',
+            isEqualTo: currentUserReference,
+          )
+          .where(
+            'addedDate',
+            isLessThan: getCurrentTimestamp,
+          )
+          .where(
+            'addedDate',
+            isGreaterThan: functions.dateFilterMinusWeek(getCurrentTimestamp),
+          ),
+    );
+    _model.hist = history;
+    return history;
+  }
+
+  int _addChatMessage(AIChatStruct message) {
+    FFAppState().addToChathistory(message);
+    safeSetState(() {});
+    return FFAppState().chathistory.length - 1;
+  }
+
+  void _updateChatMessage(int index, String message) {
+    if (index < 0 || index >= FFAppState().chathistory.length) {
+      return;
+    }
+
+    FFAppState().updateChathistoryAtIndex(
+      index,
+      (chatMessage) => chatMessage..message = message,
+    );
+    safeSetState(() {});
+  }
+
+  Future<String> _recentMealsText() async =>
+      functions.last7DaysDishesToString(
+        (await _loadRecentDishHistory()).toList(),
+      ) ??
+      '';
+
+  Future<String?> _callAssistant(String prompt) async {
+    final generatedText = await callAiAgent(
+      context: context,
+      prompt: prompt,
+      threadId: _chatThreadId,
+      agentCloudFunctionName: 'aIAssistent',
+      provider: 'OPENAI',
+      agentJson: null,
+      responseType: 'PLAINTEXT',
+    );
+    return generatedText is String ? generatedText : generatedText?.toString();
+  }
+
+  Future<void> _recordChatUsage() =>
+      UserAccountMutations.recordUsage(UserUsageFeature.chat);
+
+  bool get _hasPremium =>
+      revenue_cat.activeEntitlementIds.contains(FFAppConstants.Premium);
+
+  UsageLimitDecision _chatLimitDecision() => UsageLimitService.chatDecision(
+        hasPremium: _hasPremium,
+        usedCount: currentUserDocument?.countLimitedChat,
+        subPlan: currentUserDocument?.subPlan,
+        extraChat: currentUserDocument?.extraChat,
+      );
+
+  bool _canUseChat() => _chatLimitDecision().allowed;
+
+  Future<ChatSendResult> _sendChatMessage({
+    required String userMessage,
+    required String type,
+    String? currentDish,
+  }) {
+    final controller = ChatController(
+      addMessage: _addChatMessage,
+      updateMessage: _updateChatMessage,
+      callAi: _callAssistant,
+      loadRecentMealsText: _recentMealsText,
+      recordUsage: _recordChatUsage,
+      now: () => getCurrentTimestamp,
+      canSend: _canUseChat,
+    );
+    return controller.send(
+      userMessage: userMessage,
+      type: type,
+      currentDish: currentDish,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     context.watch<FFAppState>();
@@ -179,10 +264,7 @@ class _ChatCopyWidgetState extends State<ChatCopyWidget> {
                   padding: EdgeInsetsDirectional.fromSTEB(6.0, 0.0, 6.0, 0.0),
                   child: Builder(
                     builder: (context) {
-                      final chatMessage = FFAppState()
-                          .chathistory
-                          .sortedList(keyOf: (e) => e.date!, desc: true)
-                          .toList();
+                      final chatMessage = FFAppState().chathistory;
 
                       return ListView.separated(
                         padding: EdgeInsets.fromLTRB(
@@ -196,67 +278,24 @@ class _ChatCopyWidgetState extends State<ChatCopyWidget> {
                         itemCount: chatMessage.length,
                         separatorBuilder: (_, __) => SizedBox(height: 10.0),
                         itemBuilder: (context, chatMessageIndex) {
-                          final chatMessageItem = chatMessage[chatMessageIndex];
+                          final sourceIndex =
+                              chatMessage.length - 1 - chatMessageIndex;
+                          final chatMessageItem =
+                              ChatHistoryView.messageAtReverseIndex(
+                            chatMessage,
+                            chatMessageIndex,
+                          );
                           return MessWidget(
-                            key: Key(
-                                'Keyd2p_${chatMessageIndex}_of_${chatMessage.length}'),
+                            key: ValueKey(ChatHistoryView.stableMessageKey(
+                              chatMessageItem,
+                              fallbackIndex: sourceIndex,
+                            )),
                             mess: chatMessageItem,
                             acton: (type, text) async {
-                              FFAppState().addToChathistory(AIChatStruct(
-                                message: text,
-                                role: 'user',
-                                date: getCurrentTimestamp,
-                              ));
-                              safeSetState(() {});
-                              FFAppState().addToChathistory(AIChatStruct(
-                                role: 'assistant',
-                                date: getCurrentTimestamp,
-                              ));
-                              safeSetState(() {});
-                              await callAiAgent(
-                                context: context,
-                                prompt:
-                                    'Answer language: English. User\'s Query: \"${FFAppState().chathistory.lastOrNull?.message}\". Last 7 days meals: \"${functions.last7DaysDishesToString(_model.hist?.toList())}\". Type: ${type}',
-                                threadId: 'nutritional_helper',
-                                agentCloudFunctionName: 'aIAssistent',
-                                provider: 'OPENAI',
-                                agentJson: null,
-                                responseType: 'PLAINTEXT',
-                              ).then((generatedText) {
-                                safeSetState(() =>
-                                    _model.agentResponse3 = generatedText);
-                              });
-
-                              if (_model.agentResponse3 != null &&
-                                  _model.agentResponse3 != '') {
-                                FFAppState().updateChathistoryAtIndex(
-                                  FFAppState().chathistory.length - 1,
-                                  (e) => e..message = _model.agentResponse3,
-                                );
-                                safeSetState(() {});
-                                unawaited(
-                                  () async {
-                                    await currentUserReference!.update({
-                                      ...mapToFirestore(
-                                        {
-                                          'count_limited_chat':
-                                              FieldValue.increment(1),
-                                        },
-                                      ),
-                                    });
-                                  }(),
-                                );
-                              } else {
-                                FFAppState().updateChathistoryAtIndex(
-                                  FFAppState().chathistory.length - 1,
-                                  (e) => e
-                                    ..message =
-                                        'Sorry, looks like our partner service is having technical issues. Please try again later.',
-                                );
-                                safeSetState(() {});
-                              }
-
-                              safeSetState(() {});
+                              await _sendChatMessage(
+                                userMessage: text,
+                                type: type,
+                              );
                             },
                           );
                         },
@@ -400,110 +439,19 @@ class _ChatCopyWidgetState extends State<ChatCopyWidget> {
                                           ),
                                           onFieldSubmitted: (_) async {
                                             var _shouldSetState = false;
-                                            if (((revenue_cat
-                                                            .activeEntitlementIds
-                                                            .contains(
-                                                                FFAppConstants
-                                                                    .Premium) ==
-                                                        true) &&
-                                                    (valueOrDefault(
-                                                            currentUserDocument
-                                                                ?.countLimitedChat,
-                                                            0) <
-                                                        (currentUserDocument
-                                                                    ?.subPlan ==
-                                                                SubPlan.monthly
-                                                            ? FFAppConstants
-                                                                .countlimitedchatM
-                                                            : FFAppConstants
-                                                                .countlimitedchatY))) ||
-                                                (valueOrDefault(
-                                                        currentUserDocument
-                                                            ?.countLimitedChat,
-                                                        0) <
-                                                    FFAppConstants
-                                                        .limitedNoSub)) {
-                                              FFAppState().addToChathistory(
-                                                  AIChatStruct(
-                                                message:
-                                                    _model.textController.text,
-                                                role: 'user',
-                                                date: getCurrentTimestamp,
-                                              ));
-                                              safeSetState(() {});
+                                            if (_canUseChat()) {
+                                              final userMessage =
+                                                  _model.textController.text;
                                               safeSetState(() {
                                                 _model.textController?.clear();
                                               });
-                                              FFAppState().addToChathistory(
-                                                  AIChatStruct(
-                                                role: 'assistant',
-                                                date: getCurrentTimestamp,
-                                              ));
-                                              safeSetState(() {});
-                                              await callAiAgent(
-                                                context: context,
-                                                prompt:
-                                                    'Answer language: English. User\'s Query: \"${FFAppState().chathistory.lastOrNull?.message}\". Last 7 days meals: \"${functions.last7DaysDishesToString(_model.hist?.toList())}\". Type: message',
-                                                threadId: 'nutritional_helper',
-                                                agentCloudFunctionName:
-                                                    'aIAssistent',
-                                                provider: 'OPENAI',
-                                                agentJson: null,
-                                                responseType: 'PLAINTEXT',
-                                              ).then((generatedText) {
-                                                safeSetState(() =>
-                                                    _model.agentResponse4 =
-                                                        generatedText);
-                                              });
-
+                                              await _sendChatMessage(
+                                                userMessage: userMessage,
+                                                type: 'message',
+                                              );
                                               _shouldSetState = true;
-                                              if (_model.agentResponse4 !=
-                                                      null &&
-                                                  _model.agentResponse4 != '') {
-                                                FFAppState()
-                                                    .updateChathistoryAtIndex(
-                                                  FFAppState()
-                                                          .chathistory
-                                                          .length -
-                                                      1,
-                                                  (e) => e
-                                                    ..message =
-                                                        _model.agentResponse4,
-                                                );
-                                                safeSetState(() {});
-                                                unawaited(
-                                                  () async {
-                                                    await currentUserReference!
-                                                        .update({
-                                                      ...mapToFirestore(
-                                                        {
-                                                          'count_limited_chat':
-                                                              FieldValue
-                                                                  .increment(1),
-                                                        },
-                                                      ),
-                                                    });
-                                                  }(),
-                                                );
-                                              } else {
-                                                FFAppState()
-                                                    .updateChathistoryAtIndex(
-                                                  FFAppState()
-                                                          .chathistory
-                                                          .length -
-                                                      1,
-                                                  (e) => e
-                                                    ..message =
-                                                        'Sorry, looks like our partner service is having technical issues. Please try again later.',
-                                                );
-                                                safeSetState(() {});
-                                              }
                                             } else {
-                                              if (revenue_cat
-                                                      .activeEntitlementIds
-                                                      .contains(FFAppConstants
-                                                          .Premium) ==
-                                                  true) {
+                                              if (_hasPremium == true) {
                                                 ScaffoldMessenger.of(context)
                                                     .showSnackBar(
                                                   SnackBar(
@@ -524,8 +472,6 @@ class _ChatCopyWidgetState extends State<ChatCopyWidget> {
                                                             .secondary,
                                                   ),
                                                 );
-                                                if (_shouldSetState)
-                                                  safeSetState(() {});
                                                 return;
                                               } else {
                                                 await showDialog(
@@ -566,8 +512,6 @@ class _ChatCopyWidgetState extends State<ChatCopyWidget> {
                                                   },
                                                 );
 
-                                                if (_shouldSetState)
-                                                  safeSetState(() {});
                                                 return;
                                               }
                                             }
@@ -606,7 +550,8 @@ class _ChatCopyWidgetState extends State<ChatCopyWidget> {
                                           style: FlutterFlowTheme.of(context)
                                               .bodyMedium
                                               .override(
-                                                font: GoogleFonts.inter(
+                                                font: TextStyle(
+                                                  fontFamily: 'SF Pro',
                                                   fontWeight:
                                                       FlutterFlowTheme.of(
                                                               context)
@@ -673,139 +618,34 @@ class _ChatCopyWidgetState extends State<ChatCopyWidget> {
                                                 .secondaryText,
                                         size: 14.0,
                                       ),
-                                      onPressed: (_model.textController.text == '')
+                                      onPressed: (_model.textController.text ==
+                                              '')
                                           ? null
                                           : () async {
                                               var _shouldSetState = false;
-                                              if (((revenue_cat
-                                                              .activeEntitlementIds
-                                                              .contains(
-                                                                  FFAppConstants
-                                                                      .Premium) ==
-                                                          true) &&
-                                                      (valueOrDefault(
-                                                              currentUserDocument
-                                                                  ?.countLimitedChat,
-                                                              0) <
-                                                          (currentUserDocument
-                                                                      ?.subPlan ==
-                                                                  SubPlan
-                                                                      .monthly
-                                                              ? FFAppConstants
-                                                                  .countlimitedchatM
-                                                              : FFAppConstants
-                                                                  .countlimitedchatY))) ||
-                                                  (valueOrDefault(
-                                                          currentUserDocument
-                                                              ?.countLimitedChat,
-                                                          0) <
-                                                      FFAppConstants
-                                                          .limitedNoSub) ||
-                                                  (valueOrDefault(
-                                                          currentUserDocument
-                                                              ?.extraChat,
-                                                          0) >
-                                                      0)) {
-                                                FFAppState().addToChathistory(
-                                                    AIChatStruct(
-                                                  message: _model
-                                                      .textController.text,
-                                                  role: 'user',
-                                                  date: getCurrentTimestamp,
-                                                ));
-                                                safeSetState(() {});
+                                              if (_canUseChat()) {
+                                                final userMessage =
+                                                    _model.textController.text;
+                                                final currentDish =
+                                                    _model.string != null &&
+                                                            _model.string != ''
+                                                        ? _model.string
+                                                        : null;
                                                 safeSetState(() {
                                                   _model.textController
                                                       ?.clear();
                                                 });
-                                                FFAppState().addToChathistory(
-                                                    AIChatStruct(
-                                                  role: 'assistant',
-                                                  date: getCurrentTimestamp,
-                                                ));
-                                                safeSetState(() {});
-                                                await callAiAgent(
-                                                  context: context,
-                                                  prompt: _model.string !=
-                                                              null &&
-                                                          _model.string != ''
-                                                      ? 'Answer language: English. User\'s Query: \"${FFAppState().chathistory.lastOrNull?.message}\". Last 7 days meals: \"${functions.last7DaysDishesToString(_model.hist?.toList())}\". Type: message_dish. Current dish: \"${_model.string}\"'
-                                                      : 'Answer language: English. User\'s Query: \"${FFAppState().chathistory.lastOrNull?.message}\". Last 7 days meals: \"${functions.last7DaysDishesToString(_model.hist?.toList())}\". Type: message',
-                                                  threadId:
-                                                      'nutritional_helper',
-                                                  agentCloudFunctionName:
-                                                      'aIAssistent',
-                                                  provider: 'OPENAI',
-                                                  agentJson: null,
-                                                  responseType: 'PLAINTEXT',
-                                                ).then((generatedText) {
-                                                  safeSetState(() =>
-                                                      _model.agentResponse =
-                                                          generatedText);
-                                                });
-
+                                                await _sendChatMessage(
+                                                  userMessage: userMessage,
+                                                  type: currentDish == null
+                                                      ? 'message'
+                                                      : 'message_dish',
+                                                  currentDish: currentDish,
+                                                );
                                                 _shouldSetState = true;
-                                                if (_model.agentResponse !=
-                                                        null &&
-                                                    _model.agentResponse !=
-                                                        '') {
-                                                  FFAppState()
-                                                      .updateChathistoryAtIndex(
-                                                    FFAppState()
-                                                            .chathistory
-                                                            .length -
-                                                        1,
-                                                    (e) => e
-                                                      ..message =
-                                                          _model.agentResponse,
-                                                  );
-                                                  safeSetState(() {});
-                                                  unawaited(
-                                                    () async {
-                                                      await currentUserReference!
-                                                          .update({
-                                                        ...mapToFirestore(
-                                                          {
-                                                            'count_limited_chat':
-                                                                FieldValue
-                                                                    .increment(
-                                                                        1),
-                                                          },
-                                                        ),
-                                                      });
-                                                    }(),
-                                                  );
-                                                } else {
-                                                  FFAppState()
-                                                      .updateChathistoryAtIndex(
-                                                    FFAppState()
-                                                            .chathistory
-                                                            .length -
-                                                        1,
-                                                    (e) => e
-                                                      ..message =
-                                                          'Sorry, looks like our partner service is having technical issues. Please try again later.',
-                                                  );
-                                                  safeSetState(() {});
-                                                }
                                               } else {
-                                                if ((revenue_cat
-                                                            .activeEntitlementIds
-                                                            .contains(
-                                                                FFAppConstants
-                                                                    .Premium) ==
-                                                        true) &&
-                                                    (valueOrDefault(
-                                                            currentUserDocument
-                                                                ?.countLimitedChat,
-                                                            0) >
-                                                        (currentUserDocument
-                                                                    ?.subPlan ==
-                                                                SubPlan.monthly
-                                                            ? FFAppConstants
-                                                                .countlimitedchatM
-                                                            : FFAppConstants
-                                                                .countlimitedchatY))) {
+                                                if (_chatLimitDecision()
+                                                    .premiumIncludedQuotaReached) {
                                                   await showDialog(
                                                     context: context,
                                                     builder: (dialogContext) {
@@ -845,8 +685,6 @@ class _ChatCopyWidgetState extends State<ChatCopyWidget> {
                                                     },
                                                   );
 
-                                                  if (_shouldSetState)
-                                                    safeSetState(() {});
                                                   return;
                                                 } else {
                                                   await showDialog(
@@ -888,8 +726,6 @@ class _ChatCopyWidgetState extends State<ChatCopyWidget> {
                                                     },
                                                   );
 
-                                                  if (_shouldSetState)
-                                                    safeSetState(() {});
                                                   return;
                                                 }
                                               }
@@ -1003,7 +839,7 @@ class _ChatCopyWidgetState extends State<ChatCopyWidget> {
                         buttonSize: 45.0,
                         fillColor: Colors.white,
                         icon: FaIcon(
-                          FontAwesomeIcons.trashAlt,
+                          FontAwesomeIcons.trashCan,
                           color: FlutterFlowTheme.of(context).error,
                           size: 16.0,
                         ),

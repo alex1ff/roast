@@ -7,6 +7,10 @@
     {
       "source": "functions",
       "codebase": "functions"
+    },
+    {
+      "source": "custom_cloud_functions",
+      "codebase": "custom_cloud_functions"
     }
   ],
   "storage": {

@@ -1,7 +1,2 @@
-
-
-
-analyzer:
-  exclude:
-    - lib/custom_code/**
-    - lib/flutter_flow/custom_functions.dart
+# Intentionally no excludes: custom code and FlutterFlow custom functions are
+# analyzed by `flutter analyze`.

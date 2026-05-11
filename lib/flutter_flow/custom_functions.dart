@@ -1,18 +1,5 @@
-import 'dart:convert';
-import 'dart:math' as math;
-
-import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:timeago/timeago.dart' as timeago;
-import 'lat_lng.dart';
-import 'place.dart';
-import 'uploaded_file.dart';
 import '/backend/backend.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import '/backend/schema/structs/index.dart';
-import '/backend/schema/enums/enums.dart';
-import '/auth/firebase_auth/auth_util.dart';
 
 int? sumKcal(List<AddedDishHistoryRecord>? dishes) {
   if (dishes == null || dishes.isEmpty) {
@@ -22,9 +9,7 @@ int? sumKcal(List<AddedDishHistoryRecord>? dishes) {
   int totalKcal = 0;
 
   for (var dish in dishes) {
-    if (dish.kcal != null) {
-      totalKcal += dish.kcal!;
-    }
+    totalKcal += dish.kcal;
   }
 
   return totalKcal;
@@ -38,9 +23,7 @@ int? sumFats(List<AddedDishHistoryRecord>? dishes) {
   int totalFats = 0;
 
   for (var dish in dishes) {
-    if (dish.fats != null) {
-      totalFats += dish.fats!;
-    }
+    totalFats += dish.fats;
   }
 
   return totalFats;
@@ -54,9 +37,7 @@ int? sumCarbs(List<AddedDishHistoryRecord>? dishes) {
   int totalCarbs = 0;
 
   for (var dish in dishes) {
-    if (dish.carbs != null) {
-      totalCarbs += dish.carbs!;
-    }
+    totalCarbs += dish.carbs;
   }
 
   return totalCarbs;
@@ -70,9 +51,7 @@ int? sumProteins(List<AddedDishHistoryRecord>? dishes) {
   int totalProteins = 0;
 
   for (var dish in dishes) {
-    if (dish.proteins != null) {
-      totalProteins += dish.proteins!;
-    }
+    totalProteins += dish.proteins;
   }
 
   return totalProteins;
@@ -157,10 +136,10 @@ Color? colorObvodkiVCalendare(
   double totalFats = 0;
 
   for (final dish in dishes) {
-    totalKcal += dish.kcal?.toDouble() ?? 0;
-    totalCarbs += dish.carbs?.toDouble() ?? 0;
-    totalProteins += dish.proteins?.toDouble() ?? 0;
-    totalFats += dish.fats?.toDouble() ?? 0;
+    totalKcal += dish.kcal.toDouble();
+    totalCarbs += dish.carbs.toDouble();
+    totalProteins += dish.proteins.toDouble();
+    totalFats += dish.fats.toDouble();
   }
 
   // Считаем проценты достижения целей по каждому макроэлементу

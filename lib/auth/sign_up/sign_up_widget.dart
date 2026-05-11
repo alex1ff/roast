@@ -12,7 +12,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'sign_up_model.dart';
 export 'sign_up_model.dart';
 
@@ -218,7 +217,8 @@ class _SignUpWidgetState extends State<SignUpWidget> {
                                 style: FlutterFlowTheme.of(context)
                                     .bodyMedium
                                     .override(
-                                      font: GoogleFonts.outfit(
+                                      font: TextStyle(
+                                        fontFamily: 'SF Pro',
                                         fontWeight: FontWeight.bold,
                                         fontStyle: FlutterFlowTheme.of(context)
                                             .bodyMedium
@@ -601,7 +601,8 @@ class _SignUpWidgetState extends State<SignUpWidget> {
                                       style: FlutterFlowTheme.of(context)
                                           .bodyMedium
                                           .override(
-                                            font: GoogleFonts.montserrat(
+                                            font: TextStyle(
+                                              fontFamily: 'SF Pro',
                                               fontWeight:
                                                   FlutterFlowTheme.of(context)
                                                       .bodyMedium
@@ -659,7 +660,8 @@ class _SignUpWidgetState extends State<SignUpWidget> {
                                   style: FlutterFlowTheme.of(context)
                                       .bodyMedium
                                       .override(
-                                        font: GoogleFonts.montserrat(
+                                        font: TextStyle(
+                                          fontFamily: 'SF Pro',
                                           fontWeight:
                                               FlutterFlowTheme.of(context)
                                                   .bodyMedium
@@ -785,7 +787,8 @@ class _SignUpWidgetState extends State<SignUpWidget> {
                                   textStyle: FlutterFlowTheme.of(context)
                                       .titleSmall
                                       .override(
-                                        font: GoogleFonts.poppins(
+                                        font: TextStyle(
+                                          fontFamily: 'SF Pro',
                                           fontWeight: FontWeight.w600,
                                           fontStyle:
                                               FlutterFlowTheme.of(context)
@@ -815,7 +818,8 @@ class _SignUpWidgetState extends State<SignUpWidget> {
                                 style: FlutterFlowTheme.of(context)
                                     .bodyMedium
                                     .override(
-                                      font: GoogleFonts.outfit(
+                                      font: TextStyle(
+                                        fontFamily: 'SF Pro',
                                         fontWeight: FontWeight.normal,
                                         fontStyle: FlutterFlowTheme.of(context)
                                             .bodyMedium
@@ -905,7 +909,7 @@ class _SignUpWidgetState extends State<SignUpWidget> {
                                             ));
                                           }
                                           if (_model.textController2.text !=
-                                                  '') {
+                                              '') {
                                             _model.usergoogle =
                                                 await queryUsersRecordOnce(
                                               queryBuilder: (usersRecord) =>
@@ -1020,7 +1024,7 @@ class _SignUpWidgetState extends State<SignUpWidget> {
                                             ));
                                           }
                                           if (_model.textController2.text !=
-                                                  '') {
+                                              '') {
                                             _model.userapple =
                                                 await queryUsersRecordOnce(
                                               queryBuilder: (usersRecord) =>

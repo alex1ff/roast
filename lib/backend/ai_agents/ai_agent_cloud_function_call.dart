@@ -1,6 +1,7 @@
 import '../cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 import '/flutter_flow/flutter_flow_util.dart';
+import '/services/error_reporter.dart';
 
 /// Represents a message in a conversation thread.
 class Message {
@@ -26,6 +27,8 @@ class Message {
 /// Note: For OpenAI Responses API, maintains previous response IDs to maintain
 /// conversation context.
 class ThreadManager {
+  static const int maxMessageHistoryLength = 20;
+
   static final Map<String, Map<String, String>> _threadIds = {};
   static final Map<String, Map<String, String>> _assistantIds = {};
   static final Map<String, Map<String, List<Message>>> _messageHistory = {};
@@ -89,12 +92,16 @@ class ThreadManager {
       String provider, String userThreadId, Message message) {
     _messageHistory.putIfAbsent(provider, () => {});
     _messageHistory[provider]!.putIfAbsent(userThreadId, () => []);
-    _messageHistory[provider]![userThreadId]!.add(message);
+    final history = _messageHistory[provider]![userThreadId]!;
+    history.add(message);
+    if (history.length > maxMessageHistoryLength) {
+      history.removeRange(0, history.length - maxMessageHistoryLength);
+    }
   }
 
   /// Gets all messages for a specific thread
   static List<Message> getMessages(String provider, String userThreadId) {
-    return _messageHistory[provider]?[userThreadId] ?? [];
+    return List.unmodifiable(_messageHistory[provider]?[userThreadId] ?? []);
   }
 
   /// Clears message history for a specific thread
@@ -152,6 +159,29 @@ Future<String?> callCloudAgent({
       "messages": messages,
     });
 
+    if (result['_error'] == true) {
+      final code = result['code'] as String? ?? 'unknown';
+      final requestId = result['request_id'] as String? ?? 'unknown';
+      debugPrint('AI cloud function failed: $agentName $code');
+      await AppErrorReporter.report(
+        area: 'ai_agent',
+        message: 'cloud_function_error',
+        attributes: {
+          'agent': agentName,
+          'provider': provider,
+          'code': code,
+          'request_id': requestId,
+        },
+      );
+      showSnackbar(
+        context,
+        code == 'deadline-exceeded'
+            ? 'The request timed out. Please try again.'
+            : 'The AI request failed. Please try again.',
+      );
+      return null;
+    }
+
     final response = result['response'] as String?;
     final newVendorThreadId = result['threadId'] as String?;
     final newAssistantId = result['assistantId'] as String?;
@@ -191,7 +221,16 @@ Future<String?> callCloudAgent({
 
     return response;
   } catch (e) {
-    debugPrint('Unexpected error: $e');
+    debugPrint('Unexpected AI error: ${e.runtimeType}');
+    await AppErrorReporter.report(
+      area: 'ai_agent',
+      message: 'unexpected_exception',
+      error: e,
+      attributes: {
+        'agent': agentName,
+        'provider': provider,
+      },
+    );
     showSnackbar(
       context,
       'An unexpected error occurred',
