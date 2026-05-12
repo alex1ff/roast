@@ -32,7 +32,7 @@ class FFAppState extends ChangeNotifier {
                 try {
                   return AIChatStruct.fromSerializableMap(jsonDecode(x));
                 } catch (e) {
-                  print("Can't decode persisted data type. Error: $e.");
+                  debugPrint("Can't decode persisted data type. Error: $e.");
                   return null;
                 }
               })

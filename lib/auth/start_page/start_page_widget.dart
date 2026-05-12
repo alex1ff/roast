@@ -146,7 +146,7 @@ class _StartPageWidgetState extends State<StartPageWidget> {
                 padding: EdgeInsetsDirectional.fromSTEB(25.0, 0.0, 25.0, 53.0),
                 child: FFButtonWidget(
                   onPressed: () {
-                    print('Button pressed ...');
+                    debugPrint('Button pressed ...');
                   },
                   text: 'Get Started',
                   options: FFButtonOptions(

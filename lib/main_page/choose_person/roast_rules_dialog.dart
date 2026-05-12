@@ -460,9 +460,9 @@ class _RoastRulesDialogState extends State<RoastRulesDialog> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: _reachedBottom
                                 ? theme.primary
-                                : theme.primary.withOpacity(0.4),
+                                : theme.primary.withValues(alpha: 0.4),
                             disabledBackgroundColor:
-                                theme.primary.withOpacity(0.4),
+                                theme.primary.withValues(alpha: 0.4),
                             elevation: 0,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(14.0),

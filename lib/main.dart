@@ -25,6 +25,11 @@ const _revenueCatWebKey = String.fromEnvironment('REVENUECAT_WEB_API_KEY');
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Silence developer logs in release builds so debugPrint calls scattered
+  // across the codebase don't reach production logcat / Console output.
+  if (kReleaseMode) {
+    debugPrint = (String? message, {int? wrapWidth}) {};
+  }
   AppErrorReporter.installGlobalHandlers();
   GoRouter.optionURLReflectsImperativeAPIs = true;
   usePathUrlStrategy();

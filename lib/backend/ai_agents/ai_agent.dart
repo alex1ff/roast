@@ -60,7 +60,7 @@ Future<dynamic> callAiAgent({
           try {
             return jsonDecode(response) as Map<String, dynamic>;
           } catch (e) {
-            print('Failed to parse JSON response: $response');
+            debugPrint('Failed to parse JSON response: $response');
             throw Exception('AI response was not valid JSON');
           }
         }
