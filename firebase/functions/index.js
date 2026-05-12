@@ -27,6 +27,7 @@ const USAGE_FEATURES = {
   roast: {
     countField: "count_limited",
     extraField: "extra_photo",
+    weeklyLimit: 70,
     monthlyLimit: 280,
     yearlyLimit: 3360,
     freeLimit: 18,
@@ -34,6 +35,7 @@ const USAGE_FEATURES = {
   chat: {
     countField: "count_limited_chat",
     extraField: "extra_chat",
+    weeklyLimit: 75,
     monthlyLimit: 300,
     yearlyLimit: 3600,
     freeLimit: 18,
@@ -154,6 +156,9 @@ function planForProductIdentifier(productIdentifier) {
   if (productIdentifier === "roast_99_1year") {
     return "yearly";
   }
+  if (productIdentifier === "roast_99_1week") {
+    return "weekly";
+  }
   if (productIdentifier === "roast_9_1Month") {
     return "monthly";
   }
@@ -161,6 +166,9 @@ function planForProductIdentifier(productIdentifier) {
   const normalized = String(productIdentifier || "").toLowerCase();
   if (normalized.includes("year")) {
     return "yearly";
+  }
+  if (normalized.includes("week")) {
+    return "weekly";
   }
   if (normalized.includes("month")) {
     return "monthly";
@@ -176,6 +184,8 @@ function fallbackSubscriptionEnd(plan, now) {
   const date = new Date(now.getTime());
   if (plan === "yearly") {
     date.setFullYear(date.getFullYear() + 1);
+  } else if (plan === "weekly") {
+    date.setDate(date.getDate() + 7);
   } else {
     date.setMonth(date.getMonth() + 1);
   }
@@ -214,7 +224,7 @@ function subscriptionUpdateForEntitlement(entitlement, fieldValue) {
 
 function hasActivePremium(userData, now = new Date()) {
   const plan = userData?.SubPlan;
-  if (plan !== "monthly" && plan !== "yearly") {
+  if (plan !== "weekly" && plan !== "monthly" && plan !== "yearly") {
     return false;
   }
 
@@ -231,9 +241,13 @@ function buildUsageUpdate(userData, feature, fieldValue, now = new Date()) {
   const usedCount = normalizeCount(userData?.[config.countField]);
   const extraCredits = normalizeCount(userData?.[config.extraField]);
   const premiumActive = hasActivePremium(userData, now);
-  const plan = userData?.SubPlan === "monthly" ? "monthly" : "yearly";
+  const plan = hasActivePremium(userData, now) ? userData?.SubPlan : null;
   const includedLimit = premiumActive
-    ? (plan === "monthly" ? config.monthlyLimit : config.yearlyLimit)
+    ? (plan === "weekly"
+      ? config.weeklyLimit
+      : plan === "monthly"
+        ? config.monthlyLimit
+        : config.yearlyLimit)
     : config.freeLimit;
 
   if (usedCount < includedLimit) {

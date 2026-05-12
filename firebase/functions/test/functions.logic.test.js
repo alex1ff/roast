@@ -35,6 +35,44 @@ describe("Functions business logic", () => {
     assert.equal(entitlement.expiresAt.toISOString(), "2027-05-01T00:00:00.000Z");
   });
 
+  it("resolves weekly RevenueCat product into weekly SubPlan", () => {
+    const entitlement = _test.resolveActiveEntitlement(
+      {
+        entitlements: {
+          Premium: {
+            product_identifier: "roast_99_1week",
+            purchase_date: "2026-05-01T00:00:00Z",
+            expires_date: "2026-05-08T00:00:00Z",
+          },
+        },
+      },
+      "Premium",
+      new Date("2026-05-02T00:00:00Z"),
+    );
+
+    assert.equal(entitlement.plan, "weekly");
+    assert.equal(entitlement.productIdentifier, "roast_99_1week");
+    assert.equal(entitlement.expiresAt.toISOString(), "2026-05-08T00:00:00.000Z");
+  });
+
+  it("falls back to a seven day subscription end from sync time", () => {
+    const entitlement = _test.resolveActiveEntitlement(
+      {
+        entitlements: {
+          Premium: {
+            product_identifier: "roast_99_1week",
+            purchase_date: "2026-05-01T00:00:00Z",
+          },
+        },
+      },
+      "Premium",
+      new Date("2026-05-02T00:00:00Z"),
+    );
+
+    assert.equal(entitlement.plan, "weekly");
+    assert.equal(entitlement.expiresAt.toISOString(), "2026-05-09T00:00:00.000Z");
+  });
+
   it("rejects expired RevenueCat entitlements", () => {
     const entitlement = _test.resolveActiveEntitlement(
       {
@@ -70,6 +108,19 @@ describe("Functions business logic", () => {
     assert.deepEqual(update.count_limited_chat, {op: "delete"});
   });
 
+  it("writes weekly SubPlan in subscription updates", () => {
+    const update = _test.subscriptionUpdateForEntitlement(
+      {
+        plan: "weekly",
+        purchaseDate: new Date("2026-05-01T00:00:00Z"),
+        expiresAt: new Date("2026-05-08T00:00:00Z"),
+      },
+      fieldValue,
+    );
+
+    assert.equal(update.SubPlan, "weekly");
+  });
+
   it("records included usage before the active premium quota is reached", () => {
     const mutation = _test.buildUsageUpdate(
       {
@@ -91,6 +142,31 @@ describe("Functions business logic", () => {
       mode: "included",
       usedCount: 300,
       includedLimit: 300,
+      extraCredits: 3,
+    });
+  });
+
+  it("uses weekly included usage limit for active weekly plans", () => {
+    const mutation = _test.buildUsageUpdate(
+      {
+        SubPlan: "weekly",
+        dateSubEnd: new Date("2026-05-17T00:00:00Z"),
+        count_limited_chat: 74,
+        extra_chat: 3,
+      },
+      "chat",
+      fieldValue,
+      new Date("2026-05-10T00:00:00Z"),
+    );
+
+    assert.deepEqual(mutation.update, {
+      count_limited_chat: {op: "increment", value: 1},
+    });
+    assert.deepEqual(mutation.result, {
+      feature: "chat",
+      mode: "included",
+      usedCount: 75,
+      includedLimit: 75,
       extraCredits: 3,
     });
   });
