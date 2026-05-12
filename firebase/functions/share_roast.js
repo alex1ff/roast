@@ -180,7 +180,7 @@ function extractShareId(path) {
 
 function buildShareTitle(dish) {
   const dishName = asText(dish.dishName);
-  return dishName ? `${dishName} got roasted` : "Roast NutriTracker";
+  return dishName ? `${dishName} got roasted` : "Roast Them All";
 }
 
 function buildStableShareId(uid, sourcePath) {
@@ -192,9 +192,9 @@ function buildStableShareId(uid, sourcePath) {
 }
 
 function renderSharePage(share, shareId) {
-  const title = asText(share.title) || "Roast NutriTracker";
+  const title = asText(share.title) || "Roast Them All";
   const excerpt =
-    asText(share.excerpt) || "A food roast from Roast NutriTracker.";
+    asText(share.excerpt) || "A food roast from Roast Them All.";
   const content = asText(share.content);
   const ogImage = asUrl(share.ogImageUrl) || DEFAULT_OG_IMAGE;
   const canonicalUrl = `${SHARE_BASE_URL}/r/${encodeURIComponent(shareId)}`;
@@ -219,7 +219,7 @@ function renderSharePage(share, shareId) {
   <title>${escapeHtml(title)}</title>
   <meta name="description" content="${escapeAttr(excerpt)}">
   <meta property="og:type" content="article">
-  <meta property="og:site_name" content="Roast NutriTracker">
+  <meta property="og:site_name" content="Roast Them All">
   <meta property="og:title" content="${escapeAttr(title)}">
   <meta property="og:description" content="${escapeAttr(excerpt)}">
   <meta property="og:image" content="${escapeAttr(ogImage)}">
@@ -254,7 +254,7 @@ function renderSharePage(share, shareId) {
     <section class="download-card">
       <div>
         <p class="download-title">Roast your next meal</p>
-        <p class="download-copy">Open Roast NutriTracker to track food, hear the roast, and share the damage.</p>
+        <p class="download-copy">Open Roast Them All to track food, hear the roast, and share the damage.</p>
       </div>
       <a class="store-button" href="${escapeAttr(APP_STORE_URL)}" rel="noopener">Get Roast</a>
     </section>
@@ -359,7 +359,7 @@ function renderStatusPage(title, message) {
     <section class="status-card">
       <h1>${escapeHtml(title)}</h1>
       <p>${escapeHtml(message)}</p>
-      <a class="store-button" href="${escapeAttr(SHARE_BASE_URL)}">Back to Roast NutriTracker</a>
+      <a class="store-button" href="${escapeAttr(SHARE_BASE_URL)}">Back to Roast Them All</a>
     </section>
   </main>
 </body>

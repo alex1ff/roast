@@ -2253,7 +2253,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                                 EdgeInsetsDirectional.fromSTEB(
                                                     12.0, 0.0, 0.0, 0.0),
                                             child: Text(
-                                              '© 2025 Roast Nutritracker. Version 1.0.0',
+                                              '© 2025 Roast Them All. Version 1.0.0',
                                               style:
                                                   FlutterFlowTheme.of(context)
                                                       .bodyMedium

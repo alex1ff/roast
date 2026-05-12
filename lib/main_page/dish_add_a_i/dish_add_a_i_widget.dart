@@ -117,18 +117,34 @@ class _DishAddAIWidgetState extends State<DishAddAIWidget> {
                                 children: [
                                   Align(
                                     alignment: AlignmentDirectional(-1.0, 0.0),
-                                    child: Text(
-                                      'Dish name',
-                                      style: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .override(
-                                            fontFamily: 'SF Pro',
-                                            color: FlutterFlowTheme.of(context)
-                                                .textfieldsText,
-                                            fontSize: 16.0,
-                                            letterSpacing: 0.0,
-                                            fontWeight: FontWeight.normal,
+                                    child: RichText(
+                                      textScaler:
+                                          MediaQuery.of(context).textScaler,
+                                      text: TextSpan(
+                                        style: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .override(
+                                              fontFamily: 'SF Pro',
+                                              color:
+                                                  FlutterFlowTheme.of(context)
+                                                      .textfieldsText,
+                                              fontSize: 16.0,
+                                              letterSpacing: 0.0,
+                                              fontWeight: FontWeight.normal,
+                                            ),
+                                        children: [
+                                          const TextSpan(text: 'Dish or '),
+                                          TextSpan(
+                                            text: 'Friend',
+                                            style: TextStyle(
+                                              color:
+                                                  FlutterFlowTheme.of(context)
+                                                      .primary,
+                                            ),
                                           ),
+                                          const TextSpan(text: ' Name'),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                   Padding(
@@ -841,16 +857,29 @@ class _DishAddAIWidgetState extends State<DishAddAIWidget> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Flexible(
-                        child: Text(
-                          'ADD A NEW DISH OR ROAST\nA FRIEND or whatever you want',
+                        child: RichText(
+                          textScaler: MediaQuery.of(context).textScaler,
                           textAlign: TextAlign.center,
-                          style:
-                              FlutterFlowTheme.of(context).bodyMedium.override(
-                                    fontFamily: 'SF Pro',
-                                    fontSize: 21.0,
-                                    letterSpacing: 0.0,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                          text: TextSpan(
+                            style: FlutterFlowTheme.of(context)
+                                .bodyMedium
+                                .override(
+                                  fontFamily: 'SF Pro',
+                                  fontSize: 21.0,
+                                  letterSpacing: 0.0,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                            children: [
+                              const TextSpan(text: 'ADD A NEW DISH OR '),
+                              TextSpan(
+                                text: 'ROAST\nA FRIEND',
+                                style: TextStyle(
+                                  color: FlutterFlowTheme.of(context).primary,
+                                ),
+                              ),
+                              const TextSpan(text: ' or whatever you want'),
+                            ],
+                          ),
                         ),
                       ),
                     ],

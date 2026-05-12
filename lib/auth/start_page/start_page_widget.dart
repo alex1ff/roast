@@ -78,7 +78,7 @@ class _StartPageWidgetState extends State<StartPageWidget> {
               ),
               Spacer(),
               Text(
-                'EAT OUT',
+                'ROAST',
                 style: FlutterFlowTheme.of(context).bodyMedium.override(
                       font: TextStyle(
                         fontFamily: 'SF Pro',
@@ -99,7 +99,7 @@ class _StartPageWidgetState extends State<StartPageWidget> {
               Padding(
                 padding: EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
                 child: Text(
-                  'Nutritracker',
+                  'THEM ALL',
                   style: FlutterFlowTheme.of(context).bodyMedium.override(
                         font: TextStyle(
                           fontFamily: 'SF Pro',

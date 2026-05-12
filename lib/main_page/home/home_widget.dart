@@ -289,7 +289,7 @@ class _HomeScrollView extends StatelessWidget {
               ),
             ),
             SliverPadding(
-              padding: const EdgeInsets.fromLTRB(6.0, 4.0, 6.0, 0.0),
+              padding: const EdgeInsets.fromLTRB(6.0, 40.0, 6.0, 0.0),
               sliver: SliverToBoxAdapter(
                 child: _DailyGoalSection(
                   summary: summary,

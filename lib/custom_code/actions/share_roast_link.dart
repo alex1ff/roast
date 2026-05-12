@@ -39,7 +39,7 @@ Future<String?> shareRoastLink(
   await SharePlus.instance.share(
     ShareParams(
       text: shareUrl,
-      subject: 'Roast NutriTracker',
+      subject: 'Roast Them All',
     ),
   );
 

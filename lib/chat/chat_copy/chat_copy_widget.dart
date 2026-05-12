@@ -105,7 +105,7 @@ class _ChatCopyWidgetState extends State<ChatCopyWidget> {
           FFAppState().chathistory.length - 1,
           (e) => e
             ..message =
-                'Hi, I’m Elena — your Roast NutriTracker assistant. Send me a dish or a question, and I’ll give you smart tweaks with a playful roast.',
+                'Hi, I’m Elena — your Roast Them All assistant. Send me a dish or a question, and I’ll give you smart tweaks with a playful roast.',
         );
         safeSetState(() {});
       }

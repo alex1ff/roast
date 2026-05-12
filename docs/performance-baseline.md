@@ -5,7 +5,7 @@ Branch: `flutterflow`
 Base commit at audit start: `8ecc9bd`
 
 This document records the reproducible baseline and follow-up commands for
-Roast NutriTracker optimization work. Device profiling is still a separate
+Roast Them All optimization work. Device profiling is still a separate
 follow-up task because it needs representative account data and target devices.
 
 ## Environment

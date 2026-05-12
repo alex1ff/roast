@@ -97,7 +97,7 @@ class _SubscriptionPageWidgetState extends State<SubscriptionPageWidget> {
                                       children: [
                                         TextSpan(
                                           text:
-                                              'Get the most out of Roast NutriTracker, your arrogant dining companion:\n\n',
+                                              'Get the most out of Roast Them All, your arrogant dining companion:\n\n',
                                           style: FlutterFlowTheme.of(context)
                                               .bodyMedium
                                               .override(

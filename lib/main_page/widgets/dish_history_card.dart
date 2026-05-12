@@ -18,6 +18,8 @@ class DishHistoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final imageUrl = record.image.trim();
+
     return InkWell(
       borderRadius: BorderRadius.circular(16.0),
       onTap: () {
@@ -45,31 +47,22 @@ class DishHistoryCard extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12.0),
-                  child: CachedNetworkImage(
-                    imageUrl: valueOrDefault<String>(
-                      record.image,
-                      'https://firebasestorage.googleapis.com/v0/b/eat-out-a-i-h2yogm.firebasestorage.app/o/AppImages%2FZaglushkaDish.png?alt=media&token=removed',
-                    ),
-                    memCacheWidth: 160,
-                    memCacheHeight: 220,
-                    maxWidthDiskCache: 320,
-                    maxHeightDiskCache: 440,
-                    fadeInDuration: Duration.zero,
-                    fadeOutDuration: Duration.zero,
-                    width: 80.0,
-                    height: double.infinity,
-                    fit: BoxFit.cover,
-                    errorWidget: (context, url, error) => Container(
-                      width: 80.0,
-                      color: const Color(0xFFE5E7EB),
-                      alignment: Alignment.center,
-                      child: const Icon(
-                        Icons.image_not_supported_outlined,
-                        color: Color(0xFF8E8E93),
-                        size: 20.0,
-                      ),
-                    ),
-                  ),
+                  child: imageUrl.isEmpty
+                      ? const _DishImagePlaceholder()
+                      : CachedNetworkImage(
+                          imageUrl: imageUrl,
+                          memCacheWidth: 160,
+                          memCacheHeight: 220,
+                          maxWidthDiskCache: 320,
+                          maxHeightDiskCache: 440,
+                          fadeInDuration: Duration.zero,
+                          fadeOutDuration: Duration.zero,
+                          width: 80.0,
+                          height: double.infinity,
+                          fit: BoxFit.cover,
+                          errorWidget: (context, url, error) =>
+                              const _DishImagePlaceholder(),
+                        ),
                 ),
                 Expanded(
                   child: Padding(
@@ -156,6 +149,34 @@ class DishHistoryCard extends StatelessWidget {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DishImagePlaceholder extends StatelessWidget {
+  const _DishImagePlaceholder();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 80.0,
+      height: double.infinity,
+      color: const Color(0xFFEFF4F3),
+      alignment: Alignment.center,
+      child: Container(
+        width: 54.0,
+        height: 54.0,
+        decoration: const BoxDecoration(
+          color: Color(0xFFDCE7E5),
+          shape: BoxShape.circle,
+        ),
+        alignment: Alignment.center,
+        child: const Icon(
+          Icons.restaurant_rounded,
+          color: Color(0xFF7E9A96),
+          size: 28.0,
         ),
       ),
     );
