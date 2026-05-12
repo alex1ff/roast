@@ -20,6 +20,7 @@ import 'package:just_audio/just_audio.dart';
 import 'package:provider/provider.dart';
 import 'choose_person_content.dart';
 import 'choose_person_model.dart';
+import 'roast_rules_dialog.dart';
 export 'choose_person_model.dart';
 
 class ChoosePersonWidget extends StatefulWidget {
@@ -140,6 +141,14 @@ class _ChoosePersonWidgetState extends State<ChoosePersonWidget> {
                         _model.dropDownValue == '')
                     ? null
                     : () async {
+                        // Require accepting the app rules before any
+                        // generation can happen. No credits are spent
+                        // if the user dismisses or rejects the dialog.
+                        final accepted =
+                            await RoastRulesDialog.ensureAccepted(context);
+                        if (!accepted) {
+                          return;
+                        }
                         var _shouldSetState = false;
                         await Future.wait([
                           Future(() async {

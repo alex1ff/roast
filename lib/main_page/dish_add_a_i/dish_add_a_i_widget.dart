@@ -133,16 +133,7 @@ class _DishAddAIWidgetState extends State<DishAddAIWidget> {
                                               fontWeight: FontWeight.normal,
                                             ),
                                         children: [
-                                          const TextSpan(text: 'Dish or '),
-                                          TextSpan(
-                                            text: 'Friend',
-                                            style: TextStyle(
-                                              color:
-                                                  FlutterFlowTheme.of(context)
-                                                      .primary,
-                                            ),
-                                          ),
-                                          const TextSpan(text: ' Name'),
+                                          const TextSpan(text: 'Dish or Friend Name'),
                                         ],
                                       ),
                                     ),

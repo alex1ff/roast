@@ -40,6 +40,18 @@ class FFAppState extends ChangeNotifier {
               .toList() ??
           _chathistory;
     });
+    _safeInit(() {
+      _acceptedRoastRules =
+          prefs.getBool(_acceptedRoastRulesPrefsKey) ?? false;
+    });
+  }
+
+  static const _acceptedRoastRulesPrefsKey = 'ff_accepted_roast_rules';
+  bool _acceptedRoastRules = false;
+  bool get acceptedRoastRules => _acceptedRoastRules;
+  set acceptedRoastRules(bool value) {
+    _acceptedRoastRules = value;
+    prefs.setBool(_acceptedRoastRulesPrefsKey, value);
   }
 
   void update(VoidCallback callback) {

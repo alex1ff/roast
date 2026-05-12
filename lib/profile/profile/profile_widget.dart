@@ -152,24 +152,22 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                             child: Column(
                               mainAxisSize: MainAxisSize.max,
                               children: [
-                                Container(
-                                  width: double.infinity,
-                                  decoration: BoxDecoration(
-                                    color: FlutterFlowTheme.of(context)
-                                        .secondaryBackground,
-                                    borderRadius: BorderRadius.circular(20.0),
-                                  ),
-                                  child: Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
-                                        12.0, 12.0, 0.0, 12.0),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.max,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Container(
+                                IntrinsicHeight(
+                                  child: Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  children: [
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        color: FlutterFlowTheme.of(context)
+                                            .secondaryBackground,
+                                        borderRadius:
+                                            BorderRadius.circular(20.0),
+                                      ),
+                                      padding: EdgeInsetsDirectional.fromSTEB(
+                                          12.0, 12.0, 12.0, 12.0),
+                                      child: Center(
+                                        child: Container(
                                           decoration: BoxDecoration(
                                             shape: BoxShape.circle,
                                             border: Border.all(
@@ -324,11 +322,32 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                             ),
                                           ),
                                         ),
+                                      ),
+                                    ),
+                                    SizedBox(width: 6.0),
+                                    Expanded(
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          color: FlutterFlowTheme.of(context)
+                                              .secondaryBackground,
+                                          borderRadius:
+                                              BorderRadius.circular(20.0),
+                                        ),
+                                        padding:
+                                            EdgeInsetsDirectional.fromSTEB(
+                                                12.0, 12.0, 0.0, 12.0),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.max,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
                                         Flexible(
                                           child: Padding(
                                             padding:
                                                 EdgeInsetsDirectional.fromSTEB(
-                                                    12.0, 0.0, 0.0, 0.0),
+                                                    0.0, 0.0, 0.0, 0.0),
                                             child: Column(
                                               mainAxisSize: MainAxisSize.max,
                                               mainAxisAlignment:
@@ -619,6 +638,11 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                                       ),
                                                     ),
                                                   ),
+                                                if (valueOrDefault(
+                                                        currentUserDocument
+                                                            ?.kcalGoal,
+                                                        0) ==
+                                                    0)
                                                 Padding(
                                                   padding: EdgeInsetsDirectional
                                                       .fromSTEB(
@@ -696,9 +720,12 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                                 (value) => safeSetState(() {}));
                                           },
                                         ),
-                                      ],
+                                          ],
+                                        ),
+                                      ),
                                     ),
-                                  ),
+                                  ],
+                                ),
                                 ),
                                 ProfileSection(
                                   children: [
