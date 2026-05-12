@@ -22,7 +22,12 @@ void main() {
       expect(blocked.premiumIncludedQuotaReached, isFalse);
     });
 
-    test('uses monthly and yearly premium limits per feature', () {
+    test('uses weekly, monthly and yearly premium limits per feature', () {
+      final weeklyRoast = UsageLimitService.roastDecision(
+        hasPremium: true,
+        usedCount: 69,
+        subPlan: SubPlan.weekly,
+      );
       final monthlyRoast = UsageLimitService.roastDecision(
         hasPremium: true,
         usedCount: 279,
@@ -33,11 +38,31 @@ void main() {
         usedCount: 3599,
         subPlan: SubPlan.yearly,
       );
+      final weeklyChat = UsageLimitService.chatDecision(
+        hasPremium: true,
+        usedCount: 74,
+        subPlan: SubPlan.weekly,
+      );
 
+      expect(weeklyRoast.allowed, isTrue);
+      expect(weeklyRoast.includedLimit, 70);
       expect(monthlyRoast.allowed, isTrue);
       expect(monthlyRoast.includedLimit, 280);
       expect(yearlyChat.allowed, isTrue);
       expect(yearlyChat.includedLimit, 3600);
+      expect(weeklyChat.allowed, isTrue);
+      expect(weeklyChat.includedLimit, 75);
+    });
+
+    test('blocks weekly premium roast quota at the limit', () {
+      final decision = UsageLimitService.roastDecision(
+        hasPremium: true,
+        usedCount: 70,
+        subPlan: SubPlan.weekly,
+      );
+
+      expect(decision.allowed, isFalse);
+      expect(decision.premiumIncludedQuotaReached, isTrue);
     });
 
     test('blocks premium included quota at the limit without extra credits',

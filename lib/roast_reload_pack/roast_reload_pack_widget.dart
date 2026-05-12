@@ -1,9 +1,11 @@
+import '/auth/firebase_auth/auth_util.dart';
 import '/components/subscribe_completed_copy_widget.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/services/purchase_ui_helpers.dart';
+import '/services/sub_plan_copy.dart';
 import '/services/user_account_mutations.dart';
 import '/custom_code/actions/index.dart' as actions;
 import '/flutter_flow/revenue_cat_util.dart' as revenue_cat;
@@ -96,8 +98,8 @@ class _RoastReloadPackWidgetState extends State<RoastReloadPackWidget> {
                                     text: TextSpan(
                                       children: [
                                         TextSpan(
-                                          text:
-                                              'Your monthly roasts are finished, but your appetite clearly isn’t. Reload and keep the heat on.\n\n',
+                                          text: SubPlanCopy.reloadPackIntro(
+                                              currentUserDocument?.subPlan),
                                           style: FlutterFlowTheme.of(context)
                                               .bodyMedium
                                               .override(

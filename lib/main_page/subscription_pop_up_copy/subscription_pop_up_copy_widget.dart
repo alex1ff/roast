@@ -1,6 +1,8 @@
+import '/auth/firebase_auth/auth_util.dart';
 import '/components/limit_reached_popup/limit_reached_popup_widget.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/index.dart';
+import '/services/sub_plan_copy.dart';
 import 'package:flutter/material.dart';
 import 'subscription_pop_up_copy_model.dart';
 export 'subscription_pop_up_copy_model.dart';
@@ -40,10 +42,10 @@ class _SubscriptionPopUpCopyWidgetState
 
   @override
   Widget build(BuildContext context) {
+    final plan = currentUserDocument?.subPlan;
     return LimitReachedPopup(
-      title: 'Monthly Roasts Finished',
-      body:
-          'We love that you’re using Roast. Your monthly roasts are finished, but your appetite clearly isn’t. Get Roast Reload Pack and keep the heat on.',
+      title: SubPlanCopy.quotaReachedTitle(plan),
+      body: SubPlanCopy.quotaReachedBody(plan),
       ctaText: 'Get Roast Reload Pack',
       routeName: RoastReloadPackWidget.routeName,
     );
