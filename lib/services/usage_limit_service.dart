@@ -106,16 +106,27 @@ class UsageLimitService {
       return FFAppConstants.limitedNoSub;
     }
 
-    final isMonthly = subPlan == SubPlan.monthly;
     switch (feature) {
       case UsageFeature.roast:
-        return isMonthly
-            ? FFAppConstants.countlimitedM
-            : FFAppConstants.countlimitedY;
+        switch (subPlan) {
+          case SubPlan.weekly:
+            return FFAppConstants.countlimitedW;
+          case SubPlan.monthly:
+            return FFAppConstants.countlimitedM;
+          case SubPlan.yearly:
+          case null:
+            return FFAppConstants.countlimitedY;
+        }
       case UsageFeature.chat:
-        return isMonthly
-            ? FFAppConstants.countlimitedchatM
-            : FFAppConstants.countlimitedchatY;
+        switch (subPlan) {
+          case SubPlan.weekly:
+            return FFAppConstants.countlimitedchatW;
+          case SubPlan.monthly:
+            return FFAppConstants.countlimitedchatM;
+          case SubPlan.yearly:
+          case null:
+            return FFAppConstants.countlimitedchatY;
+        }
     }
   }
 

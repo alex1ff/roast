@@ -14,6 +14,7 @@ enum Goal {
 enum SubPlan {
   yearly,
   monthly,
+  weekly,
 }
 
 extension FFEnumExtensions<T extends Enum> on T {

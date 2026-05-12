@@ -17,6 +17,8 @@ abstract class FFAppConstants {
     'Full Inferno'
   ];
   static const String Premium = 'Premium';
+  static const int countlimitedW = 70;
+  static const int countlimitedchatW = 75;
   static const int countlimitedM = 280;
   static const int countlimitedchatM = 300;
   static const int limitedNoSub = 18;
