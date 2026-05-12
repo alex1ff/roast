@@ -23,3 +23,7 @@ ios/Flutter/Flutter.podspec
 
 firebase/functions/node_modules/
 firebase/custom_cloud_functions/node_modules/
+
+# Local Dart defines (API keys, etc.) — never commit values.
+dart_defines.json
+dart_defines.*.json
