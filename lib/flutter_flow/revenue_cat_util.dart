@@ -4,10 +4,11 @@ import 'package:flutter/foundation.dart' show kIsWeb, debugPrint;
 import 'package:flutter/services.dart';
 
 export 'package:purchases_flutter/purchases_flutter.dart'
-    show Package, Offering;
+    show Package, Offering, ProductCategory;
 
 Offerings? _offerings;
 CustomerInfo? _customerInfo;
+final Map<String, StoreProduct> _storeProducts = {};
 String? _loggedInUid;
 bool _isConfigured = false;
 Future<void>? _initializationFuture;
@@ -107,32 +108,45 @@ Future<void> waitForInitialization() async {
 
 Package? getPackage(String packageId) =>
     _offerings?.current?.getPackage(packageId);
+StoreProduct? getStoreProduct(String productId) => _storeProducts[productId];
 
 String packagePriceString(
   String packageId, {
   String loadingText = 'Loading...',
   String unavailableText = 'Unavailable',
 }) {
-  if (_offerings?.current == null) {
+  final priceString = getPackage(packageId)?.storeProduct.priceString ??
+      getStoreProduct(packageId)?.priceString;
+  if (priceString != null) {
+    return priceString;
+  }
+  if (_offerings?.current == null && !_storeProducts.containsKey(packageId)) {
     return loadingText;
   }
-  return getPackage(packageId)?.storeProduct.priceString ?? unavailableText;
+  return unavailableText;
 }
 
 // Purchase a package.
-Future<bool> purchasePackage(String package) async {
+Future<bool> purchasePackage(
+  String package, {
+  ProductCategory productCategory = ProductCategory.subscription,
+}) async {
   if (!_isConfigured) {
     debugPrint('RevenueCat is not configured. Cannot purchase package.');
     return false;
   }
   try {
     final revenueCatPackage = offerings?.current?.getPackage(package);
-    if (revenueCatPackage == null) {
-      return false;
-    }
-    final result = await Purchases.purchase(
-      PurchaseParams.package(revenueCatPackage),
-    );
+    final params = revenueCatPackage != null
+        ? PurchaseParams.package(revenueCatPackage)
+        : PurchaseParams.storeProduct(
+            getStoreProduct(package) ??
+                await _loadSingleStoreProduct(
+                  package,
+                  productCategory: productCategory,
+                ),
+          );
+    final result = await Purchases.purchase(params);
     customerInfo = result.customerInfo;
     return true;
   } catch (_) {
@@ -157,6 +171,29 @@ Future<Offerings?> ensureOfferingsLoaded() async {
   return _offerings;
 }
 
+Future<void> ensureStoreProductsLoaded(
+  List<String> productIds, {
+  ProductCategory productCategory = ProductCategory.subscription,
+}) async {
+  await waitForInitialization();
+  if (!_isConfigured) {
+    return;
+  }
+
+  final missingStoreProductIds = productIds
+      .where((productId) => getStoreProduct(productId) == null)
+      .toList();
+
+  await Future.wait([
+    loadOfferings(),
+    if (missingStoreProductIds.isNotEmpty)
+      loadStoreProducts(
+        missingStoreProductIds,
+        productCategory: productCategory,
+      ),
+  ]);
+}
+
 Future<Offerings?> loadOfferings() async {
   if (!_isConfigured) {
     return _offerings;
@@ -167,6 +204,40 @@ Future<Offerings?> loadOfferings() async {
     debugPrint("Error loading offerings info: $e");
   }
   return _offerings;
+}
+
+Future<List<StoreProduct>> loadStoreProducts(
+  List<String> productIds, {
+  ProductCategory productCategory = ProductCategory.subscription,
+}) async {
+  if (!_isConfigured || productIds.isEmpty) {
+    return const [];
+  }
+  try {
+    final products = await Purchases.getProducts(
+      productIds,
+      productCategory: productCategory,
+    );
+    for (final product in products) {
+      _storeProducts[product.identifier] = product;
+    }
+    return products;
+  } on PlatformException catch (e) {
+    debugPrint("Error loading StoreKit product info: $e");
+    return const [];
+  }
+}
+
+Future<StoreProduct> _loadSingleStoreProduct(
+  String productId, {
+  required ProductCategory productCategory,
+}) async {
+  final products = await loadStoreProducts(
+    [productId],
+    productCategory: productCategory,
+  );
+  final product = products.where((item) => item.identifier == productId).first;
+  return product;
 }
 
 Future loadCustomerInfo() async {
