@@ -2322,7 +2322,7 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
                                           Padding(
                                             padding: EdgeInsets.all(10.0),
                                             child: Text(
-                                              'Want a deeper breakdown? Open AI Chat and I’ll roast this dish with smarter tweaks.',
+                                              'Want a deeper breakdown? Open AI chat for smarter nutrition tweaks on dishes and savage commentary for your friends.',
                                               textAlign: TextAlign.center,
                                               style: FlutterFlowTheme.of(
                                                       context)
