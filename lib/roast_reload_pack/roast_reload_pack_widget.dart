@@ -27,9 +27,34 @@ class RoastReloadPackWidget extends StatefulWidget {
 }
 
 class _RoastReloadPackWidgetState extends State<RoastReloadPackWidget> {
+  static const _reloadPackPackage = 'Roast_Reload_Pack';
+
   late RoastReloadPackModel _model;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
+
+  Future<bool> _ensureReloadPackReady() async {
+    if (revenue_cat.getPackage(_reloadPackPackage) != null) {
+      return true;
+    }
+
+    await revenue_cat.ensureOfferingsLoaded();
+    if (!mounted) {
+      return false;
+    }
+    safeSetState(() {});
+
+    if (revenue_cat.getPackage(_reloadPackPackage) != null) {
+      return true;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Purchases are still loading. Please try again shortly.'),
+      ),
+    );
+    return false;
+  }
 
   @override
   void initState() {
@@ -39,9 +64,11 @@ class _RoastReloadPackWidgetState extends State<RoastReloadPackWidget> {
     // On page load action.
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       await actions.lockOrientation();
+      await revenue_cat.ensureOfferingsLoaded();
+      if (mounted) {
+        safeSetState(() {});
+      }
     });
-
-    WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
 
   @override
@@ -167,11 +194,8 @@ class _RoastReloadPackWidgetState extends State<RoastReloadPackWidget> {
                                             children: [
                                               TextSpan(
                                                 text: revenue_cat
-                                                    .offerings!.current!
-                                                    .getPackage(
-                                                        'Roast_Reload_Pack')!
-                                                    .storeProduct
-                                                    .priceString,
+                                                    .packagePriceString(
+                                                        _reloadPackPackage),
                                                 style:
                                                     FlutterFlowTheme.of(context)
                                                         .bodyMedium
@@ -203,8 +227,11 @@ class _RoastReloadPackWidgetState extends State<RoastReloadPackWidget> {
                                     0.0, 32.0, 0.0, 0.0),
                                 child: FFButtonWidget(
                                   onPressed: () async {
+                                    if (!await _ensureReloadPackReady()) {
+                                      return;
+                                    }
                                     _model.reload = await revenue_cat
-                                        .purchasePackage('Roast_Reload_Pack');
+                                        .purchasePackage(_reloadPackPackage);
                                     if (_model.reload!) {
                                       final reloadSync =
                                           await UserAccountMutations

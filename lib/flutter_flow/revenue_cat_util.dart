@@ -10,6 +10,7 @@ Offerings? _offerings;
 CustomerInfo? _customerInfo;
 String? _loggedInUid;
 bool _isConfigured = false;
+Future<void>? _initializationFuture;
 
 Offerings? get offerings => _offerings;
 CustomerInfo? get customerInfo => _customerInfo;
@@ -17,12 +18,29 @@ bool get isConfigured => _isConfigured;
 
 set customerInfo(CustomerInfo? customerInfo) => _customerInfo = customerInfo;
 
-Future initialize(
+Future<void> initialize(
   String appStoreKey,
   String playStoreKey, {
   String webKey = '',
   bool debugLogEnabled = false,
   bool loadDataAfterLaunch = false,
+}) {
+  _initializationFuture ??= _initialize(
+    appStoreKey,
+    playStoreKey,
+    webKey: webKey,
+    debugLogEnabled: debugLogEnabled,
+    loadDataAfterLaunch: loadDataAfterLaunch,
+  );
+  return _initializationFuture!;
+}
+
+Future<void> _initialize(
+  String appStoreKey,
+  String playStoreKey, {
+  required String webKey,
+  required bool debugLogEnabled,
+  required bool loadDataAfterLaunch,
 }) async {
   try {
     // Set log level before configuration
@@ -83,6 +101,24 @@ Future initialize(
   }
 }
 
+Future<void> waitForInitialization() async {
+  await (_initializationFuture ?? Future.value());
+}
+
+Package? getPackage(String packageId) =>
+    _offerings?.current?.getPackage(packageId);
+
+String packagePriceString(
+  String packageId, {
+  String loadingText = 'Loading...',
+  String unavailableText = 'Unavailable',
+}) {
+  if (_offerings?.current == null) {
+    return loadingText;
+  }
+  return getPackage(packageId)?.storeProduct.priceString ?? unavailableText;
+}
+
 // Purchase a package.
 Future<bool> purchasePackage(String package) async {
   if (!_isConfigured) {
@@ -110,15 +146,27 @@ List<String> get activeEntitlementIds => _customerInfo != null
         .toList()
     : [];
 
-Future loadOfferings() async {
+Future<Offerings?> ensureOfferingsLoaded() async {
+  await waitForInitialization();
   if (!_isConfigured) {
-    return;
+    return _offerings;
+  }
+  if (_offerings?.current == null) {
+    await loadOfferings();
+  }
+  return _offerings;
+}
+
+Future<Offerings?> loadOfferings() async {
+  if (!_isConfigured) {
+    return _offerings;
   }
   try {
     _offerings = await Purchases.getOfferings();
   } on PlatformException catch (e) {
     debugPrint("Error loading offerings info: $e");
   }
+  return _offerings;
 }
 
 Future loadCustomerInfo() async {

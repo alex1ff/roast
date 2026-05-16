@@ -25,9 +25,48 @@ class SubscriptionPageWidget extends StatefulWidget {
 }
 
 class _SubscriptionPageWidgetState extends State<SubscriptionPageWidget> {
+  static const _weeklyPackage = 'roast_99_1week';
+  static const _monthlyPackage = 'roast_9_1Month';
+  static const _yearlyPackage = 'roast_99_1year';
+
   late SubscriptionPageModel _model;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
+
+  String get _selectedPackageId {
+    switch (_model.subType) {
+      case 'week':
+        return _weeklyPackage;
+      case 'month':
+        return _monthlyPackage;
+      case 'year':
+      default:
+        return _yearlyPackage;
+    }
+  }
+
+  Future<bool> _ensureSelectedPackageReady() async {
+    if (revenue_cat.getPackage(_selectedPackageId) != null) {
+      return true;
+    }
+
+    await revenue_cat.ensureOfferingsLoaded();
+    if (!mounted) {
+      return false;
+    }
+    safeSetState(() {});
+
+    if (revenue_cat.getPackage(_selectedPackageId) != null) {
+      return true;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Purchases are still loading. Please try again shortly.'),
+      ),
+    );
+    return false;
+  }
 
   @override
   void initState() {
@@ -37,9 +76,11 @@ class _SubscriptionPageWidgetState extends State<SubscriptionPageWidget> {
     // On page load action.
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       await actions.lockOrientation();
+      await revenue_cat.ensureOfferingsLoaded();
+      if (mounted) {
+        safeSetState(() {});
+      }
     });
-
-    WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
 
   @override
@@ -201,11 +242,8 @@ class _SubscriptionPageWidgetState extends State<SubscriptionPageWidget> {
                                               children: [
                                                 TextSpan(
                                                   text: revenue_cat
-                                                      .offerings!.current!
-                                                      .getPackage(
-                                                          'roast_99_1week')!
-                                                      .storeProduct
-                                                      .priceString,
+                                                      .packagePriceString(
+                                                          _weeklyPackage),
                                                   style: FlutterFlowTheme.of(
                                                           context)
                                                       .bodyMedium
@@ -318,11 +356,8 @@ class _SubscriptionPageWidgetState extends State<SubscriptionPageWidget> {
                                               children: [
                                                 TextSpan(
                                                   text: revenue_cat
-                                                      .offerings!.current!
-                                                      .getPackage(
-                                                          'roast_9_1Month')!
-                                                      .storeProduct
-                                                      .priceString,
+                                                      .packagePriceString(
+                                                          _monthlyPackage),
                                                   style: FlutterFlowTheme.of(
                                                           context)
                                                       .bodyMedium
@@ -435,11 +470,8 @@ class _SubscriptionPageWidgetState extends State<SubscriptionPageWidget> {
                                               children: [
                                                 TextSpan(
                                                   text: revenue_cat
-                                                      .offerings!.current!
-                                                      .getPackage(
-                                                          'roast_99_1year')!
-                                                      .storeProduct
-                                                      .priceString,
+                                                      .packagePriceString(
+                                                          _yearlyPackage),
                                                   style: FlutterFlowTheme.of(
                                                           context)
                                                       .bodyMedium
@@ -482,9 +514,12 @@ class _SubscriptionPageWidgetState extends State<SubscriptionPageWidget> {
                                 child: FFButtonWidget(
                                   onPressed: () async {
                                     var _shouldSetState = false;
+                                    if (!await _ensureSelectedPackageReady()) {
+                                      return;
+                                    }
                                     if (_model.subType == 'year') {
                                       _model.yearly = await revenue_cat
-                                          .purchasePackage('roast_99_1year');
+                                          .purchasePackage(_yearlyPackage);
                                       _shouldSetState = true;
                                       if (_model.yearly!) {
                                         final subscriptionSync =
@@ -535,7 +570,7 @@ class _SubscriptionPageWidgetState extends State<SubscriptionPageWidget> {
                                       }
                                     } else if (_model.subType == 'week') {
                                       _model.weekly = await revenue_cat
-                                          .purchasePackage('roast_99_1week');
+                                          .purchasePackage(_weeklyPackage);
                                       _shouldSetState = true;
                                       if (_model.weekly!) {
                                         final subscriptionSync =
@@ -586,7 +621,7 @@ class _SubscriptionPageWidgetState extends State<SubscriptionPageWidget> {
                                       }
                                     } else {
                                       _model.monthly = await revenue_cat
-                                          .purchasePackage('roast_9_1Month');
+                                          .purchasePackage(_monthlyPackage);
                                       _shouldSetState = true;
                                       if (_model.monthly!) {
                                         final subscriptionSync =
@@ -635,7 +670,7 @@ class _SubscriptionPageWidgetState extends State<SubscriptionPageWidget> {
                                       }
                                     }
                                   },
-                                  text: 'Subcribe now',
+                                  text: 'Subscribe now',
                                   options: FFButtonOptions(
                                     width: double.infinity,
                                     height: 50.0,
