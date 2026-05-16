@@ -37,10 +37,10 @@
         <key>CFBundleTypeRole</key>
         <string>Editor</string>
         <key>CFBundleURLName</key>
-        <string>roastnutritracker.com</string>
+        <string>roastthemall.com</string>
         <key>CFBundleURLSchemes</key>
         <array>
-        <string>roastnutritracker</string>
+        <string>roastthemall</string>
         </array>
         </dict>
     </array>

@@ -9,7 +9,7 @@ const SHARE_BASE_URL =
   process.env.SHARE_BASE_URL || `https://${PROJECT_ID}.web.app`;
 const APP_STORE_URL =
   process.env.APP_STORE_URL ||
-  "https://apps.apple.com/ru/app/roast-nutritracker/id6754046515";
+  "https://apps.apple.com/ru/app/roast-them-all/id6754046515";
 const DEFAULT_OG_IMAGE =
   process.env.DEFAULT_OG_IMAGE ||
   `${SHARE_BASE_URL}/icons/Icon-512.png`;

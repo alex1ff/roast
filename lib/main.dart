@@ -123,7 +123,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     _authUserSub = authenticatedUserStream.listen((user) {
       unawaited(revenue_cat.login(user?.uid));
     });
-    userStream = roastNutriTrackerFirebaseUserStream();
+    userStream = roastThemAllFirebaseUserStream();
     _userSub = userStream.listen((user) {
       _appStateNotifier.update(user);
     });

@@ -46,7 +46,7 @@ class _RequestProcessedWidgetState extends State<RequestProcessedWidget> {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(15.0),
             child: Image.asset(
-              'assets/images/Roast_NutriTracker_Logo.webp',
+              'assets/images/Roast_Them_All_Logo.webp',
               width: 102.0,
               height: 102.0,
               fit: BoxFit.contain,
