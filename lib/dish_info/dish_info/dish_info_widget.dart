@@ -83,7 +83,7 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
     super.dispose();
   }
 
-  Future<String?> _generateAudioForRoast({
+  Future<String?> _prepareAudioForRoast({
     required DocumentReference roastReference,
     required String roastText,
     required String voiceId,
@@ -106,8 +106,19 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
     }
     _model.soundPlayer2!.setVolume(1.0);
     await _model.soundPlayer2!.setUrl(audioUrl);
-    await _model.soundPlayer2!.play();
     return audioUrl;
+  }
+
+  void _playPreparedRoastAudio() {
+    final player = _model.soundPlayer2;
+    if (player == null) {
+      return;
+    }
+    unawaited(() async {
+      try {
+        await player.play();
+      } catch (_) {}
+    }());
   }
 
   @override
@@ -1063,7 +1074,8 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
                                                                                             await _model.soundPlayer1!.stop();
                                                                                           }
                                                                                           _model.soundPlayer1!.setVolume(1.0);
-                                                                                          await _model.soundPlayer1!.setUrl(stackAddedDishHistoryRecord.roastAudio).then((_) => _model.soundPlayer1!.play());
+                                                                                          await _model.soundPlayer1!.setUrl(stackAddedDishHistoryRecord.roastAudio);
+                                                                                          unawaited(_model.soundPlayer1!.play());
                                                                                         },
                                                                                       ),
                                                                                     Container(
@@ -1266,12 +1278,16 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
                                                                               roastAudio: '',
                                                                             ));
                                                                             final audioUrl =
-                                                                                await _generateAudioForRoast(
+                                                                                await _prepareAudioForRoast(
                                                                               roastReference: widget.dish!,
                                                                               roastText: roastText,
                                                                               voiceId: stackAddedDishHistoryRecord.roastVoiceId,
                                                                             );
                                                                             Navigator.pop(context);
+                                                                            if (audioUrl !=
+                                                                                null) {
+                                                                              _playPreparedRoastAudio();
+                                                                            }
                                                                             if (audioUrl == null &&
                                                                                 mounted) {
                                                                               ScaffoldMessenger.of(context).showSnackBar(
@@ -2127,7 +2143,7 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
                                                           .nestedFirestoreData(),
                                                     });
                                                     final audioUrl =
-                                                        await _generateAudioForRoast(
+                                                        await _prepareAudioForRoast(
                                                       roastReference:
                                                           stackAddedDishHistoryRecord
                                                               .reference,
@@ -2137,6 +2153,9 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
                                                               .roastVoiceId,
                                                     );
                                                     Navigator.pop(context);
+                                                    if (audioUrl != null) {
+                                                      _playPreparedRoastAudio();
+                                                    }
                                                     if (audioUrl == null &&
                                                         mounted) {
                                                       ScaffoldMessenger.of(

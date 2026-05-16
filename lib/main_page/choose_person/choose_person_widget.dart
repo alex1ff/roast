@@ -67,7 +67,7 @@ class _ChoosePersonWidgetState extends State<ChoosePersonWidget> {
     super.dispose();
   }
 
-  Future<String?> _generateAudioForRoast({
+  Future<String?> _prepareAudioForRoast({
     required DocumentReference roastReference,
     required String roastText,
     required String? voiceId,
@@ -90,8 +90,19 @@ class _ChoosePersonWidgetState extends State<ChoosePersonWidget> {
     }
     _model.soundPlayer!.setVolume(1.0);
     await _model.soundPlayer!.setUrl(audioUrl);
-    await _model.soundPlayer!.play();
     return audioUrl;
+  }
+
+  void _playPreparedRoastAudio() {
+    final player = _model.soundPlayer;
+    if (player == null) {
+      return;
+    }
+    unawaited(() async {
+      try {
+        await player.play();
+      } catch (_) {}
+    }());
   }
 
   @override
@@ -304,7 +315,7 @@ class _ChoosePersonWidgetState extends State<ChoosePersonWidget> {
                                   roastData,
                                   addedDishHistoryRecordReference,
                                 );
-                                final audioUrl = await _generateAudioForRoast(
+                                final audioUrl = await _prepareAudioForRoast(
                                   roastReference:
                                       addedDishHistoryRecordReference,
                                   roastText: roastText,
@@ -312,6 +323,9 @@ class _ChoosePersonWidgetState extends State<ChoosePersonWidget> {
                                 );
                                 _shouldSetState = true;
                                 Navigator.pop(context);
+                                if (audioUrl != null) {
+                                  _playPreparedRoastAudio();
+                                }
                                 unawaited(
                                   () async {
                                     await widget.action?.call();
