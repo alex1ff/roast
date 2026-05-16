@@ -32,6 +32,8 @@ class _SubscriptionPageWidgetState extends State<SubscriptionPageWidget> {
   late SubscriptionPageModel _model;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
+  bool _isCatalogLoading = true;
+  bool _catalogLoadFailed = false;
 
   String get _selectedPackageId {
     switch (_model.subType) {
@@ -50,11 +52,10 @@ class _SubscriptionPageWidgetState extends State<SubscriptionPageWidget> {
       return true;
     }
 
-    await revenue_cat.ensureOfferingsLoaded();
+    await _loadPurchaseCatalog();
     if (!mounted) {
       return false;
     }
-    safeSetState(() {});
 
     if (revenue_cat.getPackage(_selectedPackageId) != null) {
       return true;
@@ -68,6 +69,86 @@ class _SubscriptionPageWidgetState extends State<SubscriptionPageWidget> {
     return false;
   }
 
+  Future<void> _loadPurchaseCatalog() async {
+    safeSetState(() {
+      _isCatalogLoading = true;
+      _catalogLoadFailed = false;
+    });
+    try {
+      await revenue_cat
+          .ensureOfferingsLoaded()
+          .timeout(const Duration(seconds: 12));
+    } catch (_) {
+      // The UI below shows a retry state; RevenueCat logs the concrete cause.
+    }
+    if (!mounted) {
+      return;
+    }
+    safeSetState(() {
+      _isCatalogLoading = false;
+      _catalogLoadFailed = revenue_cat.offerings?.current == null;
+    });
+  }
+
+  String _priceText(String packageId) {
+    if (revenue_cat.offerings?.current == null) {
+      return _isCatalogLoading ? 'Loading...' : 'Retry';
+    }
+    return revenue_cat.packagePriceString(
+      packageId,
+      unavailableText: 'Unavailable',
+    );
+  }
+
+  Widget _buildCatalogStatus(BuildContext context) {
+    if (!_catalogLoadFailed || revenue_cat.offerings?.current != null) {
+      return const SizedBox.shrink();
+    }
+
+    return Padding(
+      padding: const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+      child: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: FlutterFlowTheme.of(context).secondaryBackground,
+          borderRadius: BorderRadius.circular(16.0),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  revenue_cat.isConfigured
+                      ? 'Could not load App Store prices.'
+                      : 'Purchases are unavailable in this build.',
+                  style: FlutterFlowTheme.of(context).bodyMedium.override(
+                        fontFamily: 'SF Pro',
+                        fontSize: 14.0,
+                        letterSpacing: 0.0,
+                      ),
+                ),
+              ),
+              TextButton(
+                onPressed: _loadPurchaseCatalog,
+                child: Text(
+                  'Retry',
+                  style: FlutterFlowTheme.of(context).bodyMedium.override(
+                        fontFamily: 'SF Pro',
+                        color: FlutterFlowTheme.of(context).primary,
+                        letterSpacing: 0.0,
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -76,10 +157,7 @@ class _SubscriptionPageWidgetState extends State<SubscriptionPageWidget> {
     // On page load action.
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       await actions.lockOrientation();
-      await revenue_cat.ensureOfferingsLoaded();
-      if (mounted) {
-        safeSetState(() {});
-      }
+      await _loadPurchaseCatalog();
     });
   }
 
@@ -241,9 +319,8 @@ class _SubscriptionPageWidgetState extends State<SubscriptionPageWidget> {
                                             text: TextSpan(
                                               children: [
                                                 TextSpan(
-                                                  text: revenue_cat
-                                                      .packagePriceString(
-                                                          _weeklyPackage),
+                                                  text: _priceText(
+                                                      _weeklyPackage),
                                                   style: FlutterFlowTheme.of(
                                                           context)
                                                       .bodyMedium
@@ -355,9 +432,8 @@ class _SubscriptionPageWidgetState extends State<SubscriptionPageWidget> {
                                             text: TextSpan(
                                               children: [
                                                 TextSpan(
-                                                  text: revenue_cat
-                                                      .packagePriceString(
-                                                          _monthlyPackage),
+                                                  text: _priceText(
+                                                      _monthlyPackage),
                                                   style: FlutterFlowTheme.of(
                                                           context)
                                                       .bodyMedium
@@ -469,9 +545,8 @@ class _SubscriptionPageWidgetState extends State<SubscriptionPageWidget> {
                                             text: TextSpan(
                                               children: [
                                                 TextSpan(
-                                                  text: revenue_cat
-                                                      .packagePriceString(
-                                                          _yearlyPackage),
+                                                  text: _priceText(
+                                                      _yearlyPackage),
                                                   style: FlutterFlowTheme.of(
                                                           context)
                                                       .bodyMedium
@@ -510,7 +585,12 @@ class _SubscriptionPageWidgetState extends State<SubscriptionPageWidget> {
                               ),
                               Padding(
                                 padding: EdgeInsetsDirectional.fromSTEB(
-                                    0.0, 32.0, 0.0, 0.0),
+                                    0.0, 12.0, 0.0, 0.0),
+                                child: _buildCatalogStatus(context),
+                              ),
+                              Padding(
+                                padding: EdgeInsetsDirectional.fromSTEB(0.0,
+                                    _catalogLoadFailed ? 20.0 : 32.0, 0.0, 0.0),
                                 child: FFButtonWidget(
                                   onPressed: () async {
                                     var _shouldSetState = false;

@@ -32,17 +32,18 @@ class _RoastReloadPackWidgetState extends State<RoastReloadPackWidget> {
   late RoastReloadPackModel _model;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
+  bool _isCatalogLoading = true;
+  bool _catalogLoadFailed = false;
 
   Future<bool> _ensureReloadPackReady() async {
     if (revenue_cat.getPackage(_reloadPackPackage) != null) {
       return true;
     }
 
-    await revenue_cat.ensureOfferingsLoaded();
+    await _loadPurchaseCatalog();
     if (!mounted) {
       return false;
     }
-    safeSetState(() {});
 
     if (revenue_cat.getPackage(_reloadPackPackage) != null) {
       return true;
@@ -56,6 +57,86 @@ class _RoastReloadPackWidgetState extends State<RoastReloadPackWidget> {
     return false;
   }
 
+  Future<void> _loadPurchaseCatalog() async {
+    safeSetState(() {
+      _isCatalogLoading = true;
+      _catalogLoadFailed = false;
+    });
+    try {
+      await revenue_cat
+          .ensureOfferingsLoaded()
+          .timeout(const Duration(seconds: 12));
+    } catch (_) {
+      // The UI below shows a retry state; RevenueCat logs the concrete cause.
+    }
+    if (!mounted) {
+      return;
+    }
+    safeSetState(() {
+      _isCatalogLoading = false;
+      _catalogLoadFailed = revenue_cat.offerings?.current == null;
+    });
+  }
+
+  String _priceText(String packageId) {
+    if (revenue_cat.offerings?.current == null) {
+      return _isCatalogLoading ? 'Loading...' : 'Retry';
+    }
+    return revenue_cat.packagePriceString(
+      packageId,
+      unavailableText: 'Unavailable',
+    );
+  }
+
+  Widget _buildCatalogStatus(BuildContext context) {
+    if (!_catalogLoadFailed || revenue_cat.offerings?.current != null) {
+      return const SizedBox.shrink();
+    }
+
+    return Padding(
+      padding: const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+      child: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: FlutterFlowTheme.of(context).secondaryBackground,
+          borderRadius: BorderRadius.circular(16.0),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  revenue_cat.isConfigured
+                      ? 'Could not load App Store prices.'
+                      : 'Purchases are unavailable in this build.',
+                  style: FlutterFlowTheme.of(context).bodyMedium.override(
+                        fontFamily: 'SF Pro',
+                        fontSize: 14.0,
+                        letterSpacing: 0.0,
+                      ),
+                ),
+              ),
+              TextButton(
+                onPressed: _loadPurchaseCatalog,
+                child: Text(
+                  'Retry',
+                  style: FlutterFlowTheme.of(context).bodyMedium.override(
+                        fontFamily: 'SF Pro',
+                        color: FlutterFlowTheme.of(context).primary,
+                        letterSpacing: 0.0,
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -64,10 +145,7 @@ class _RoastReloadPackWidgetState extends State<RoastReloadPackWidget> {
     // On page load action.
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       await actions.lockOrientation();
-      await revenue_cat.ensureOfferingsLoaded();
-      if (mounted) {
-        safeSetState(() {});
-      }
+      await _loadPurchaseCatalog();
     });
   }
 
@@ -193,9 +271,8 @@ class _RoastReloadPackWidgetState extends State<RoastReloadPackWidget> {
                                           text: TextSpan(
                                             children: [
                                               TextSpan(
-                                                text: revenue_cat
-                                                    .packagePriceString(
-                                                        _reloadPackPackage),
+                                                text: _priceText(
+                                                    _reloadPackPackage),
                                                 style:
                                                     FlutterFlowTheme.of(context)
                                                         .bodyMedium
@@ -224,7 +301,12 @@ class _RoastReloadPackWidgetState extends State<RoastReloadPackWidget> {
                               ),
                               Padding(
                                 padding: EdgeInsetsDirectional.fromSTEB(
-                                    0.0, 32.0, 0.0, 0.0),
+                                    0.0, 12.0, 0.0, 0.0),
+                                child: _buildCatalogStatus(context),
+                              ),
+                              Padding(
+                                padding: EdgeInsetsDirectional.fromSTEB(0.0,
+                                    _catalogLoadFailed ? 20.0 : 32.0, 0.0, 0.0),
                                 child: FFButtonWidget(
                                   onPressed: () async {
                                     if (!await _ensureReloadPackReady()) {
