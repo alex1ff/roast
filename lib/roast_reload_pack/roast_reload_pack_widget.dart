@@ -35,8 +35,7 @@ class _RoastReloadPackWidgetState extends State<RoastReloadPackWidget> {
   bool _isCatalogLoading = true;
 
   Future<bool> _ensureReloadPackReady() async {
-    if (revenue_cat.getPackage(_reloadPackPackage) != null ||
-        revenue_cat.getStoreProduct(_reloadPackPackage) != null) {
+    if (revenue_cat.getPackage(_reloadPackPackage) != null) {
       return true;
     }
 
@@ -45,8 +44,7 @@ class _RoastReloadPackWidgetState extends State<RoastReloadPackWidget> {
       return false;
     }
 
-    if (revenue_cat.getPackage(_reloadPackPackage) != null ||
-        revenue_cat.getStoreProduct(_reloadPackPackage) != null) {
+    if (revenue_cat.getPackage(_reloadPackPackage) != null) {
       return true;
     }
 
@@ -63,10 +61,9 @@ class _RoastReloadPackWidgetState extends State<RoastReloadPackWidget> {
       _isCatalogLoading = true;
     });
     try {
-      await revenue_cat.ensureStoreProductsLoaded(
-        const [_reloadPackPackage],
-        productCategory: revenue_cat.ProductCategory.nonSubscription,
-      ).timeout(const Duration(seconds: 20));
+      await revenue_cat
+          .ensureOfferingsLoaded()
+          .timeout(const Duration(seconds: 20));
     } catch (_) {
       // RevenueCat logs the concrete cause; keep the page usable.
     }
@@ -256,12 +253,8 @@ class _RoastReloadPackWidgetState extends State<RoastReloadPackWidget> {
                                     if (!await _ensureReloadPackReady()) {
                                       return;
                                     }
-                                    _model.reload =
-                                        await revenue_cat.purchasePackage(
-                                      _reloadPackPackage,
-                                      productCategory: revenue_cat
-                                          .ProductCategory.nonSubscription,
-                                    );
+                                    _model.reload = await revenue_cat
+                                        .purchasePackage(_reloadPackPackage);
                                     if (_model.reload!) {
                                       final reloadSync =
                                           await UserAccountMutations

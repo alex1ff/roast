@@ -47,8 +47,7 @@ class _SubscriptionPageWidgetState extends State<SubscriptionPageWidget> {
   }
 
   Future<bool> _ensureSelectedPackageReady() async {
-    if (revenue_cat.getPackage(_selectedPackageId) != null ||
-        revenue_cat.getStoreProduct(_selectedPackageId) != null) {
+    if (revenue_cat.getPackage(_selectedPackageId) != null) {
       return true;
     }
 
@@ -57,8 +56,7 @@ class _SubscriptionPageWidgetState extends State<SubscriptionPageWidget> {
       return false;
     }
 
-    if (revenue_cat.getPackage(_selectedPackageId) != null ||
-        revenue_cat.getStoreProduct(_selectedPackageId) != null) {
+    if (revenue_cat.getPackage(_selectedPackageId) != null) {
       return true;
     }
 
@@ -75,9 +73,9 @@ class _SubscriptionPageWidgetState extends State<SubscriptionPageWidget> {
       _isCatalogLoading = true;
     });
     try {
-      await revenue_cat.ensureStoreProductsLoaded(
-        const [_weeklyPackage, _monthlyPackage, _yearlyPackage],
-      ).timeout(const Duration(seconds: 20));
+      await revenue_cat
+          .ensureOfferingsLoaded()
+          .timeout(const Duration(seconds: 20));
     } catch (_) {
       // RevenueCat logs the concrete cause; keep the page usable.
     }
