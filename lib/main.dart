@@ -17,8 +17,10 @@ import 'flutter_flow/revenue_cat_util.dart' as revenue_cat;
 import 'services/error_reporter.dart';
 import 'services/performance_monitor.dart';
 
-const _revenueCatAppStoreKey =
-    String.fromEnvironment('REVENUECAT_APPSTORE_API_KEY');
+const _revenueCatAppStoreKey = String.fromEnvironment(
+  'REVENUECAT_APPSTORE_API_KEY',
+  defaultValue: 'appl_CRQXxTGBsBRSaHVqIfPgqnbkoqR',
+);
 const _revenueCatPlayStoreKey =
     String.fromEnvironment('REVENUECAT_PLAYSTORE_API_KEY');
 const _revenueCatWebKey = String.fromEnvironment('REVENUECAT_WEB_API_KEY');
