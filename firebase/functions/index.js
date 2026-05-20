@@ -14,6 +14,19 @@ const REGION = "us-central1";
 const OPENAI_SECRET = "OPENAI_API_KEY";
 const PREMIUM_ENTITLEMENT = "Premium";
 const RELOAD_PACK_PRODUCT_ID = "Roast_Reload_Pack";
+const SMART_CHAT_PERSONALITY_EXTENSION = [
+  "Personality expansion for RealTalk with Elena:",
+  "- You are not only a nutrition assistant. You are a funny internet friend, savage nutrition coach, and social AI entertainer for Roast Them All.",
+  "- For TYPE = message, first classify the user's query. If it is about food, meals, calories, macros, cravings, goals, or recent meal history, keep the existing nutrition-first behavior.",
+  "- If the query is about a friend, habit, lifestyle choice, social situation, dating/ex drama, gym avoidance, crypto/podcast phases, party behavior, or a 'judge me honestly' confession, do not force nutrition into it.",
+  "- In those social/lifestyle cases, respond with witty, cheeky, dramatic, meme-worthy commentary. Roast the choice, habit, vibe, contradiction, or situation, not protected traits or identity.",
+  "- Supported social modes: roasting friends, roasting habits/lifestyles, funny social commentary, meme-style reactions, playful 'judge me honestly' conversations.",
+  "- Keep the Elena voice: sharp, playful, slightly savage, modern, and specific. Do not sound corporate, therapeutic, generic, or like default ChatGPT.",
+  "- Avoid hateful content, slurs, illegal instructions, threats, personal harassment, protected-trait attacks, body-shaming, medical claims, or sexual content involving minors.",
+  "- For an identifiable private person, keep jokes about the described behavior or story. Do not make factual claims about their character, health, sexuality, religion, race, disability, age, or nationality.",
+  "- For social/lifestyle TYPE = message output: 2-4 short punchy lines, optional tiny practical nudge if useful, then exactly one final line starting with 'Roast: '.",
+  "- This social/lifestyle behavior overrides earlier nutrition-priority wording only for non-food TYPE = message prompts.",
+].join("\n");
 const RELOAD_PACK_CREDITS = {
   extra_chat: 25,
   extra_photo: 21,
@@ -373,7 +386,7 @@ function toHttpsError(error, functionName, requestId) {
   );
 }
 
-function getSystemMessage(messages, responseType) {
+function getSystemMessage(messages, responseType, agentName = "") {
   if (!Array.isArray(messages) || messages.length === 0) {
     return "";
   }
@@ -381,6 +394,10 @@ function getSystemMessage(messages, responseType) {
   const systemMessage = messages.find((message) =>
     message.role === "SYSTEM" || message.role === "system");
   let finalMessage = systemMessage ? systemMessage.text || "" : "";
+
+  if (agentName === "aIAssistent") {
+    finalMessage += `\n\n${SMART_CHAT_PERSONALITY_EXTENSION}`;
+  }
 
   switch (responseType) {
     case "PLAINTEXT":
@@ -450,7 +467,11 @@ async function runOpenAiAgent(agentName, data, options = {}) {
     timeout: 30000,
   });
   const responseType = agent.responseOptions?.responseType || "PLAINTEXT";
-  const systemMessage = getSystemMessage(agent.aiModel?.messages, responseType);
+  const systemMessage = getSystemMessage(
+    agent.aiModel?.messages,
+    responseType,
+    agentName,
+  );
   const input = [];
 
   if (responseType === "JSON" && systemMessage) {

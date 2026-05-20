@@ -308,6 +308,33 @@ describe("Functions business logic", () => {
     ]);
   });
 
+  it("extends Smart Chat for social roast prompts", async () => {
+    let capturedParams;
+    const fakeOpenAi = {
+      responses: {
+        create: async (params) => {
+          capturedParams = params;
+          return {
+            id: "resp_2",
+            output_text: "Roast: ok",
+          };
+        },
+      },
+    };
+
+    await _test.runOpenAiAgent(
+      "aIAssistent",
+      {message: "My friend started a crypto podcast after losing money."},
+      {openaiClient: fakeOpenAi},
+    );
+
+    assert.match(capturedParams.instructions, /RealTalk with Elena/);
+    assert.match(capturedParams.instructions, /roasting friends/);
+    assert.match(capturedParams.instructions, /do not force nutrition/);
+    assert.match(capturedParams.instructions, /final line starting with 'Roast: '/);
+    assert.equal(capturedParams.input.at(-1).role, "user");
+  });
+
   it("extracts OpenAI output text from content arrays", () => {
     assert.equal(
       _test.extractOpenAiOutputText({
