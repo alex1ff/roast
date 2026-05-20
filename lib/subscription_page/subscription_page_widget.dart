@@ -27,7 +27,6 @@ class SubscriptionPageWidget extends StatefulWidget {
 class _SubscriptionPageWidgetState extends State<SubscriptionPageWidget> {
   static const _weeklyPackage = 'roast_99_1week';
   static const _monthlyPackage = 'roast_9_1Month';
-  static const _yearlyPackage = 'roast_99_1year';
 
   late SubscriptionPageModel _model;
 
@@ -40,9 +39,8 @@ class _SubscriptionPageWidgetState extends State<SubscriptionPageWidget> {
         return _weeklyPackage;
       case 'month':
         return _monthlyPackage;
-      case 'year':
       default:
-        return _yearlyPackage;
+        return _weeklyPackage;
     }
   }
 
@@ -418,119 +416,6 @@ class _SubscriptionPageWidgetState extends State<SubscriptionPageWidget> {
                               ),
                               Padding(
                                 padding: EdgeInsetsDirectional.fromSTEB(
-                                    0.0, 10.0, 0.0, 0.0),
-                                child: InkWell(
-                                  splashColor: Colors.transparent,
-                                  focusColor: Colors.transparent,
-                                  hoverColor: Colors.transparent,
-                                  highlightColor: Colors.transparent,
-                                  onTap: () async {
-                                    _model.subType = 'year';
-                                    safeSetState(() {});
-                                  },
-                                  child: Container(
-                                    width: double.infinity,
-                                    decoration: BoxDecoration(
-                                      color: FlutterFlowTheme.of(context)
-                                          .secondaryBackground,
-                                      borderRadius: BorderRadius.circular(20.0),
-                                      border: Border.all(
-                                        color: _model.subType == 'year'
-                                            ? FlutterFlowTheme.of(context)
-                                                .primary
-                                            : Colors.transparent,
-                                        width: 2.0,
-                                      ),
-                                    ),
-                                    child: Padding(
-                                      padding: EdgeInsets.all(12.0),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.max,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Column(
-                                            mainAxisSize: MainAxisSize.max,
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                'Annual Subscription',
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          fontFamily: 'SF Pro',
-                                                          fontSize: 16.0,
-                                                          letterSpacing: 0.0,
-                                                          fontWeight:
-                                                              FontWeight.w600,
-                                                        ),
-                                              ),
-                                              Padding(
-                                                padding: EdgeInsetsDirectional
-                                                    .fromSTEB(
-                                                        0.0, 8.0, 0.0, 0.0),
-                                                child: Text(
-                                                  'Up to 8 requests per day',
-                                                  style: FlutterFlowTheme.of(
-                                                          context)
-                                                      .bodyMedium
-                                                      .override(
-                                                        fontFamily: 'SF Pro',
-                                                        fontSize: 14.0,
-                                                        letterSpacing: 0.0,
-                                                      ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          RichText(
-                                            textScaler: MediaQuery.of(context)
-                                                .textScaler,
-                                            text: TextSpan(
-                                              children: [
-                                                TextSpan(
-                                                  text: _priceText(
-                                                      _yearlyPackage),
-                                                  style: FlutterFlowTheme.of(
-                                                          context)
-                                                      .bodyMedium
-                                                      .override(
-                                                        fontFamily: 'SF Pro',
-                                                        fontSize: 16.0,
-                                                        letterSpacing: 0.0,
-                                                        fontWeight:
-                                                            FontWeight.w600,
-                                                      ),
-                                                ),
-                                                TextSpan(
-                                                  text: '\n/per year',
-                                                  style: TextStyle(
-                                                    fontWeight:
-                                                        FontWeight.normal,
-                                                    fontSize: 14.0,
-                                                  ),
-                                                )
-                                              ],
-                                              style:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .override(
-                                                        fontFamily: 'SF Pro',
-                                                        letterSpacing: 0.0,
-                                                      ),
-                                            ),
-                                            textAlign: TextAlign.end,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
                                     0.0, 32.0, 0.0, 0.0),
                                 child: FFButtonWidget(
                                   onPressed: () async {
@@ -538,58 +423,7 @@ class _SubscriptionPageWidgetState extends State<SubscriptionPageWidget> {
                                     if (!await _ensureSelectedPackageReady()) {
                                       return;
                                     }
-                                    if (_model.subType == 'year') {
-                                      _model.yearly = await revenue_cat
-                                          .purchasePackage(_yearlyPackage);
-                                      _shouldSetState = true;
-                                      if (_model.yearly!) {
-                                        final subscriptionSync =
-                                            await UserAccountMutations
-                                                .syncRevenueCatSubscription();
-                                        if (!subscriptionSync.success) {
-                                          showPurchaseSyncFailedSnackBar(
-                                            context,
-                                            message:
-                                                'Purchase completed, but subscription sync failed. Please try again.',
-                                          );
-                                          if (_shouldSetState)
-                                            safeSetState(() {});
-                                          return;
-                                        }
-                                        await showModalBottomSheet(
-                                          isScrollControlled: true,
-                                          backgroundColor: Colors.transparent,
-                                          enableDrag: false,
-                                          context: context,
-                                          builder: (context) {
-                                            return GestureDetector(
-                                              onTap: () {
-                                                FocusScope.of(context)
-                                                    .unfocus();
-                                                FocusManager
-                                                    .instance.primaryFocus
-                                                    ?.unfocus();
-                                              },
-                                              child: Padding(
-                                                padding:
-                                                    MediaQuery.viewInsetsOf(
-                                                        context),
-                                                child:
-                                                    SubscribeCompletedWidget(),
-                                              ),
-                                            );
-                                          },
-                                        ).then((value) => safeSetState(() {}));
-
-                                        if (_shouldSetState)
-                                          safeSetState(() {});
-                                        return;
-                                      } else {
-                                        if (_shouldSetState)
-                                          safeSetState(() {});
-                                        return;
-                                      }
-                                    } else if (_model.subType == 'week') {
+                                    if (_model.subType == 'week') {
                                       _model.weekly = await revenue_cat
                                           .purchasePackage(_weeklyPackage);
                                       _shouldSetState = true;

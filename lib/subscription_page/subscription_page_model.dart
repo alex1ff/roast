@@ -6,12 +6,10 @@ import 'package:flutter/material.dart';
 class SubscriptionPageModel extends FlutterFlowModel<SubscriptionPageWidget> {
   ///  Local state fields for this page.
 
-  String subType = 'year';
+  String subType = 'week';
 
   ///  State fields for stateful widgets in this page.
 
-  // Stores action output result for [RevenueCat - Purchase] action in Button widget.
-  bool? yearly;
   // Stores action output result for [RevenueCat - Purchase] action in Button widget.
   bool? monthly;
   // Stores action output result for [RevenueCat - Purchase] action in Button widget.
