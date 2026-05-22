@@ -7,17 +7,19 @@ void main() {
     test('allows free users until the shared free quota is reached', () {
       final allowed = UsageLimitService.roastDecision(
         hasPremium: false,
-        usedCount: 17,
+        usedCount: 2,
+        otherFeatureUsedCount: 0,
         subPlan: null,
       );
       final blocked = UsageLimitService.roastDecision(
         hasPremium: false,
-        usedCount: 18,
+        usedCount: 2,
+        otherFeatureUsedCount: 1,
         subPlan: null,
       );
 
       expect(allowed.allowed, isTrue);
-      expect(allowed.includedLimit, 18);
+      expect(allowed.includedLimit, 3);
       expect(blocked.allowed, isFalse);
       expect(blocked.premiumIncludedQuotaReached, isFalse);
     });
@@ -25,7 +27,7 @@ void main() {
     test('uses weekly, monthly and yearly premium limits per feature', () {
       final weeklyRoast = UsageLimitService.roastDecision(
         hasPremium: true,
-        usedCount: 69,
+        usedCount: 24,
         subPlan: SubPlan.weekly,
       );
       final monthlyRoast = UsageLimitService.roastDecision(
@@ -40,24 +42,24 @@ void main() {
       );
       final weeklyChat = UsageLimitService.chatDecision(
         hasPremium: true,
-        usedCount: 74,
+        usedCount: 24,
         subPlan: SubPlan.weekly,
       );
 
       expect(weeklyRoast.allowed, isTrue);
-      expect(weeklyRoast.includedLimit, 70);
+      expect(weeklyRoast.includedLimit, 25);
       expect(monthlyRoast.allowed, isTrue);
       expect(monthlyRoast.includedLimit, 280);
       expect(yearlyChat.allowed, isTrue);
       expect(yearlyChat.includedLimit, 3600);
       expect(weeklyChat.allowed, isTrue);
-      expect(weeklyChat.includedLimit, 75);
+      expect(weeklyChat.includedLimit, 25);
     });
 
     test('blocks weekly premium roast quota at the limit', () {
       final decision = UsageLimitService.roastDecision(
         hasPremium: true,
-        usedCount: 70,
+        usedCount: 25,
         subPlan: SubPlan.weekly,
       );
 
@@ -86,7 +88,7 @@ void main() {
       );
       final chat = UsageLimitService.chatDecision(
         hasPremium: false,
-        usedCount: 18,
+        usedCount: 3,
         subPlan: null,
         extraChat: 2,
       );
@@ -94,7 +96,8 @@ void main() {
       expect(roast.allowed, isTrue);
       expect(roast.hasExtraCredits, isTrue);
       expect(roast.premiumIncludedQuotaReached, isFalse);
-      expect(chat.allowed, isTrue);
+      expect(chat.allowed, isFalse);
+      expect(chat.hasExtraCredits, isTrue);
     });
 
     test('normalizes null and negative counts', () {

@@ -41,8 +41,7 @@ class _SubscriptionPopUpWidgetState extends State<SubscriptionPopUpWidget> {
   Widget build(BuildContext context) {
     return LimitReachedPopup(
       title: 'Looks like you’ve reached your free limit',
-      body:
-          'Subscribe and enjoy personalized nutrition insights, meal analysis, and more.',
+      body: 'You get 3 free AI requests total. Subscribe to keep roasting.',
       ctaText: 'Subscribe Now',
       routeName: SubscriptionPageWidget.routeName,
     );

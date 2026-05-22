@@ -244,7 +244,7 @@ class _SubscriptionPageWidgetState extends State<SubscriptionPageWidget> {
                                                     .fromSTEB(
                                                         0.0, 8.0, 0.0, 0.0),
                                                 child: Text(
-                                                  'Up to 8 requests per day',
+                                                  '25 roasts + 25 chats / week',
                                                   style: FlutterFlowTheme.of(
                                                           context)
                                                       .bodyMedium
@@ -357,7 +357,7 @@ class _SubscriptionPageWidgetState extends State<SubscriptionPageWidget> {
                                                     .fromSTEB(
                                                         0.0, 8.0, 0.0, 0.0),
                                                 child: Text(
-                                                  'Up to 8 requests per day',
+                                                  '280 roasts + 300 chats / month',
                                                   style: FlutterFlowTheme.of(
                                                           context)
                                                       .bodyMedium

@@ -214,6 +214,7 @@ class _ChatCopyWidgetState extends State<ChatCopyWidget> {
   UsageLimitDecision _chatLimitDecision() => UsageLimitService.chatDecision(
         hasPremium: _hasPremium,
         usedCount: currentUserDocument?.countLimitedChat,
+        otherFeatureUsedCount: currentUserDocument?.countLimited,
         subPlan: currentUserDocument?.subPlan,
         extraChat: currentUserDocument?.extraChat,
       );

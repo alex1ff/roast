@@ -167,6 +167,8 @@ class _ChoosePersonWidgetState extends State<ChoosePersonWidget> {
                               hasPremium: revenue_cat.activeEntitlementIds
                                   .contains(FFAppConstants.Premium),
                               usedCount: currentUserDocument?.countLimited,
+                              otherFeatureUsedCount:
+                                  currentUserDocument?.countLimitedChat,
                               subPlan: currentUserDocument?.subPlan,
                               extraPhoto: currentUserDocument?.extraPhoto,
                             )) {
@@ -390,6 +392,8 @@ class _ChoosePersonWidgetState extends State<ChoosePersonWidget> {
                                 hasPremium: revenue_cat.activeEntitlementIds
                                     .contains(FFAppConstants.Premium),
                                 usedCount: currentUserDocument?.countLimited,
+                                otherFeatureUsedCount:
+                                    currentUserDocument?.countLimitedChat,
                                 subPlan: currentUserDocument?.subPlan,
                                 extraPhoto: currentUserDocument?.extraPhoto,
                               ).premiumIncludedQuotaReached) {

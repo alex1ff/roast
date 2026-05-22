@@ -1,4 +1,3 @@
-
 abstract class FFAppConstants {
   static const List<String> gender = ['Male', 'Female'];
   static const List<String> UserGoal = [
@@ -17,11 +16,11 @@ abstract class FFAppConstants {
     'Full Inferno'
   ];
   static const String Premium = 'Premium';
-  static const int countlimitedW = 70;
-  static const int countlimitedchatW = 75;
+  static const int countlimitedW = 25;
+  static const int countlimitedchatW = 25;
   static const int countlimitedM = 280;
   static const int countlimitedchatM = 300;
-  static const int limitedNoSub = 18;
+  static const int limitedNoSub = 3;
   static const int countlimitedY = 3360;
   static const int countlimitedchatY = 3600;
 }

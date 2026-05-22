@@ -151,7 +151,7 @@ describe("Functions business logic", () => {
       {
         SubPlan: "weekly",
         dateSubEnd: new Date("2026-05-17T00:00:00Z"),
-        count_limited_chat: 74,
+        count_limited_chat: 24,
         extra_chat: 3,
       },
       "chat",
@@ -165,16 +165,50 @@ describe("Functions business logic", () => {
     assert.deepEqual(mutation.result, {
       feature: "chat",
       mode: "included",
-      usedCount: 75,
-      includedLimit: 75,
+      usedCount: 25,
+      includedLimit: 25,
       extraCredits: 3,
     });
+  });
+
+  it("uses a shared free quota across roast and chat", () => {
+    assert.throws(
+      () => _test.buildUsageUpdate(
+        {
+          count_limited: 2,
+          count_limited_chat: 1,
+          extra_photo: 0,
+        },
+        "roast",
+        fieldValue,
+        new Date("2026-05-10T00:00:00Z"),
+      ),
+      /Usage limit exceeded/,
+    );
+
+    const mutation = _test.buildUsageUpdate(
+      {
+        count_limited: 1,
+        count_limited_chat: 1,
+      },
+      "chat",
+      fieldValue,
+      new Date("2026-05-10T00:00:00Z"),
+    );
+
+    assert.deepEqual(mutation.update, {
+      count_limited_chat: {op: "increment", value: 1},
+    });
+    assert.equal(mutation.result.usedCount, 3);
+    assert.equal(mutation.result.includedLimit, 3);
   });
 
   it("uses extra credits after included usage is exhausted", () => {
     const mutation = _test.buildUsageUpdate(
       {
-        count_limited: 18,
+        SubPlan: "monthly",
+        dateSubEnd: new Date("2026-06-01T00:00:00Z"),
+        count_limited: 280,
         extra_photo: 2,
       },
       "roast",
@@ -189,11 +223,26 @@ describe("Functions business logic", () => {
     assert.equal(mutation.result.extraCredits, 1);
   });
 
+  it("does not allow free users to bypass the shared quota with extras", () => {
+    assert.throws(
+      () => _test.buildUsageUpdate(
+        {
+          count_limited: 3,
+          extra_photo: 2,
+        },
+        "roast",
+        fieldValue,
+        new Date("2026-05-10T00:00:00Z"),
+      ),
+      /Usage limit exceeded/,
+    );
+  });
+
   it("throws when usage quota and extra credits are exhausted", () => {
     assert.throws(
       () => _test.buildUsageUpdate(
         {
-          count_limited_chat: 18,
+          count_limited_chat: 3,
           extra_chat: 0,
         },
         "chat",

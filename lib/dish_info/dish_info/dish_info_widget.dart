@@ -1142,6 +1142,8 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
                                                                               .contains(FFAppConstants.Premium),
                                                                           usedCount:
                                                                               currentUserDocument?.countLimited,
+                                                                          otherFeatureUsedCount:
+                                                                              currentUserDocument?.countLimitedChat,
                                                                           subPlan:
                                                                               currentUserDocument?.subPlan,
                                                                           extraPhoto:
@@ -1328,6 +1330,8 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
                                                                                 revenue_cat.activeEntitlementIds.contains(FFAppConstants.Premium),
                                                                             usedCount:
                                                                                 currentUserDocument?.countLimited,
+                                                                            otherFeatureUsedCount:
+                                                                                currentUserDocument?.countLimitedChat,
                                                                             subPlan:
                                                                                 currentUserDocument?.subPlan,
                                                                             extraPhoto:
@@ -1948,6 +1952,9 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
                                                           .Premium),
                                                   usedCount: currentUserDocument
                                                       ?.countLimited,
+                                                  otherFeatureUsedCount:
+                                                      currentUserDocument
+                                                          ?.countLimitedChat,
                                                   subPlan: currentUserDocument
                                                       ?.subPlan,
                                                   extraPhoto:
@@ -2214,6 +2221,9 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
                                                     usedCount:
                                                         currentUserDocument
                                                             ?.countLimited,
+                                                    otherFeatureUsedCount:
+                                                        currentUserDocument
+                                                            ?.countLimitedChat,
                                                     subPlan: currentUserDocument
                                                         ?.subPlan,
                                                     extraPhoto:

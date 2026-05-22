@@ -23,7 +23,8 @@ class UsageLimitDecision {
 
   bool get hasIncludedQuota => usedCount < includedLimit;
   bool get hasExtraCredits => extraCredits > 0;
-  bool get allowed => hasIncludedQuota || hasExtraCredits;
+  bool get canUseExtraCredits => hasPremium && hasExtraCredits;
+  bool get allowed => hasIncludedQuota || canUseExtraCredits;
   bool get premiumIncludedQuotaReached =>
       hasPremium && usedCount >= includedLimit && !hasExtraCredits;
 }
@@ -34,13 +35,19 @@ class UsageLimitService {
   static UsageLimitDecision roastDecision({
     required bool hasPremium,
     required int? usedCount,
+    int? otherFeatureUsedCount,
     required SubPlan? subPlan,
     int? extraPhoto,
   }) {
+    final normalizedUsedCount = _usageCount(
+      hasPremium: hasPremium,
+      usedCount: usedCount,
+      otherFeatureUsedCount: otherFeatureUsedCount,
+    );
     return UsageLimitDecision(
       feature: UsageFeature.roast,
       hasPremium: hasPremium,
-      usedCount: _normalizeCount(usedCount),
+      usedCount: normalizedUsedCount,
       includedLimit: _includedLimit(
         feature: UsageFeature.roast,
         hasPremium: hasPremium,
@@ -53,13 +60,19 @@ class UsageLimitService {
   static UsageLimitDecision chatDecision({
     required bool hasPremium,
     required int? usedCount,
+    int? otherFeatureUsedCount,
     required SubPlan? subPlan,
     int? extraChat,
   }) {
+    final normalizedUsedCount = _usageCount(
+      hasPremium: hasPremium,
+      usedCount: usedCount,
+      otherFeatureUsedCount: otherFeatureUsedCount,
+    );
     return UsageLimitDecision(
       feature: UsageFeature.chat,
       hasPremium: hasPremium,
-      usedCount: _normalizeCount(usedCount),
+      usedCount: normalizedUsedCount,
       includedLimit: _includedLimit(
         feature: UsageFeature.chat,
         hasPremium: hasPremium,
@@ -72,12 +85,14 @@ class UsageLimitService {
   static bool canUseRoast({
     required bool hasPremium,
     required int? usedCount,
+    int? otherFeatureUsedCount,
     required SubPlan? subPlan,
     int? extraPhoto,
   }) {
     return roastDecision(
       hasPremium: hasPremium,
       usedCount: usedCount,
+      otherFeatureUsedCount: otherFeatureUsedCount,
       subPlan: subPlan,
       extraPhoto: extraPhoto,
     ).allowed;
@@ -86,12 +101,14 @@ class UsageLimitService {
   static bool canUseChat({
     required bool hasPremium,
     required int? usedCount,
+    int? otherFeatureUsedCount,
     required SubPlan? subPlan,
     int? extraChat,
   }) {
     return chatDecision(
       hasPremium: hasPremium,
       usedCount: usedCount,
+      otherFeatureUsedCount: otherFeatureUsedCount,
       subPlan: subPlan,
       extraChat: extraChat,
     ).allowed;
@@ -132,4 +149,16 @@ class UsageLimitService {
 
   static int _normalizeCount(int? value) =>
       value == null || value < 0 ? 0 : value;
+
+  static int _usageCount({
+    required bool hasPremium,
+    required int? usedCount,
+    int? otherFeatureUsedCount,
+  }) {
+    final current = _normalizeCount(usedCount);
+    if (hasPremium) {
+      return current;
+    }
+    return current + _normalizeCount(otherFeatureUsedCount);
+  }
 }

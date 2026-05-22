@@ -36,22 +36,23 @@ const AI_DAILY_CALL_LIMITS = {
   roast: 80,
   aIAssistent: 200,
 };
+const FREE_SHARED_USAGE_LIMIT = 3;
 const USAGE_FEATURES = {
   roast: {
     countField: "count_limited",
     extraField: "extra_photo",
-    weeklyLimit: 70,
+    weeklyLimit: 25,
     monthlyLimit: 280,
     yearlyLimit: 3360,
-    freeLimit: 18,
+    freeLimit: FREE_SHARED_USAGE_LIMIT,
   },
   chat: {
     countField: "count_limited_chat",
     extraField: "extra_chat",
-    weeklyLimit: 75,
+    weeklyLimit: 25,
     monthlyLimit: 300,
     yearlyLimit: 3600,
-    freeLimit: 18,
+    freeLimit: FREE_SHARED_USAGE_LIMIT,
   },
 };
 
@@ -251,10 +252,13 @@ function buildUsageUpdate(userData, feature, fieldValue, now = new Date()) {
     throw new CallableError("invalid-argument", "Unsupported usage feature.");
   }
 
-  const usedCount = normalizeCount(userData?.[config.countField]);
+  const featureUsedCount = normalizeCount(userData?.[config.countField]);
+  const freeUsedCount = normalizeCount(userData?.count_limited) +
+    normalizeCount(userData?.count_limited_chat);
   const extraCredits = normalizeCount(userData?.[config.extraField]);
   const premiumActive = hasActivePremium(userData, now);
-  const plan = hasActivePremium(userData, now) ? userData?.SubPlan : null;
+  const plan = premiumActive ? userData?.SubPlan : null;
+  const usedCount = premiumActive ? featureUsedCount : freeUsedCount;
   const includedLimit = premiumActive
     ? (plan === "weekly"
       ? config.weeklyLimit
@@ -278,7 +282,7 @@ function buildUsageUpdate(userData, feature, fieldValue, now = new Date()) {
     };
   }
 
-  if (extraCredits > 0) {
+  if (premiumActive && extraCredits > 0) {
     return {
       update: {
         [config.extraField]: fieldValue.increment(-1),
