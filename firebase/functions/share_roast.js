@@ -194,7 +194,7 @@ function buildStableShareId(uid, sourcePath) {
 function renderSharePage(share, shareId) {
   const title = asText(share.title) || "Roast Them All";
   const excerpt =
-    asText(share.excerpt) || "A food roast from Roast Them All.";
+    asText(share.excerpt) || "A roast from Roast Them All.";
   const content = asText(share.content);
   const ogImage = asUrl(share.ogImageUrl) || DEFAULT_OG_IMAGE;
   const canonicalUrl = `${SHARE_BASE_URL}/r/${encodeURIComponent(shareId)}`;
@@ -203,11 +203,11 @@ function renderSharePage(share, shareId) {
   const itemImageUrl = asUrl(share.itemImageUrl) || asUrl(share.imageUrl);
   const roastImageUrl = asUrl(share.roastImageUrl) || itemImageUrl;
   const audioUrl = asUrl(share.audioUrl);
-  const kcal = asNumber(share.kcal);
+  const primaryImageUrl = itemImageUrl || roastImageUrl;
+  const actionClass = audioUrl ? "primary-actions" : "primary-actions single-action";
   const headlineParts = [
     dishName,
     dishWeight,
-    Number.isFinite(kcal) && kcal > 0 ? `${formatNumber(kcal)} kcal/dish` : "",
   ].filter(Boolean);
 
   return `<!doctype html>
@@ -233,34 +233,42 @@ function renderSharePage(share, shareId) {
 <body>
   <main class="app-shell">
     <section class="dish-card">
-      <div class="dish-summary">
-        ${renderImage(itemImageUrl, "dish-image", dishName)}
-        <div class="dish-copy">
-          <p class="dish-title">${escapeHtml(headlineParts.join(" | "))}</p>
-          ${renderRestaurant(share.restaurant)}
-          ${renderMetaPills(share)}
-        </div>
+      <div class="hero-frame">
+        ${renderImage(primaryImageUrl, "hero-image", dishName)}
+        ${renderHeroCaption(headlineParts, share)}
       </div>
-      ${renderNutrition(share)}
+      <div class="${escapeAttr(actionClass)}">
+        ${renderAudioPlayer(audioUrl)}
+        ${renderRoastBackButton("top-cta")}
+      </div>
       <div class="section-label">Roast</div>
-      <div class="roast-row">
-        ${renderImage(roastImageUrl, "roast-image", "Roast character")}
-        <div class="roast-stack">
-          <div class="roast-bubble">${renderParagraphs(content)}</div>
-          ${renderAudioPlayer(audioUrl)}
-        </div>
-      </div>
+      <div class="roast-bubble">${renderParagraphs(content)}</div>
+      ${renderNutrition(share)}
     </section>
     <section class="download-card">
       <div>
-        <p class="download-title">Roast your next meal</p>
-        <p class="download-copy">Open Roast Them All to track food, hear the roast, and share the damage.</p>
+        <p class="download-title">Don’t just take it! Roast back!</p>
+        <p class="download-copy">Get Roast Them All app &amp; start the chaos: roast friends, dishes, or whatever you want.</p>
       </div>
-      <a class="store-button" href="${escapeAttr(APP_STORE_URL)}" rel="noopener">Get Roast</a>
+      ${renderRoastBackButton("bottom-cta")}
     </section>
   </main>
 </body>
 </html>`;
+}
+
+function renderHeroCaption(headlineParts, share) {
+  const headline = headlineParts.join(" | ");
+  const restaurant = renderRestaurant(share.restaurant);
+  const meta = renderMetaPills(share);
+
+  if (!headline && !restaurant && !meta) {
+    return "";
+  }
+
+  return `<div class="hero-caption">${
+    headline ? `<p class="dish-title">${escapeHtml(headline)}</p>` : ""
+  }${restaurant}${meta}</div>`;
 }
 
 function renderNutrition(share) {
@@ -340,9 +348,16 @@ function renderAudioPlayer(audioUrl) {
     return "";
   }
 
-  return `<div class="audio-card"><span>Listen to roast</span><audio controls preload="none" src="${escapeAttr(
+  return `<div class="audio-card"><span>Play roast</span><audio controls preload="none" src="${escapeAttr(
     audioUrl,
   )}"></audio></div>`;
+}
+
+function renderRoastBackButton(extraClass) {
+  const className = ["store-button", extraClass].filter(Boolean).join(" ");
+  return `<a class="${escapeAttr(className)}" href="${escapeAttr(
+    APP_STORE_URL,
+  )}" rel="noopener">Roast Back</a>`;
 }
 
 function renderStatusPage(title, message) {
@@ -373,38 +388,47 @@ function renderCss() {
     body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", sans-serif; line-height: 1.35; }
     .app-shell { width: min(100%, 430px); min-height: 100vh; margin: 0 auto; padding: max(14px, env(safe-area-inset-top)) 14px 34px; }
     .dish-card, .download-card, .status-card { background: var(--card); border-radius: 20px; box-shadow: var(--shadow); }
-    .dish-card { padding: 14px; }
-    .dish-summary { display: grid; grid-template-columns: 80px 1fr; gap: 12px; align-items: stretch; }
-    .dish-image { display: block; width: 80px; height: 110px; border: 1px solid var(--soft); border-radius: 16px; object-fit: cover; background: var(--soft); }
-    .dish-copy { min-width: 0; display: flex; flex-direction: column; justify-content: center; }
+    .dish-card { display: grid; gap: 14px; padding: 14px; }
+    .hero-frame { position: relative; overflow: hidden; border-radius: 18px; background: var(--soft); }
+    .hero-image { display: block; width: 100%; height: min(62vh, 360px); object-fit: cover; background: var(--soft); }
+    .hero-caption { position: absolute; left: 0; right: 0; bottom: 0; padding: 42px 14px 14px; color: #fff; background: linear-gradient(180deg, rgba(20, 20, 20, 0), rgba(20, 20, 20, 0.82)); }
     .dish-title { margin: 0; color: var(--text); font-size: 16px; font-weight: 600; }
+    .hero-caption .dish-title { color: #fff; }
     .restaurant { margin: 6px 0 0; color: var(--muted); font-size: 13px; font-weight: 500; }
+    .hero-caption .restaurant { color: rgba(255, 255, 255, 0.78); }
     .meta-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
     .meta-pill { min-height: 25px; display: inline-flex; align-items: center; max-width: 100%; padding: 0 12px; border-radius: 999px; background: var(--soft); color: var(--text); font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .hero-caption .meta-pill { background: rgba(255, 255, 255, 0.18); color: #fff; }
     .meta-pill.danger { color: var(--danger); }
+    .hero-caption .meta-pill.danger { color: #ffdfdc; }
+    .primary-actions { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: stretch; }
+    .primary-actions.single-action { grid-template-columns: 1fr; }
     .nutrition-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-top: 14px; }
     .nutrition-item { min-height: 56px; border-radius: 16px; background: var(--soft); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
     .nutrition-item strong { font-size: 16px; font-weight: 700; }
     .nutrition-item span { display: block; margin-top: 2px; color: var(--muted); font-size: 11px; font-weight: 600; }
-    .section-label { margin: 18px 0 10px; color: var(--muted); font-size: 13px; font-weight: 700; }
-    .roast-row { display: grid; grid-template-columns: 60px 1fr; gap: 10px; align-items: start; }
-    .roast-image { display: block; width: 60px; height: 60px; border-radius: 14px; object-fit: cover; background: var(--soft); }
+    .section-label { margin: 2px 0 -4px; color: var(--muted); font-size: 13px; font-weight: 700; }
     .image-placeholder { display: flex; align-items: center; justify-content: center; color: rgba(20, 20, 20, 0.38); font-size: 12px; font-weight: 800; letter-spacing: 0.04em; }
-    .roast-stack { min-width: 0; display: grid; gap: 10px; }
     .roast-bubble { min-height: 60px; padding: 12px; border-radius: 16px; background: var(--roast); color: #000; font-size: 16px; font-weight: 400; }
     .roast-bubble p { margin: 0; }
     .roast-bubble p + p { margin-top: 10px; }
-    .audio-card { display: grid; gap: 8px; padding: 10px 12px 12px; border-radius: 16px; background: var(--soft); }
+    .audio-card { min-width: 0; display: grid; align-content: center; gap: 8px; padding: 10px 12px 12px; border-radius: 16px; background: var(--soft); }
     .audio-card span { color: var(--muted); font-size: 12px; font-weight: 700; }
     audio { width: 100%; height: 34px; }
-    .download-card { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; padding: 16px; }
+    .download-card { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px; margin-top: 14px; padding: 16px; }
     .download-title { margin: 0; font-size: 16px; font-weight: 700; }
     .download-copy { margin: 5px 0 0; max-width: 260px; color: var(--muted); font-size: 13px; font-weight: 500; }
-    .store-button { flex: 0 0 auto; display: inline-flex; min-height: 38px; align-items: center; justify-content: center; padding: 0 14px; border-radius: 999px; background: #141414; color: #fff; text-decoration: none; font-size: 13px; font-weight: 700; }
+    .store-button { flex: 0 0 auto; display: inline-flex; min-height: 38px; align-items: center; justify-content: center; padding: 0 14px; border-radius: 999px; background: #141414; color: #fff; text-decoration: none; font-size: 13px; font-weight: 700; white-space: nowrap; }
+    .top-cta { min-height: 64px; padding: 0 18px; }
     .status { display: grid; place-items: center; }
     .status-card { padding: 24px; text-align: center; }
     .status-card h1 { margin: 0; font-size: 24px; }
     .status-card p { margin: 10px 0 18px; color: var(--muted); font-size: 14px; }
+    @media (max-width: 360px) {
+      .primary-actions, .download-card { grid-template-columns: 1fr; }
+      .store-button { width: 100%; }
+      .top-cta { min-height: 48px; }
+    }
   `;
 }
 
@@ -473,6 +497,7 @@ module.exports = {
     asUrl,
     buildStableShareId,
     extractShareId,
+    renderSharePage,
     summarize,
   },
 };

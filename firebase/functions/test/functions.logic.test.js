@@ -325,6 +325,50 @@ describe("Functions business logic", () => {
     assert.equal(shareTest.extractShareId("/missing/share-id"), "");
   });
 
+  it("renders share page with roast back CTAs before roast copy", () => {
+    const html = shareTest.renderSharePage(
+      {
+        title: "Pasta got roasted",
+        excerpt: "shared",
+        content: "Too much drama for one bowl.",
+        dishName: "Pasta",
+        itemImageUrl: "https://example.com/pasta.jpg",
+        audioUrl: "https://example.com/roast.mp3",
+        kcal: 520,
+        proteins: 20,
+        fats: 18,
+        carbs: 64,
+      },
+      "share-id",
+    );
+
+    assert.equal((html.match(/Roast Back/g) || []).length, 2);
+    assert.match(html, /Don’t just take it! Roast back!/);
+    assert.match(
+      html,
+      /Get Roast Them All app &amp; start the chaos: roast friends, dishes, or whatever you want\./,
+    );
+
+    const bodyIndex = html.indexOf("<body>");
+    const imageIndex = html.indexOf("class=\"hero-image\"", bodyIndex);
+    const audioIndex = html.indexOf("class=\"audio-card\"", bodyIndex);
+    const topCtaIndex = html.indexOf(
+      "class=\"store-button top-cta\"",
+      bodyIndex,
+    );
+    const roastIndex = html.indexOf("class=\"roast-bubble\"", bodyIndex);
+    const nutritionIndex = html.indexOf(
+      "class=\"nutrition-grid\"",
+      bodyIndex,
+    );
+
+    assert.ok(imageIndex > -1);
+    assert.ok(imageIndex < audioIndex);
+    assert.ok(audioIndex < topCtaIndex);
+    assert.ok(topCtaIndex < roastIndex);
+    assert.ok(roastIndex < nutritionIndex);
+  });
+
   it("runs the roast agent with a mocked OpenAI client", async () => {
     let capturedParams;
     const fakeOpenAi = {
