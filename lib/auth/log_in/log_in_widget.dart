@@ -478,8 +478,8 @@ class _LogInWidgetState extends State<LogInWidget>
                                     return;
                                   }
 
-                                  context.goNamedAuth(
-                                      HomeWidget.routeName, context.mounted);
+                                  context.goNamedAuth(DishAddAIWidget.routeName,
+                                      context.mounted);
                                 },
                                 text: 'LET’S ROLL',
                                 options: FFButtonOptions(
@@ -619,7 +619,7 @@ class _LogInWidgetState extends State<LogInWidget>
                                           }
 
                                           context.goNamedAuth(
-                                            ProfileWidget.routeName,
+                                            DishAddAIWidget.routeName,
                                             context.mounted,
                                             extra: <String, dynamic>{
                                               '__transition_info__':
@@ -701,7 +701,7 @@ class _LogInWidgetState extends State<LogInWidget>
                                           }
 
                                           context.goNamedAuth(
-                                            ProfileWidget.routeName,
+                                            DishAddAIWidget.routeName,
                                             context.mounted,
                                             extra: <String, dynamic>{
                                               '__transition_info__':

@@ -762,7 +762,7 @@ class _SignUpWidgetState extends State<SignUpWidget> {
                                   }
 
                                   context.goNamedAuth(
-                                    HomeWidget.routeName,
+                                    DishAddAIWidget.routeName,
                                     context.mounted,
                                     extra: <String, dynamic>{
                                       '__transition_info__': TransitionInfo(
@@ -940,7 +940,7 @@ class _SignUpWidgetState extends State<SignUpWidget> {
                                           }
 
                                           context.goNamedAuth(
-                                            ProfileWidget.routeName,
+                                            DishAddAIWidget.routeName,
                                             context.mounted,
                                             extra: <String, dynamic>{
                                               '__transition_info__':
@@ -1055,7 +1055,7 @@ class _SignUpWidgetState extends State<SignUpWidget> {
                                           }
 
                                           context.goNamedAuth(
-                                            ProfileWidget.routeName,
+                                            DishAddAIWidget.routeName,
                                             context.mounted,
                                             extra: <String, dynamic>{
                                               '__transition_info__':
