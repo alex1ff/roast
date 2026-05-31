@@ -401,7 +401,7 @@ function renderCss() {
     .hero-caption .meta-pill { background: rgba(255, 255, 255, 0.18); color: #fff; }
     .meta-pill.danger { color: var(--danger); }
     .hero-caption .meta-pill.danger { color: #ffdfdc; }
-    .primary-actions { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: stretch; }
+    .primary-actions { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; }
     .primary-actions.single-action { grid-template-columns: 1fr; }
     .nutrition-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-top: 14px; }
     .nutrition-item { min-height: 56px; border-radius: 16px; background: var(--soft); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
@@ -419,7 +419,7 @@ function renderCss() {
     .download-title { margin: 0; font-size: 16px; font-weight: 700; }
     .download-copy { margin: 5px 0 0; max-width: 260px; color: var(--muted); font-size: 13px; font-weight: 500; }
     .store-button { flex: 0 0 auto; display: inline-flex; min-height: 38px; align-items: center; justify-content: center; padding: 0 14px; border-radius: 999px; background: #141414; color: #fff; text-decoration: none; font-size: 13px; font-weight: 700; white-space: nowrap; }
-    .top-cta { min-height: 64px; padding: 0 18px; }
+    .top-cta { min-height: 48px; padding: 0 18px; align-self: center; }
     .status { display: grid; place-items: center; }
     .status-card { padding: 24px; text-align: center; }
     .status-card h1 { margin: 0; font-size: 24px; }
