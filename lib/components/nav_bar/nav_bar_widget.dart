@@ -148,7 +148,7 @@ class _NavBarWidgetState extends State<NavBarWidget> {
                       ),
                     ),
                     Text(
-                      'Add Dish',
+                      'Roast Them',
                       style: FlutterFlowTheme.of(context).bodyMedium.override(
                             fontFamily: 'SF Pro',
                             color: widget.activePage == 'Add'

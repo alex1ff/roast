@@ -125,6 +125,31 @@ class AddedDishHistoryRecord extends FirestoreRecord {
   String get calorieshare => _calorieshare ?? '';
   bool hasCalorieshare() => _calorieshare != null;
 
+  // "roast_mode" field.
+  String? _roastMode;
+  String get roastMode => _roastMode ?? '';
+  bool hasRoastMode() => _roastMode != null;
+
+  // "occasion_key" field.
+  String? _occasionKey;
+  String get occasionKey => _occasionKey ?? '';
+  bool hasOccasionKey() => _occasionKey != null;
+
+  // "occasion_label" field.
+  String? _occasionLabel;
+  String get occasionLabel => _occasionLabel ?? '';
+  bool hasOccasionLabel() => _occasionLabel != null;
+
+  // "subject_type" field.
+  String? _subjectType;
+  String get subjectType => _subjectType ?? '';
+  bool hasSubjectType() => _subjectType != null;
+
+  // "show_nutrition" field.
+  bool? _showNutrition;
+  bool get showNutrition => _showNutrition ?? false;
+  bool hasShowNutrition() => _showNutrition != null;
+
   void _initializeFields() {
     _dishName = snapshotData['dishName'] as String?;
     _dishWeight = castToType<int>(snapshotData['dishWeight']);
@@ -151,6 +176,11 @@ class AddedDishHistoryRecord extends FirestoreRecord {
     _badge = snapshotData['badge'] as String?;
     _impact = snapshotData['impact'] as String?;
     _calorieshare = snapshotData['calorieshare'] as String?;
+    _roastMode = snapshotData['roast_mode'] as String?;
+    _occasionKey = snapshotData['occasion_key'] as String?;
+    _occasionLabel = snapshotData['occasion_label'] as String?;
+    _subjectType = snapshotData['subject_type'] as String?;
+    _showNutrition = snapshotData['show_nutrition'] as bool?;
   }
 
   static CollectionReference get collection =>
@@ -208,6 +238,11 @@ Map<String, dynamic> createAddedDishHistoryRecordData({
   String? badge,
   String? impact,
   String? calorieshare,
+  String? roastMode,
+  String? occasionKey,
+  String? occasionLabel,
+  String? subjectType,
+  bool? showNutrition,
 }) {
   final firestoreData = mapToFirestore(
     <String, dynamic>{
@@ -230,6 +265,11 @@ Map<String, dynamic> createAddedDishHistoryRecordData({
       'badge': badge,
       'impact': impact,
       'calorieshare': calorieshare,
+      'roast_mode': roastMode,
+      'occasion_key': occasionKey,
+      'occasion_label': occasionLabel,
+      'subject_type': subjectType,
+      'show_nutrition': showNutrition,
     }.withoutNulls,
   );
 
@@ -264,7 +304,12 @@ class AddedDishHistoryRecordDocumentEquality
         e1?.roastLevel == e2?.roastLevel &&
         e1?.badge == e2?.badge &&
         e1?.impact == e2?.impact &&
-        e1?.calorieshare == e2?.calorieshare;
+        e1?.calorieshare == e2?.calorieshare &&
+        e1?.roastMode == e2?.roastMode &&
+        e1?.occasionKey == e2?.occasionKey &&
+        e1?.occasionLabel == e2?.occasionLabel &&
+        e1?.subjectType == e2?.subjectType &&
+        e1?.showNutrition == e2?.showNutrition;
   }
 
   @override
@@ -290,7 +335,12 @@ class AddedDishHistoryRecordDocumentEquality
         e?.roastLevel,
         e?.badge,
         e?.impact,
-        e?.calorieshare
+        e?.calorieshare,
+        e?.roastMode,
+        e?.occasionKey,
+        e?.occasionLabel,
+        e?.subjectType,
+        e?.showNutrition
       ]);
 
   @override

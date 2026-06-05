@@ -12,6 +12,7 @@ import '/main_page/subscription_pop_up_copy/subscription_pop_up_copy_widget.dart
 import '/services/nutrition_summary.dart';
 import '/services/roast_analysis.dart';
 import '/services/roast_audio_service.dart';
+import '/services/roast_result_metadata.dart';
 import '/services/user_account_mutations.dart';
 import '/services/usage_limit_service.dart';
 import 'dart:async';
@@ -152,6 +153,9 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
             }
 
             final stackAddedDishHistoryRecord = snapshot.data!;
+            final showNutrition = RoastResultMetadata.shouldShowNutrition(
+              stackAddedDishHistoryRecord,
+            );
 
             return Container(
               height: MediaQuery.sizeOf(context).height * 1.0,
@@ -247,7 +251,10 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
                                                                   builder:
                                                                       (context) =>
                                                                           Text(
-                                                                    '${stackAddedDishHistoryRecord.dishName} • ${NutritionSummary.formatGrams(stackAddedDishHistoryRecord.dishWeight, useOunces: valueOrDefault<bool>(currentUserDocument?.measurementOz, false))} • ${stackAddedDishHistoryRecord.kcal.toString()} kcal/dish',
+                                                                    showNutrition
+                                                                        ? '${stackAddedDishHistoryRecord.dishName} • ${NutritionSummary.formatGrams(stackAddedDishHistoryRecord.dishWeight, useOunces: valueOrDefault<bool>(currentUserDocument?.measurementOz, false))} • ${stackAddedDishHistoryRecord.kcal.toString()} kcal/dish'
+                                                                        : stackAddedDishHistoryRecord
+                                                                            .dishName,
                                                                     maxLines: 2,
                                                                     style: FlutterFlowTheme.of(
                                                                             context)
@@ -265,255 +272,204 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
                                                                   ),
                                                                 ),
                                                               ),
-                                                              FlutterFlowIconButton(
-                                                                borderRadius:
-                                                                    8.0,
-                                                                buttonSize:
-                                                                    40.0,
-                                                                fillColor: Color(
-                                                                    0xFFFAE6D7),
-                                                                icon: Icon(
-                                                                  FFIcons
-                                                                      .kgsdfef,
-                                                                  color: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .primary,
-                                                                  size: 20.0,
+                                                              if (showNutrition)
+                                                                FlutterFlowIconButton(
+                                                                  borderRadius:
+                                                                      8.0,
+                                                                  buttonSize:
+                                                                      40.0,
+                                                                  fillColor: Color(
+                                                                      0xFFFAE6D7),
+                                                                  icon: Icon(
+                                                                    FFIcons
+                                                                        .kgsdfef,
+                                                                    color: FlutterFlowTheme.of(
+                                                                            context)
+                                                                        .primary,
+                                                                    size: 20.0,
+                                                                  ),
+                                                                  onPressed:
+                                                                      () async {
+                                                                    _model.editMode =
+                                                                        true;
+                                                                    _model.ingredientsEdit = stackAddedDishHistoryRecord
+                                                                        .mainIngredients
+                                                                        .toList()
+                                                                        .cast<
+                                                                            String>();
+                                                                    safeSetState(
+                                                                        () {});
+                                                                  },
                                                                 ),
-                                                                onPressed:
-                                                                    () async {
-                                                                  _model.editMode =
-                                                                      true;
-                                                                  _model.ingredientsEdit = stackAddedDishHistoryRecord
-                                                                      .mainIngredients
-                                                                      .toList()
-                                                                      .cast<
-                                                                          String>();
-                                                                  safeSetState(
-                                                                      () {});
-                                                                },
-                                                              ),
                                                             ],
                                                           ),
-                                                          Wrap(
-                                                            spacing: 10.0,
-                                                            runSpacing: 8.0,
-                                                            alignment:
-                                                                WrapAlignment
-                                                                    .start,
-                                                            crossAxisAlignment:
-                                                                WrapCrossAlignment
-                                                                    .start,
-                                                            direction:
-                                                                Axis.horizontal,
-                                                            runAlignment:
-                                                                WrapAlignment
-                                                                    .start,
-                                                            verticalDirection:
-                                                                VerticalDirection
-                                                                    .down,
-                                                            clipBehavior:
-                                                                Clip.none,
-                                                            children: [
-                                                              Row(
-                                                                mainAxisSize:
-                                                                    MainAxisSize
-                                                                        .min,
-                                                                mainAxisAlignment:
-                                                                    MainAxisAlignment
-                                                                        .spaceEvenly,
-                                                                crossAxisAlignment:
-                                                                    CrossAxisAlignment
-                                                                        .start,
-                                                                children: [
-                                                                  Row(
-                                                                    mainAxisSize:
-                                                                        MainAxisSize
-                                                                            .min,
-                                                                    crossAxisAlignment:
-                                                                        CrossAxisAlignment
-                                                                            .center,
-                                                                    children: [
-                                                                      Text(
-                                                                        'Protein',
-                                                                        style: FlutterFlowTheme.of(context)
-                                                                            .bodyMedium
-                                                                            .override(
-                                                                              fontFamily: 'SF Pro',
-                                                                              color: Color(0xFF80BFB4),
-                                                                              fontSize: 16.0,
-                                                                              letterSpacing: 0.0,
-                                                                              fontWeight: FontWeight.normal,
-                                                                            ),
-                                                                      ),
-                                                                      Padding(
-                                                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                                                            4.0,
-                                                                            0.0,
-                                                                            0.0,
-                                                                            0.0),
-                                                                        child:
-                                                                            Container(
-                                                                          width:
-                                                                              4.0,
-                                                                          height:
-                                                                              4.0,
-                                                                          decoration:
-                                                                              BoxDecoration(
-                                                                            color:
-                                                                                Color(0xFF80BFB4),
-                                                                            shape:
-                                                                                BoxShape.circle,
-                                                                          ),
-                                                                        ),
-                                                                      ),
-                                                                      Padding(
-                                                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                                                            4.0,
-                                                                            0.0,
-                                                                            0.0,
-                                                                            0.0),
-                                                                        child:
-                                                                            Text(
-                                                                          '${stackAddedDishHistoryRecord.proteins.toString()} g',
+                                                          if (showNutrition)
+                                                            Wrap(
+                                                              spacing: 10.0,
+                                                              runSpacing: 8.0,
+                                                              alignment:
+                                                                  WrapAlignment
+                                                                      .start,
+                                                              crossAxisAlignment:
+                                                                  WrapCrossAlignment
+                                                                      .start,
+                                                              direction: Axis
+                                                                  .horizontal,
+                                                              runAlignment:
+                                                                  WrapAlignment
+                                                                      .start,
+                                                              verticalDirection:
+                                                                  VerticalDirection
+                                                                      .down,
+                                                              clipBehavior:
+                                                                  Clip.none,
+                                                              children: [
+                                                                Row(
+                                                                  mainAxisSize:
+                                                                      MainAxisSize
+                                                                          .min,
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .spaceEvenly,
+                                                                  crossAxisAlignment:
+                                                                      CrossAxisAlignment
+                                                                          .start,
+                                                                  children: [
+                                                                    Row(
+                                                                      mainAxisSize:
+                                                                          MainAxisSize
+                                                                              .min,
+                                                                      crossAxisAlignment:
+                                                                          CrossAxisAlignment
+                                                                              .center,
+                                                                      children: [
+                                                                        Text(
+                                                                          'Protein',
                                                                           style: FlutterFlowTheme.of(context)
                                                                               .bodyMedium
                                                                               .override(
                                                                                 fontFamily: 'SF Pro',
+                                                                                color: Color(0xFF80BFB4),
                                                                                 fontSize: 16.0,
                                                                                 letterSpacing: 0.0,
                                                                                 fontWeight: FontWeight.normal,
                                                                               ),
                                                                         ),
-                                                                      ),
-                                                                    ],
-                                                                  ),
-                                                                  Row(
-                                                                    mainAxisSize:
-                                                                        MainAxisSize
-                                                                            .max,
-                                                                    children: [
-                                                                      Text(
-                                                                        'Fat',
-                                                                        style: FlutterFlowTheme.of(context)
-                                                                            .bodyMedium
-                                                                            .override(
-                                                                              fontFamily: 'SF Pro',
-                                                                              color: Color(0xFFF19656),
-                                                                              fontSize: 16.0,
-                                                                              letterSpacing: 0.0,
-                                                                              fontWeight: FontWeight.normal,
-                                                                            ),
-                                                                      ),
-                                                                      Padding(
-                                                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                                                            4.0,
-                                                                            0.0,
-                                                                            0.0,
-                                                                            0.0),
-                                                                        child:
-                                                                            Container(
-                                                                          width:
+                                                                        Padding(
+                                                                          padding: EdgeInsetsDirectional.fromSTEB(
                                                                               4.0,
-                                                                          height:
-                                                                              4.0,
-                                                                          decoration:
-                                                                              BoxDecoration(
-                                                                            color:
-                                                                                Color(0xFFF19656),
-                                                                            shape:
-                                                                                BoxShape.circle,
-                                                                          ),
-                                                                        ),
-                                                                      ),
-                                                                      Padding(
-                                                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                                                            4.0,
-                                                                            0.0,
-                                                                            0.0,
-                                                                            0.0),
-                                                                        child:
-                                                                            Text(
-                                                                          '${stackAddedDishHistoryRecord.fats.toString()} g',
-                                                                          style: FlutterFlowTheme.of(context)
-                                                                              .bodyMedium
-                                                                              .override(
-                                                                                fontFamily: 'SF Pro',
-                                                                                fontSize: 16.0,
-                                                                                letterSpacing: 0.0,
-                                                                                fontWeight: FontWeight.normal,
-                                                                              ),
-                                                                        ),
-                                                                      ),
-                                                                    ],
-                                                                  ),
-                                                                ].divide(SizedBox(
-                                                                    width:
-                                                                        10.0)),
-                                                              ),
-                                                              Row(
-                                                                mainAxisSize:
-                                                                    MainAxisSize
-                                                                        .min,
-                                                                mainAxisAlignment:
-                                                                    MainAxisAlignment
-                                                                        .center,
-                                                                children: [
-                                                                  Text(
-                                                                    'Carbs',
-                                                                    style: FlutterFlowTheme.of(
-                                                                            context)
-                                                                        .bodyMedium
-                                                                        .override(
-                                                                          fontFamily:
-                                                                              'SF Pro',
-                                                                          color:
-                                                                              Color(0xFF9F4284),
-                                                                          fontSize:
-                                                                              16.0,
-                                                                          letterSpacing:
                                                                               0.0,
-                                                                          fontWeight:
-                                                                              FontWeight.normal,
+                                                                              0.0,
+                                                                              0.0),
+                                                                          child:
+                                                                              Container(
+                                                                            width:
+                                                                                4.0,
+                                                                            height:
+                                                                                4.0,
+                                                                            decoration:
+                                                                                BoxDecoration(
+                                                                              color: Color(0xFF80BFB4),
+                                                                              shape: BoxShape.circle,
+                                                                            ),
+                                                                          ),
                                                                         ),
-                                                                  ),
-                                                                  Padding(
-                                                                    padding: EdgeInsetsDirectional
-                                                                        .fromSTEB(
-                                                                            4.0,
-                                                                            0.0,
-                                                                            0.0,
-                                                                            0.0),
-                                                                    child:
-                                                                        Container(
-                                                                      width:
-                                                                          4.0,
-                                                                      height:
-                                                                          4.0,
-                                                                      decoration:
-                                                                          BoxDecoration(
-                                                                        color: Color(
-                                                                            0xFF9F4284),
-                                                                        shape: BoxShape
-                                                                            .circle,
-                                                                      ),
+                                                                        Padding(
+                                                                          padding: EdgeInsetsDirectional.fromSTEB(
+                                                                              4.0,
+                                                                              0.0,
+                                                                              0.0,
+                                                                              0.0),
+                                                                          child:
+                                                                              Text(
+                                                                            '${stackAddedDishHistoryRecord.proteins.toString()} g',
+                                                                            style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                                                                  fontFamily: 'SF Pro',
+                                                                                  fontSize: 16.0,
+                                                                                  letterSpacing: 0.0,
+                                                                                  fontWeight: FontWeight.normal,
+                                                                                ),
+                                                                          ),
+                                                                        ),
+                                                                      ],
                                                                     ),
-                                                                  ),
-                                                                  Padding(
-                                                                    padding: EdgeInsetsDirectional
-                                                                        .fromSTEB(
-                                                                            4.0,
-                                                                            0.0,
-                                                                            0.0,
-                                                                            0.0),
-                                                                    child: Text(
-                                                                      '${stackAddedDishHistoryRecord.carbs.toString()} g',
+                                                                    Row(
+                                                                      mainAxisSize:
+                                                                          MainAxisSize
+                                                                              .max,
+                                                                      children: [
+                                                                        Text(
+                                                                          'Fat',
+                                                                          style: FlutterFlowTheme.of(context)
+                                                                              .bodyMedium
+                                                                              .override(
+                                                                                fontFamily: 'SF Pro',
+                                                                                color: Color(0xFFF19656),
+                                                                                fontSize: 16.0,
+                                                                                letterSpacing: 0.0,
+                                                                                fontWeight: FontWeight.normal,
+                                                                              ),
+                                                                        ),
+                                                                        Padding(
+                                                                          padding: EdgeInsetsDirectional.fromSTEB(
+                                                                              4.0,
+                                                                              0.0,
+                                                                              0.0,
+                                                                              0.0),
+                                                                          child:
+                                                                              Container(
+                                                                            width:
+                                                                                4.0,
+                                                                            height:
+                                                                                4.0,
+                                                                            decoration:
+                                                                                BoxDecoration(
+                                                                              color: Color(0xFFF19656),
+                                                                              shape: BoxShape.circle,
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                        Padding(
+                                                                          padding: EdgeInsetsDirectional.fromSTEB(
+                                                                              4.0,
+                                                                              0.0,
+                                                                              0.0,
+                                                                              0.0),
+                                                                          child:
+                                                                              Text(
+                                                                            '${stackAddedDishHistoryRecord.fats.toString()} g',
+                                                                            style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                                                                  fontFamily: 'SF Pro',
+                                                                                  fontSize: 16.0,
+                                                                                  letterSpacing: 0.0,
+                                                                                  fontWeight: FontWeight.normal,
+                                                                                ),
+                                                                          ),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ].divide(SizedBox(
+                                                                      width:
+                                                                          10.0)),
+                                                                ),
+                                                                Row(
+                                                                  mainAxisSize:
+                                                                      MainAxisSize
+                                                                          .min,
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .center,
+                                                                  children: [
+                                                                    Text(
+                                                                      'Carbs',
                                                                       style: FlutterFlowTheme.of(
                                                                               context)
                                                                           .bodyMedium
                                                                           .override(
                                                                             fontFamily:
                                                                                 'SF Pro',
+                                                                            color:
+                                                                                Color(0xFF9F4284),
                                                                             fontSize:
                                                                                 16.0,
                                                                             letterSpacing:
@@ -522,157 +478,192 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
                                                                                 FontWeight.normal,
                                                                           ),
                                                                     ),
-                                                                  ),
-                                                                ],
-                                                              ),
-                                                              Wrap(
-                                                                spacing: 6.0,
-                                                                runSpacing: 6.0,
-                                                                alignment:
-                                                                    WrapAlignment
-                                                                        .start,
-                                                                crossAxisAlignment:
-                                                                    WrapCrossAlignment
-                                                                        .start,
-                                                                direction: Axis
-                                                                    .horizontal,
-                                                                runAlignment:
-                                                                    WrapAlignment
-                                                                        .start,
-                                                                verticalDirection:
-                                                                    VerticalDirection
-                                                                        .down,
-                                                                clipBehavior:
-                                                                    Clip.none,
-                                                                children: [
-                                                                  Container(
-                                                                    height:
-                                                                        25.0,
-                                                                    decoration:
-                                                                        BoxDecoration(
-                                                                      color: Color(
-                                                                          0xFFF2F2F7),
-                                                                      borderRadius:
-                                                                          BorderRadius.circular(
-                                                                              12.0),
-                                                                    ),
-                                                                    child: Row(
-                                                                      mainAxisSize:
-                                                                          MainAxisSize
-                                                                              .min,
-                                                                      mainAxisAlignment:
-                                                                          MainAxisAlignment
-                                                                              .center,
-                                                                      children: [
-                                                                        Padding(
-                                                                          padding: EdgeInsetsDirectional.fromSTEB(
-                                                                              12.0,
-                                                                              0.0,
-                                                                              12.0,
-                                                                              0.0),
-                                                                          child:
-                                                                              Text(
-                                                                            stackAddedDishHistoryRecord.badge,
-                                                                            style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                                                                  fontFamily: 'SF Pro',
-                                                                                  color: FlutterFlowTheme.of(context).error,
-                                                                                  letterSpacing: 0.0,
-                                                                                  fontWeight: FontWeight.w500,
-                                                                                ),
-                                                                          ),
+                                                                    Padding(
+                                                                      padding: EdgeInsetsDirectional.fromSTEB(
+                                                                          4.0,
+                                                                          0.0,
+                                                                          0.0,
+                                                                          0.0),
+                                                                      child:
+                                                                          Container(
+                                                                        width:
+                                                                            4.0,
+                                                                        height:
+                                                                            4.0,
+                                                                        decoration:
+                                                                            BoxDecoration(
+                                                                          color:
+                                                                              Color(0xFF9F4284),
+                                                                          shape:
+                                                                              BoxShape.circle,
                                                                         ),
-                                                                      ],
+                                                                      ),
                                                                     ),
-                                                                  ),
-                                                                  Container(
-                                                                    height:
-                                                                        25.0,
-                                                                    decoration:
-                                                                        BoxDecoration(
-                                                                      color: Color(
-                                                                          0xFFF2F2F7),
-                                                                      borderRadius:
-                                                                          BorderRadius.circular(
-                                                                              12.0),
+                                                                    Padding(
+                                                                      padding: EdgeInsetsDirectional.fromSTEB(
+                                                                          4.0,
+                                                                          0.0,
+                                                                          0.0,
+                                                                          0.0),
+                                                                      child:
+                                                                          Text(
+                                                                        '${stackAddedDishHistoryRecord.carbs.toString()} g',
+                                                                        style: FlutterFlowTheme.of(context)
+                                                                            .bodyMedium
+                                                                            .override(
+                                                                              fontFamily: 'SF Pro',
+                                                                              fontSize: 16.0,
+                                                                              letterSpacing: 0.0,
+                                                                              fontWeight: FontWeight.normal,
+                                                                            ),
+                                                                      ),
                                                                     ),
-                                                                    child: Row(
-                                                                      mainAxisSize:
-                                                                          MainAxisSize
-                                                                              .min,
-                                                                      mainAxisAlignment:
-                                                                          MainAxisAlignment
-                                                                              .center,
-                                                                      children: [
-                                                                        Padding(
-                                                                          padding: EdgeInsetsDirectional.fromSTEB(
-                                                                              12.0,
-                                                                              0.0,
-                                                                              12.0,
-                                                                              0.0),
-                                                                          child:
-                                                                              Text(
-                                                                            stackAddedDishHistoryRecord.impact,
-                                                                            style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                                                                  fontFamily: 'SF Pro',
-                                                                                  color: FlutterFlowTheme.of(context).primaryText,
-                                                                                  letterSpacing: 0.0,
-                                                                                  fontWeight: FontWeight.w500,
-                                                                                ),
+                                                                  ],
+                                                                ),
+                                                                Wrap(
+                                                                  spacing: 6.0,
+                                                                  runSpacing:
+                                                                      6.0,
+                                                                  alignment:
+                                                                      WrapAlignment
+                                                                          .start,
+                                                                  crossAxisAlignment:
+                                                                      WrapCrossAlignment
+                                                                          .start,
+                                                                  direction: Axis
+                                                                      .horizontal,
+                                                                  runAlignment:
+                                                                      WrapAlignment
+                                                                          .start,
+                                                                  verticalDirection:
+                                                                      VerticalDirection
+                                                                          .down,
+                                                                  clipBehavior:
+                                                                      Clip.none,
+                                                                  children: [
+                                                                    Container(
+                                                                      height:
+                                                                          25.0,
+                                                                      decoration:
+                                                                          BoxDecoration(
+                                                                        color: Color(
+                                                                            0xFFF2F2F7),
+                                                                        borderRadius:
+                                                                            BorderRadius.circular(12.0),
+                                                                      ),
+                                                                      child:
+                                                                          Row(
+                                                                        mainAxisSize:
+                                                                            MainAxisSize.min,
+                                                                        mainAxisAlignment:
+                                                                            MainAxisAlignment.center,
+                                                                        children: [
+                                                                          Padding(
+                                                                            padding: EdgeInsetsDirectional.fromSTEB(
+                                                                                12.0,
+                                                                                0.0,
+                                                                                12.0,
+                                                                                0.0),
+                                                                            child:
+                                                                                Text(
+                                                                              stackAddedDishHistoryRecord.badge,
+                                                                              style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                                                                    fontFamily: 'SF Pro',
+                                                                                    color: FlutterFlowTheme.of(context).error,
+                                                                                    letterSpacing: 0.0,
+                                                                                    fontWeight: FontWeight.w500,
+                                                                                  ),
+                                                                            ),
                                                                           ),
-                                                                        ),
-                                                                      ],
+                                                                        ],
+                                                                      ),
                                                                     ),
-                                                                  ),
-                                                                  Container(
-                                                                    height:
-                                                                        25.0,
-                                                                    decoration:
-                                                                        BoxDecoration(
-                                                                      color: Color(
-                                                                          0xFFF2F2F7),
-                                                                      borderRadius:
-                                                                          BorderRadius.circular(
-                                                                              12.0),
-                                                                    ),
-                                                                    child: Row(
-                                                                      mainAxisSize:
-                                                                          MainAxisSize
-                                                                              .min,
-                                                                      mainAxisAlignment:
-                                                                          MainAxisAlignment
-                                                                              .center,
-                                                                      children: [
-                                                                        Padding(
-                                                                          padding: EdgeInsetsDirectional.fromSTEB(
-                                                                              12.0,
-                                                                              0.0,
-                                                                              12.0,
-                                                                              0.0),
-                                                                          child:
-                                                                              Text(
-                                                                            stackAddedDishHistoryRecord.calorieshare,
-                                                                            style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                                                                  fontFamily: 'SF Pro',
-                                                                                  color: FlutterFlowTheme.of(context).primaryText,
-                                                                                  letterSpacing: 0.0,
-                                                                                  fontWeight: FontWeight.w500,
-                                                                                ),
+                                                                    Container(
+                                                                      height:
+                                                                          25.0,
+                                                                      decoration:
+                                                                          BoxDecoration(
+                                                                        color: Color(
+                                                                            0xFFF2F2F7),
+                                                                        borderRadius:
+                                                                            BorderRadius.circular(12.0),
+                                                                      ),
+                                                                      child:
+                                                                          Row(
+                                                                        mainAxisSize:
+                                                                            MainAxisSize.min,
+                                                                        mainAxisAlignment:
+                                                                            MainAxisAlignment.center,
+                                                                        children: [
+                                                                          Padding(
+                                                                            padding: EdgeInsetsDirectional.fromSTEB(
+                                                                                12.0,
+                                                                                0.0,
+                                                                                12.0,
+                                                                                0.0),
+                                                                            child:
+                                                                                Text(
+                                                                              stackAddedDishHistoryRecord.impact,
+                                                                              style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                                                                    fontFamily: 'SF Pro',
+                                                                                    color: FlutterFlowTheme.of(context).primaryText,
+                                                                                    letterSpacing: 0.0,
+                                                                                    fontWeight: FontWeight.w500,
+                                                                                  ),
+                                                                            ),
                                                                           ),
-                                                                        ),
-                                                                      ],
+                                                                        ],
+                                                                      ),
                                                                     ),
-                                                                  ),
-                                                                ],
-                                                              ),
-                                                            ],
-                                                          ),
+                                                                    Container(
+                                                                      height:
+                                                                          25.0,
+                                                                      decoration:
+                                                                          BoxDecoration(
+                                                                        color: Color(
+                                                                            0xFFF2F2F7),
+                                                                        borderRadius:
+                                                                            BorderRadius.circular(12.0),
+                                                                      ),
+                                                                      child:
+                                                                          Row(
+                                                                        mainAxisSize:
+                                                                            MainAxisSize.min,
+                                                                        mainAxisAlignment:
+                                                                            MainAxisAlignment.center,
+                                                                        children: [
+                                                                          Padding(
+                                                                            padding: EdgeInsetsDirectional.fromSTEB(
+                                                                                12.0,
+                                                                                0.0,
+                                                                                12.0,
+                                                                                0.0),
+                                                                            child:
+                                                                                Text(
+                                                                              stackAddedDishHistoryRecord.calorieshare,
+                                                                              style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                                                                    fontFamily: 'SF Pro',
+                                                                                    color: FlutterFlowTheme.of(context).primaryText,
+                                                                                    letterSpacing: 0.0,
+                                                                                    fontWeight: FontWeight.w500,
+                                                                                  ),
+                                                                            ),
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              ],
+                                                            ),
                                                         ].divide(SizedBox(
                                                             height: 8.0)),
                                                       ),
                                                     ),
                                                   ],
                                                 ),
-                                                if (_model.editMode)
+                                                if (showNutrition &&
+                                                    _model.editMode)
                                                   Padding(
                                                     padding:
                                                         EdgeInsetsDirectional
@@ -840,25 +831,30 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
                                                       ],
                                                     ),
                                                   ),
-                                                Padding(
-                                                  padding: EdgeInsetsDirectional
-                                                      .fromSTEB(
-                                                          0.0, 12.0, 0.0, 0.0),
-                                                  child: AutoSizeText(
-                                                    '*Estimated from photo/name and may differ from actual values',
-                                                    maxLines: 1,
-                                                    style: FlutterFlowTheme.of(
-                                                            context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          fontFamily: 'SF Pro',
-                                                          color: FlutterFlowTheme
-                                                                  .of(context)
-                                                              .secondaryText,
-                                                          letterSpacing: 0.0,
-                                                        ),
+                                                if (showNutrition)
+                                                  Padding(
+                                                    padding:
+                                                        EdgeInsetsDirectional
+                                                            .fromSTEB(0.0, 12.0,
+                                                                0.0, 0.0),
+                                                    child: AutoSizeText(
+                                                      '*Estimated from photo/name and may differ from actual values',
+                                                      maxLines: 1,
+                                                      style:
+                                                          FlutterFlowTheme.of(
+                                                                  context)
+                                                              .bodyMedium
+                                                              .override(
+                                                                fontFamily:
+                                                                    'SF Pro',
+                                                                color: FlutterFlowTheme.of(
+                                                                        context)
+                                                                    .secondaryText,
+                                                                letterSpacing:
+                                                                    0.0,
+                                                              ),
+                                                    ),
                                                   ),
-                                                ),
                                               ],
                                             ),
                                           ),
@@ -1178,7 +1174,7 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
                                                                             context:
                                                                                 context,
                                                                             prompt: functions.buildDishAgentInput(
-                                                                                're_roast',
+                                                                                RoastResultMetadata.isCongratuRoast(stackAddedDishHistoryRecord) ? 'congratu_roast' : 're_roast',
                                                                                 valueOrDefault<String>(
                                                                                   stackAddedDishHistoryRecord.dishName,
                                                                                   '-',
@@ -1227,7 +1223,7 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
                                                                                   0,
                                                                                 ),
                                                                                 valueOrDefault<int>(
-                                                                                  stackAddedDishHistoryRecord.kcal,
+                                                                                  stackAddedDishHistoryRecord.fats,
                                                                                   0,
                                                                                 ),
                                                                                 valueOrDefault<int>(
@@ -1243,7 +1239,12 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
                                                                                   stackAddedDishHistoryRecord.badge,
                                                                                   '-',
                                                                                 ),
-                                                                                stackAddedDishHistoryRecord.healthTips.toList()),
+                                                                                stackAddedDishHistoryRecord.healthTips.toList(),
+                                                                                roastMode: RoastResultMetadata.normalizedMode(stackAddedDishHistoryRecord.roastMode),
+                                                                                occasionKey: stackAddedDishHistoryRecord.occasionKey,
+                                                                                occasionLabel: stackAddedDishHistoryRecord.occasionLabel,
+                                                                                subjectType: stackAddedDishHistoryRecord.subjectType,
+                                                                                showNutrition: showNutrition),
                                                                             imageUrl:
                                                                                 stackAddedDishHistoryRecord.image,
                                                                             threadId:
@@ -1278,6 +1279,11 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
                                                                             await widget.dish!.update(createAddedDishHistoryRecordData(
                                                                               roastText: roastText,
                                                                               roastAudio: '',
+                                                                              roastMode: RoastResultMetadata.normalizedMode(stackAddedDishHistoryRecord.roastMode),
+                                                                              occasionKey: stackAddedDishHistoryRecord.occasionKey,
+                                                                              occasionLabel: stackAddedDishHistoryRecord.occasionLabel,
+                                                                              subjectType: stackAddedDishHistoryRecord.subjectType,
+                                                                              showNutrition: showNutrition,
                                                                             ));
                                                                             final audioUrl =
                                                                                 await _prepareAudioForRoast(
@@ -1509,20 +1515,23 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
                                                       ),
                                                     ),
                                                   ),
-                                                  DishInfoTipsSection(
-                                                    tips:
-                                                        stackAddedDishHistoryRecord
-                                                            .healthTips
-                                                            .toList(),
-                                                  ),
-                                                  DishInfoIngredientsSection(
-                                                    ingredients:
-                                                        stackAddedDishHistoryRecord
-                                                            .mainIngredients
-                                                            .toList(),
-                                                  ),
-                                                  if (stackAddedDishHistoryRecord
-                                                      .vitamins.isNotEmpty)
+                                                  if (showNutrition)
+                                                    DishInfoTipsSection(
+                                                      tips:
+                                                          stackAddedDishHistoryRecord
+                                                              .healthTips
+                                                              .toList(),
+                                                    ),
+                                                  if (showNutrition)
+                                                    DishInfoIngredientsSection(
+                                                      ingredients:
+                                                          stackAddedDishHistoryRecord
+                                                              .mainIngredients
+                                                              .toList(),
+                                                    ),
+                                                  if (showNutrition &&
+                                                      stackAddedDishHistoryRecord
+                                                          .vitamins.isNotEmpty)
                                                     DishInfoVitaminsSection(
                                                       vitamins:
                                                           stackAddedDishHistoryRecord
@@ -2332,7 +2341,9 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
                                           Padding(
                                             padding: EdgeInsets.all(10.0),
                                             child: Text(
-                                              'Want a deeper breakdown? Open AI chat for smarter nutrition tweaks on dishes and savage commentary for your friends.',
+                                              showNutrition
+                                                  ? 'Want a deeper breakdown? Open AI chat for smarter nutrition tweaks on dishes and savage commentary for your friends.'
+                                                  : 'Want a sharper angle? Open AI chat for savage commentary and comeback ideas.',
                                               textAlign: TextAlign.center,
                                               style: FlutterFlowTheme.of(
                                                       context)

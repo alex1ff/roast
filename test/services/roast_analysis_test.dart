@@ -56,5 +56,24 @@ void main() {
       expect(analysis.vitamins, isEmpty);
       expect(analysis.healthTips, isEmpty);
     });
+
+    test('parses mode and nutrition visibility metadata', () {
+      final analysis = RoastAnalysis.fromAgentResponse({
+        'dish_name': 'Sam',
+        'roast':
+            'Happy birthday. Your cake has more structure than your plans.',
+        'roast_mode': 'congratu_roast',
+        'occasion_key': 'birthday',
+        'occasion_label': 'Birthday',
+        'subject_type': 'person',
+        'show_nutrition': false,
+      });
+
+      expect(analysis.roastMode, 'congratu_roast');
+      expect(analysis.occasionKey, 'birthday');
+      expect(analysis.occasionLabel, 'Birthday');
+      expect(analysis.subjectType, 'person');
+      expect(analysis.showNutrition, isFalse);
+    });
   });
 }

@@ -74,6 +74,187 @@ class _DishAddAIWidgetState extends State<DishAddAIWidget> {
     super.dispose();
   }
 
+  Future<void> _showModeSelectionDialog() async {
+    final roastMode = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) {
+        return SimpleDialog(
+          title: Text(
+            'What do you want to do?',
+            style: FlutterFlowTheme.of(context).bodyMedium.override(
+                  fontFamily: 'SF Pro',
+                  fontSize: 18.0,
+                  letterSpacing: 0.0,
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
+          children: [
+            SimpleDialogOption(
+              onPressed: () => Navigator.pop(
+                dialogContext,
+                FFAppConstants.roastModeRoast,
+              ),
+              child: Text(
+                'Roast',
+                style: FlutterFlowTheme.of(context).bodyMedium.override(
+                      fontFamily: 'SF Pro',
+                      fontSize: 16.0,
+                      letterSpacing: 0.0,
+                    ),
+              ),
+            ),
+            SimpleDialogOption(
+              onPressed: () => Navigator.pop(
+                dialogContext,
+                FFAppConstants.roastModeCongratuRoast,
+              ),
+              child: Text(
+                'Congratulate',
+                style: FlutterFlowTheme.of(context).bodyMedium.override(
+                      fontFamily: 'SF Pro',
+                      fontSize: 16.0,
+                      letterSpacing: 0.0,
+                    ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (!mounted || roastMode == null) {
+      return;
+    }
+
+    if (roastMode == FFAppConstants.roastModeCongratuRoast) {
+      final occasion = await _showOccasionSelectionDialog();
+      if (!mounted || occasion == null) {
+        return;
+      }
+      await _showChoosePersonDialog(
+        roastMode: roastMode,
+        occasionKey: occasion.key,
+        occasionLabel: occasion.label,
+      );
+      return;
+    }
+
+    await _showChoosePersonDialog(roastMode: roastMode);
+  }
+
+  Future<CongratuRoastOccasionOption?> _showOccasionSelectionDialog() async {
+    return showDialog<CongratuRoastOccasionOption>(
+      context: context,
+      builder: (dialogContext) {
+        return Dialog(
+          backgroundColor: FlutterFlowTheme.of(context).secondaryBackground,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.0),
+          ),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: 430.0,
+              maxHeight: MediaQuery.sizeOf(context).height * 0.78,
+            ),
+            child: Padding(
+              padding: EdgeInsetsDirectional.fromSTEB(20.0, 18.0, 20.0, 12.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Choose occasion',
+                    style: FlutterFlowTheme.of(context).bodyMedium.override(
+                          fontFamily: 'SF Pro',
+                          fontSize: 18.0,
+                          letterSpacing: 0.0,
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                  SizedBox(height: 12.0),
+                  Flexible(
+                    child: ListView.separated(
+                      shrinkWrap: true,
+                      itemCount: congratuRoastOccasionOptions.length,
+                      separatorBuilder: (_, __) => Divider(
+                        height: 1.0,
+                        color: FlutterFlowTheme.of(context).divider,
+                      ),
+                      itemBuilder: (context, index) {
+                        final occasion = congratuRoastOccasionOptions[index];
+                        return ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(
+                            occasion.label,
+                            style: FlutterFlowTheme.of(context)
+                                .bodyMedium
+                                .override(
+                                  fontFamily: 'SF Pro',
+                                  fontSize: 16.0,
+                                  letterSpacing: 0.0,
+                                ),
+                          ),
+                          onTap: () => Navigator.pop(dialogContext, occasion),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _showChoosePersonDialog({
+    required String roastMode,
+    String? occasionKey,
+    String? occasionLabel,
+  }) async {
+    await showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return Dialog(
+          elevation: 0,
+          insetPadding: EdgeInsets.zero,
+          backgroundColor: Colors.transparent,
+          alignment: AlignmentDirectional(0.0, 0.0)
+              .resolve(Directionality.of(context)),
+          child: GestureDetector(
+            onTap: () {
+              FocusScope.of(dialogContext).unfocus();
+              FocusManager.instance.primaryFocus?.unfocus();
+            },
+            child: Container(
+              width: MediaQuery.sizeOf(context).width * 0.8,
+              child: ChoosePersonWidget(
+                dishName: _model.dishNameTextController.text,
+                dishWeight: int.tryParse(_model.dishWeightTextController.text),
+                restaurant: _model.restaurantTextController.text,
+                dishPhoto: _model.uploadedFileUrl_uploadedPhoto2,
+                roastMode: roastMode,
+                occasionKey: occasionKey,
+                occasionLabel: occasionLabel,
+                action: () async {
+                  safeSetState(() {
+                    _model.isDataUploading_uploadedPhoto2 = false;
+                    _model.uploadedLocalFile_uploadedPhoto2 = FFUploadedFile(
+                      bytes: Uint8List.fromList([]),
+                      originalFilename: '',
+                    );
+                    _model.uploadedFileUrl_uploadedPhoto2 = '';
+                  });
+                },
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -103,6 +284,72 @@ class _DishAddAIWidgetState extends State<DishAddAIWidget> {
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         children: [
+                          Padding(
+                            padding: EdgeInsetsDirectional.fromSTEB(
+                                16.0, 0.0, 16.0, 18.0),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text(
+                                    'ROAST A FRIEND',
+                                    maxLines: 1,
+                                    textAlign: TextAlign.center,
+                                    style: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .override(
+                                          fontFamily: 'SF Pro',
+                                          color: FlutterFlowTheme.of(context)
+                                              .primaryText,
+                                          fontSize: 17.0,
+                                          letterSpacing: 0.0,
+                                          fontWeight: FontWeight.w700,
+                                          lineHeight: 1.25,
+                                        ),
+                                  ),
+                                ),
+                                FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text(
+                                    'OR CONGRATULATE THEM WITH A ROAST',
+                                    maxLines: 1,
+                                    textAlign: TextAlign.center,
+                                    style: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .override(
+                                          fontFamily: 'SF Pro',
+                                          color: FlutterFlowTheme.of(context)
+                                              .primary,
+                                          fontSize: 16.0,
+                                          letterSpacing: 0.0,
+                                          fontWeight: FontWeight.w700,
+                                          lineHeight: 1.25,
+                                        ),
+                                  ),
+                                ),
+                                FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text(
+                                    'OR ADD A NEW DISH',
+                                    maxLines: 1,
+                                    textAlign: TextAlign.center,
+                                    style: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .override(
+                                          fontFamily: 'SF Pro',
+                                          color: FlutterFlowTheme.of(context)
+                                              .primaryText,
+                                          fontSize: 17.0,
+                                          letterSpacing: 0.0,
+                                          fontWeight: FontWeight.w700,
+                                          lineHeight: 1.25,
+                                        ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                           Container(
                             decoration: BoxDecoration(
                               color: FlutterFlowTheme.of(context)
@@ -133,7 +380,8 @@ class _DishAddAIWidgetState extends State<DishAddAIWidget> {
                                               fontWeight: FontWeight.normal,
                                             ),
                                         children: [
-                                          const TextSpan(text: 'Dish or Friend Name'),
+                                          const TextSpan(
+                                              text: 'Dish or Friend Name'),
                                         ],
                                       ),
                                     ),
@@ -705,7 +953,7 @@ class _DishAddAIWidgetState extends State<DishAddAIWidget> {
                             ),
                         ]
                             .divide(SizedBox(height: 6.0))
-                            .addToStart(SizedBox(height: 115.0))
+                            .addToStart(SizedBox(height: 64.0))
                             .addToEnd(SizedBox(height: 180.0)),
                       ),
                     ),
@@ -729,62 +977,7 @@ class _DishAddAIWidgetState extends State<DishAddAIWidget> {
                                     (_model.uploadedFileUrl_uploadedPhoto2 ==
                                         ''))
                                 ? null
-                                : () async {
-                                    await showDialog(
-                                      context: context,
-                                      builder: (dialogContext) {
-                                        return Dialog(
-                                          elevation: 0,
-                                          insetPadding: EdgeInsets.zero,
-                                          backgroundColor: Colors.transparent,
-                                          alignment: AlignmentDirectional(
-                                                  0.0, 0.0)
-                                              .resolve(
-                                                  Directionality.of(context)),
-                                          child: GestureDetector(
-                                            onTap: () {
-                                              FocusScope.of(dialogContext)
-                                                  .unfocus();
-                                              FocusManager.instance.primaryFocus
-                                                  ?.unfocus();
-                                            },
-                                            child: Container(
-                                              width: MediaQuery.sizeOf(context)
-                                                      .width *
-                                                  0.8,
-                                              child: ChoosePersonWidget(
-                                                dishName: _model
-                                                    .dishNameTextController
-                                                    .text,
-                                                dishWeight: int.tryParse(_model
-                                                    .dishWeightTextController
-                                                    .text),
-                                                restaurant: _model
-                                                    .restaurantTextController
-                                                    .text,
-                                                dishPhoto: _model
-                                                    .uploadedFileUrl_uploadedPhoto2,
-                                                action: () async {
-                                                  safeSetState(() {
-                                                    _model.isDataUploading_uploadedPhoto2 =
-                                                        false;
-                                                    _model.uploadedLocalFile_uploadedPhoto2 =
-                                                        FFUploadedFile(
-                                                            bytes: Uint8List
-                                                                .fromList([]),
-                                                            originalFilename:
-                                                                '');
-                                                    _model.uploadedFileUrl_uploadedPhoto2 =
-                                                        '';
-                                                  });
-                                                },
-                                              ),
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    );
-                                  },
+                                : _showModeSelectionDialog,
                             text: 'Start AI Analysis',
                             icon: Icon(
                               FFIcons.kplllllus,

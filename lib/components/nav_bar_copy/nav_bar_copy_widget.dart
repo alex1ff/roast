@@ -73,7 +73,7 @@ class _NavBarCopyWidgetState extends State<NavBarCopyWidget> {
               activePage: widget.activePage,
               pageKey: 'Add',
               routeName: DishAddAIWidget.routeName,
-              label: 'Add Dish',
+              label: 'Roast Them',
               activeAsset:
                   'assets/images/Property_1=30,_Property_2=camera,_Property_3=green.svg',
               inactiveAsset:

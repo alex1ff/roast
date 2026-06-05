@@ -4,6 +4,10 @@ const axios = require("axios");
 const {OpenAI} = require("openai");
 const {AGENT_CONFIGS} = require("./agent_configs");
 const {
+  buildSelectedRoastPersonaPrompt,
+  extractRoastPersonaValue,
+} = require("./roast_personas");
+const {
   createRoastShare,
   renderRoastShare,
 } = require("./share_roast");
@@ -26,6 +30,18 @@ const SMART_CHAT_PERSONALITY_EXTENSION = [
   "- For an identifiable private person, keep jokes about the described behavior or story. Do not make factual claims about their character, health, sexuality, religion, race, disability, age, or nationality.",
   "- For social/lifestyle TYPE = message output: 2-4 short punchy lines, optional tiny practical nudge if useful, then exactly one final line starting with 'Roast: '.",
   "- This social/lifestyle behavior overrides earlier nutrition-priority wording only for non-food TYPE = message prompts.",
+].join("\n");
+const CONGRATUROAST_PROMPT_EXTENSION = [
+  "CONGRATUROAST MODE EXTENSION:",
+  "- Supported call_type values now include: analyze, re_roast, re_roast_harder, congratu_roast.",
+  "- Input may include roast_mode, occasion_key, occasion_label, subject_type, and show_nutrition.",
+  "- If call_type = congratu_roast or roast_mode = congratu_roast, generate a funny congratulation for occasion_key / occasion_label in the selected roast persona voice.",
+  "- CongratuRoast tone must be 90% congratulations and 10% friendly roast. It is not a sincere greeting card and not a full roast.",
+  "- CongratuRoast must not mention calories, kcal, macros, nutrition, diet, daily goals, goal impact, calorie share, meal tracking, or food analysis.",
+  "- For CongratuRoast, set roast_mode to congratu_roast, copy occasion_key and occasion_label, set subject_type to person unless the image clearly has no person, and show_nutrition must be false.",
+  "- For regular roast analyze mode, set roast_mode to roast, subject_type to dish | person | other, and show_nutrition to true only when subject_type is dish with real positive nutrition.",
+  "- For person/object/non-food roast results, show_nutrition must be false even if placeholder nutrition fields are present for schema compatibility.",
+  "- Output JSON must include roast_mode, occasion_key, occasion_label, subject_type, and show_nutrition along with the existing fields.",
 ].join("\n");
 const RELOAD_PACK_CREDITS = {
   extra_chat: 25,
@@ -390,7 +406,31 @@ function toHttpsError(error, functionName, requestId) {
   );
 }
 
-function getSystemMessage(messages, responseType, agentName = "") {
+function stripInlineRoastPersonaList(systemMessage) {
+  return String(systemMessage || "").replace(
+    /  "roast_persona": "[^"]*",\n/,
+    [
+      "  \"roast_persona_id\": \"<selected persona id>\",",
+      "  \"roast_persona\": \"<selected persona display name>\",",
+    ].join("\n") + "\n",
+  );
+}
+
+function buildRoastSystemMessage(systemMessage, data = {}) {
+  const message = data?.message;
+  const personaValue = extractRoastPersonaValue(message);
+  const isCongratuRoast = /(?:^|;\s*)call_type=congratu_roast(?:;|$)/.test(String(message || "")) ||
+    /(?:^|;\s*)roast_mode=congratu_roast(?:;|$)/.test(String(message || ""));
+  return [
+    stripInlineRoastPersonaList(systemMessage),
+    CONGRATUROAST_PROMPT_EXTENSION,
+    buildSelectedRoastPersonaPrompt(personaValue, {
+      nutritionMode: !isCongratuRoast,
+    }),
+  ].join("\n\n");
+}
+
+function getSystemMessage(messages, responseType, agentName = "", data = {}) {
   if (!Array.isArray(messages) || messages.length === 0) {
     return "";
   }
@@ -401,6 +441,10 @@ function getSystemMessage(messages, responseType, agentName = "") {
 
   if (agentName === "aIAssistent") {
     finalMessage += `\n\n${SMART_CHAT_PERSONALITY_EXTENSION}`;
+  }
+
+  if (agentName === "roast") {
+    finalMessage = buildRoastSystemMessage(finalMessage, data);
   }
 
   switch (responseType) {
@@ -475,6 +519,7 @@ async function runOpenAiAgent(agentName, data, options = {}) {
     agent.aiModel?.messages,
     responseType,
     agentName,
+    data,
   );
   const input = [];
 
@@ -707,6 +752,7 @@ exports._test = {
   extractOpenAiOutputText,
   fallbackSubscriptionEnd,
   getSystemMessage,
+  buildRoastSystemMessage,
   hasActivePremium,
   openAiInputContent,
   planForProductIdentifier,

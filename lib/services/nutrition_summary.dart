@@ -1,4 +1,5 @@
 import '/backend/backend.dart';
+import '/services/roast_result_metadata.dart';
 
 class NutritionEntry {
   const NutritionEntry({
@@ -6,12 +7,14 @@ class NutritionEntry {
     required this.fats,
     required this.carbs,
     required this.proteins,
+    this.includeInSummary = true,
   });
 
   final int kcal;
   final int fats;
   final int carbs;
   final int proteins;
+  final bool includeInSummary;
 
   factory NutritionEntry.fromAddedDishHistoryRecord(
     AddedDishHistoryRecord record,
@@ -21,6 +24,7 @@ class NutritionEntry {
         fats: record.fats,
         carbs: record.carbs,
         proteins: record.proteins,
+        includeInSummary: RoastResultMetadata.shouldShowNutrition(record),
       );
 }
 
@@ -39,6 +43,9 @@ class NutritionSummary {
     var proteins = 0;
 
     for (final entry in entries) {
+      if (!entry.includeInSummary) {
+        continue;
+      }
       kcal += entry.kcal;
       fats += entry.fats;
       carbs += entry.carbs;

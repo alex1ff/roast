@@ -1,6 +1,7 @@
 import '/backend/backend.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
+import '/services/roast_result_metadata.dart';
 import 'package:flutter/material.dart';
 
 class HomeCalendarCard extends StatelessWidget {
@@ -181,7 +182,8 @@ Map<DateTime, _CalendarDaySummary> _calendarDaySummaries(
         summaries[key] ?? const _CalendarDaySummary(count: 0, kcal: 0);
     summaries[key] = _CalendarDaySummary(
       count: current.count + 1,
-      kcal: current.kcal + record.kcal,
+      kcal: current.kcal +
+          (RoastResultMetadata.shouldShowNutrition(record) ? record.kcal : 0),
     );
   }
   return summaries;

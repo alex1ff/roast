@@ -3,6 +3,7 @@ import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/index.dart';
 import '/services/nutrition_summary.dart';
+import '/services/roast_result_metadata.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
@@ -19,6 +20,12 @@ class DishHistoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final imageUrl = record.image.trim();
+    final showNutrition = RoastResultMetadata.shouldShowNutrition(record);
+    final metadataText = record.occasionLabel.isNotEmpty
+        ? record.occasionLabel
+        : RoastResultMetadata.isCongratuRoast(record)
+            ? 'CongratuRoast'
+            : 'Roast';
 
     return InkWell(
       borderRadius: BorderRadius.circular(16.0),
@@ -41,7 +48,7 @@ class DishHistoryCard extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(4.0),
           child: SizedBox(
-            height: useOunces ? 104.0 : 88.0,
+            height: showNutrition && useOunces ? 104.0 : 88.0,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -85,63 +92,81 @@ class DishHistoryCard extends StatelessWidget {
                                   ),
                         ),
                         const SizedBox(height: 14.0),
-                        Row(
-                          children: [
-                            Text(
-                              NutritionSummary.formatGrams(
-                                record.dishWeight,
-                                useOunces: useOunces,
+                        if (showNutrition)
+                          Row(
+                            children: [
+                              Text(
+                                NutritionSummary.formatGrams(
+                                  record.dishWeight,
+                                  useOunces: useOunces,
+                                ),
+                                style: FlutterFlowTheme.of(context)
+                                    .bodyMedium
+                                    .override(
+                                      fontFamily: 'SF Pro',
+                                      fontSize: 16.0,
+                                      letterSpacing: 0.0,
+                                      fontWeight: FontWeight.w500,
+                                    ),
                               ),
-                              style: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .override(
-                                    fontFamily: 'SF Pro',
-                                    fontSize: 16.0,
-                                    letterSpacing: 0.0,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                            ),
-                            Text(
-                              '${record.kcal} kcal',
-                              style: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .override(
-                                    fontFamily: 'SF Pro',
-                                    fontSize: 16.0,
-                                    letterSpacing: 0.0,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                            ),
-                          ].divide(const SizedBox(width: 12.0)),
-                        ),
-                        const SizedBox(height: 4.0),
-                        Wrap(
-                          spacing: 12.0,
-                          runSpacing: 4.0,
-                          children: [
-                            MacroPill(
-                              color: const Color(0xFF49928C),
-                              value: NutritionSummary.formatGrams(
-                                record.proteins,
-                                useOunces: useOunces,
+                              Text(
+                                '${record.kcal} kcal',
+                                style: FlutterFlowTheme.of(context)
+                                    .bodyMedium
+                                    .override(
+                                      fontFamily: 'SF Pro',
+                                      fontSize: 16.0,
+                                      letterSpacing: 0.0,
+                                      fontWeight: FontWeight.w500,
+                                    ),
                               ),
-                            ),
-                            MacroPill(
-                              color: const Color(0xFFF19656),
-                              value: NutritionSummary.formatGrams(
-                                record.fats,
-                                useOunces: useOunces,
+                            ].divide(const SizedBox(width: 12.0)),
+                          )
+                        else
+                          Text(
+                            metadataText,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: FlutterFlowTheme.of(context)
+                                .bodyMedium
+                                .override(
+                                  fontFamily: 'SF Pro',
+                                  color: FlutterFlowTheme.of(context)
+                                      .secondaryText,
+                                  fontSize: 16.0,
+                                  letterSpacing: 0.0,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                          ),
+                        if (showNutrition) const SizedBox(height: 4.0),
+                        if (showNutrition)
+                          Wrap(
+                            spacing: 12.0,
+                            runSpacing: 4.0,
+                            children: [
+                              MacroPill(
+                                color: const Color(0xFF49928C),
+                                value: NutritionSummary.formatGrams(
+                                  record.proteins,
+                                  useOunces: useOunces,
+                                ),
                               ),
-                            ),
-                            MacroPill(
-                              color: const Color(0xFF9F4284),
-                              value: NutritionSummary.formatGrams(
-                                record.carbs,
-                                useOunces: useOunces,
+                              MacroPill(
+                                color: const Color(0xFFF19656),
+                                value: NutritionSummary.formatGrams(
+                                  record.fats,
+                                  useOunces: useOunces,
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
+                              MacroPill(
+                                color: const Color(0xFF9F4284),
+                                value: NutritionSummary.formatGrams(
+                                  record.carbs,
+                                  useOunces: useOunces,
+                                ),
+                              ),
+                            ],
+                          ),
                       ],
                     ),
                   ),

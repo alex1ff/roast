@@ -30,6 +30,9 @@ class ChoosePersonWidget extends StatefulWidget {
     this.dishWeight,
     this.restaurant,
     this.dishPhoto,
+    this.roastMode = FFAppConstants.roastModeRoast,
+    this.occasionKey,
+    this.occasionLabel,
     required this.action,
   });
 
@@ -37,6 +40,9 @@ class ChoosePersonWidget extends StatefulWidget {
   final int? dishWeight;
   final String? restaurant;
   final String? dishPhoto;
+  final String roastMode;
+  final String? occasionKey;
+  final String? occasionLabel;
   final Future Function()? action;
 
   @override
@@ -161,6 +167,15 @@ class _ChoosePersonWidgetState extends State<ChoosePersonWidget> {
                           return;
                         }
                         var _shouldSetState = false;
+                        final selectedPerson = containerPersonsRecordList
+                            .where((e) => e.voiceId == _model.dropDownValue)
+                            .firstOrNull;
+                        final selectedRoastPersona =
+                            selectedPerson?.name ?? _model.dropDownValue!;
+                        final isCongratuRoast = widget.roastMode ==
+                            FFAppConstants.roastModeCongratuRoast;
+                        final callType =
+                            isCongratuRoast ? 'congratu_roast' : 'analyze';
                         await Future.wait([
                           Future(() async {
                             if (UsageLimitService.canUseRoast(
@@ -198,7 +213,7 @@ class _ChoosePersonWidgetState extends State<ChoosePersonWidget> {
                               await callAiAgent(
                                 context: context,
                                 prompt: functions.buildDishAgentInput(
-                                    'analyze',
+                                    callType,
                                     valueOrDefault<String>(
                                       widget.dishName,
                                       '-',
@@ -244,7 +259,7 @@ class _ChoosePersonWidgetState extends State<ChoosePersonWidget> {
                                           currentUserDocument?.roastLevel, ''),
                                       '-',
                                     ),
-                                    _model.dropDownValue!,
+                                    selectedRoastPersona,
                                     0,
                                     0,
                                     0,
@@ -252,7 +267,18 @@ class _ChoosePersonWidgetState extends State<ChoosePersonWidget> {
                                     FFAppState().n.toList(),
                                     '-',
                                     '-',
-                                    FFAppState().n.toList()),
+                                    FFAppState().n.toList(),
+                                    roastMode: widget.roastMode,
+                                    occasionKey: valueOrDefault<String>(
+                                      widget.occasionKey,
+                                      '',
+                                    ),
+                                    occasionLabel: valueOrDefault<String>(
+                                      widget.occasionLabel,
+                                      '',
+                                    ),
+                                    showNutrition:
+                                        isCongratuRoast ? false : null),
                                 imageUrl: widget.dishPhoto,
                                 threadId: 'roast',
                                 agentCloudFunctionName: 'roast',
@@ -270,6 +296,9 @@ class _ChoosePersonWidgetState extends State<ChoosePersonWidget> {
                                     RoastAnalysis.fromAgentResponse(
                                         _model.roast);
                                 final roastText = roastAnalysis.roastText;
+                                final showNutrition = isCongratuRoast
+                                    ? false
+                                    : roastAnalysis.showNutrition;
                                 unawaited(
                                   UserAccountMutations.recordUsage(
                                     UserUsageFeature.roast,
@@ -291,22 +320,31 @@ class _ChoosePersonWidgetState extends State<ChoosePersonWidget> {
                                     user: currentUserReference,
                                     roastText: roastText,
                                     roastAudio: '',
-                                    roastPerson: containerPersonsRecordList
-                                        .where((e) =>
-                                            e.voiceId == _model.dropDownValue)
-                                        .firstOrNull
-                                        ?.name,
+                                    roastPerson: selectedPerson?.name,
                                     roastVoiceId: _model.dropDownValue,
-                                    roastImage: containerPersonsRecordList
-                                        .where((e) =>
-                                            e.voiceId == _model.dropDownValue)
-                                        .firstOrNull
-                                        ?.image,
+                                    roastImage: selectedPerson?.image,
                                     roastLevel: valueOrDefault(
                                         currentUserDocument?.roastLevel, ''),
-                                    badge: roastAnalysis.badge,
-                                    impact: roastAnalysis.impact,
-                                    calorieshare: roastAnalysis.calorieShare,
+                                    badge: showNutrition
+                                        ? roastAnalysis.badge
+                                        : '',
+                                    impact: showNutrition
+                                        ? roastAnalysis.impact
+                                        : '',
+                                    calorieshare: showNutrition
+                                        ? roastAnalysis.calorieShare
+                                        : '',
+                                    roastMode: widget.roastMode,
+                                    occasionKey: valueOrDefault<String>(
+                                      widget.occasionKey,
+                                      roastAnalysis.occasionKey,
+                                    ),
+                                    occasionLabel: valueOrDefault<String>(
+                                      widget.occasionLabel,
+                                      roastAnalysis.occasionLabel,
+                                    ),
+                                    subjectType: roastAnalysis.subjectType,
+                                    showNutrition: showNutrition,
                                   ),
                                   ...roastAnalysis.nestedFirestoreData(),
                                 };
@@ -450,12 +488,7 @@ class _ChoosePersonWidgetState extends State<ChoosePersonWidget> {
                                   await currentUserReference!
                                       .update(createUsersRecordData(
                                     voiceId: _model.dropDownValue,
-                                    voiceName: containerPersonsRecordList
-                                        .where((e) =>
-                                            e.voiceId == _model.dropDownValue)
-                                        .toList()
-                                        .firstOrNull
-                                        ?.name,
+                                    voiceName: selectedPerson?.name,
                                   ));
                                 }(),
                               );

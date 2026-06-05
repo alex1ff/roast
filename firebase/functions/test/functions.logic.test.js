@@ -6,6 +6,10 @@ const {
 
 const {_test} = require("../index.js");
 const {AGENT_CONFIGS} = require("../agent_configs.js");
+const {
+  ROAST_PERSONAS,
+  resolveRoastPersona,
+} = require("../roast_personas.js");
 const {_test: shareTest} = require("../share_roast.js");
 
 const fieldValue = {
@@ -369,6 +373,36 @@ describe("Functions business logic", () => {
     assert.ok(roastIndex < nutritionIndex);
   });
 
+  it("renders non-nutrition share page without goal or macro copy", () => {
+    const html = shareTest.renderSharePage(
+      {
+        title: "Sam got congraturoasted",
+        excerpt: "shared",
+        content: "Happy birthday. Your scheduling skills remain on airplane mode.",
+        dishName: "Sam",
+        itemImageUrl: "https://example.com/sam.jpg",
+        roastMode: "congratu_roast",
+        occasionLabel: "Birthday",
+        subjectType: "person",
+        showNutrition: false,
+        kcal: 520,
+        proteins: 20,
+        fats: 18,
+        carbs: 64,
+        impact: "Impact on your goal: On track",
+        calorieShare: "This alone = 32% of your daily calories",
+      },
+      "share-id",
+    );
+
+    assert.doesNotMatch(html, /class="nutrition-grid"/);
+    assert.doesNotMatch(html, /Kcal/);
+    assert.doesNotMatch(html, /Proteins/);
+    assert.doesNotMatch(html, /daily calories/);
+    assert.doesNotMatch(html, /Impact on your goal/);
+    assert.match(html, /Birthday/);
+  });
+
   it("runs the roast agent with a mocked OpenAI client", async () => {
     let capturedParams;
     const fakeOpenAi = {
@@ -399,6 +433,54 @@ describe("Functions business logic", () => {
     assert.deepEqual(capturedParams.input.at(-1).content, [
       {type: "input_text", text: "dish_name=test"},
     ]);
+  });
+
+  it("stores structured roast personas", () => {
+    assert.equal(Object.keys(ROAST_PERSONAS).length, 29);
+    assert.equal(resolveRoastPersona("Snack Shady").id, "snack_shady");
+    assert.equal(resolveRoastPersona("Breadpool").id, "breadfool");
+    assert.notEqual(resolveRoastPersona("The Orange Deal Maker").id, "wolf_wrap_street");
+    assert.notEqual(resolveRoastPersona("Gordon Rant-say").id, "wolf_wrap_street");
+    assert.notEqual(resolveRoastPersona("Snackye West").id, "wolf_wrap_street");
+  });
+
+  it("injects only the selected roast persona into the roast prompt", () => {
+    const systemMessage = _test.getSystemMessage(
+      AGENT_CONFIGS.roast.aiModel.messages,
+      "JSON",
+      "roast",
+      {
+        message: "call_type=analyze; roast_persona_id=snack_shady; roast_persona=Snack Shady;",
+      },
+    );
+
+    assert.match(systemMessage, /SELECTED ROAST PERSONA/);
+    assert.match(systemMessage, /Name: Snack Shady/);
+    assert.match(systemMessage, /"roast_persona_id": "<selected persona id>"/);
+    assert.doesNotMatch(systemMessage, /Snackwolf of Wall Street/);
+    assert.doesNotMatch(systemMessage, /Wolf of Wrap Street/);
+    assert.doesNotMatch(systemMessage, /Fight Bite Dana \|/);
+  });
+
+  it("documents congraturoast mode and bans nutrition language for it", () => {
+    const systemMessage = _test.getSystemMessage(
+      AGENT_CONFIGS.roast.aiModel.messages,
+      "JSON",
+      "roast",
+      {
+        message: "call_type=congratu_roast; occasion_key=birthday; occasion_label=Birthday; roast_persona_id=snack_shady;",
+      },
+    );
+
+    assert.match(systemMessage, /congratu_roast/);
+    assert.match(systemMessage, /occasion_key/);
+    assert.match(systemMessage, /90% congratulations/i);
+    assert.match(systemMessage, /10% friendly roast/i);
+    assert.match(systemMessage, /show_nutrition/);
+    assert.match(systemMessage, /must be false/);
+    const personaBlock = systemMessage.split("SELECTED ROAST PERSONA:").at(-1);
+    assert.doesNotMatch(personaBlock, /macro|calorie|kcal|protein|carb|sodium/i);
+    assert.doesNotMatch(personaBlock, /meal|dish|plate|food decision/i);
   });
 
   it("extends Smart Chat for social roast prompts", async () => {

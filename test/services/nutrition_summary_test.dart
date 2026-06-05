@@ -15,6 +15,24 @@ void main() {
       expect(summary.proteins, 34);
     });
 
+    test('ignores entries hidden from nutrition summary', () {
+      final summary = NutritionSummary.fromEntries([
+        const NutritionEntry(kcal: 420, fats: 14, carbs: 50, proteins: 22),
+        const NutritionEntry(
+          kcal: 999,
+          fats: 99,
+          carbs: 99,
+          proteins: 99,
+          includeInSummary: false,
+        ),
+      ]);
+
+      expect(summary.kcal, 420);
+      expect(summary.fats, 14);
+      expect(summary.carbs, 50);
+      expect(summary.proteins, 22);
+    });
+
     test('computes bounded progress and remaining kcal', () {
       final summary = NutritionSummary.fromEntries([
         const NutritionEntry(kcal: 1200, fats: 30, carbs: 140, proteins: 90),

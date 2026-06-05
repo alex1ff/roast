@@ -87,6 +87,17 @@ async function createRoastShare(data, context) {
   const audioUrl = asUrl(dish.roast_audio);
   const title = buildShareTitle(dish);
   const excerpt = summarize(dish.roast_text, 180);
+  const roastMode = asText(dish.roast_mode) || "roast";
+  const subjectType = asText(dish.subject_type);
+  const showNutrition = shouldShowNutrition({
+    roastMode,
+    subjectType,
+    showNutrition: asBool(dish.show_nutrition),
+    kcal: asNumber(dish.kcal),
+    proteins: asNumber(dish.proteins),
+    fats: asNumber(dish.fats),
+    carbs: asNumber(dish.carbs),
+  });
 
   await shareRef.set(
     {
@@ -114,6 +125,11 @@ async function createRoastShare(data, context) {
       calorieShare: asText(dish.calorieshare || dish.calorieShare),
       roastPerson: asText(dish.roast_person),
       roastLevel: asText(dish.roastLevel),
+      roastMode,
+      occasionKey: asText(dish.occasion_key),
+      occasionLabel: asText(dish.occasion_label),
+      subjectType,
+      showNutrition,
       createdAt: existingShareSnap.exists ?
         existingShareSnap.get("createdAt") || now :
         now,
@@ -180,6 +196,9 @@ function extractShareId(path) {
 
 function buildShareTitle(dish) {
   const dishName = asText(dish.dishName);
+  if (asText(dish.roast_mode) === "congratu_roast") {
+    return dishName ? `${dishName} got congraturoasted` : "CongratuRoast";
+  }
   return dishName ? `${dishName} got roasted` : "Roast Them All";
 }
 
@@ -205,10 +224,14 @@ function renderSharePage(share, shareId) {
   const audioUrl = asUrl(share.audioUrl);
   const primaryImageUrl = itemImageUrl || roastImageUrl;
   const actionClass = audioUrl ? "primary-actions" : "primary-actions single-action";
+  const showNutrition = shouldShowNutrition(share);
   const headlineParts = [
     dishName,
-    dishWeight,
+    showNutrition ? dishWeight : "",
   ].filter(Boolean);
+  const sectionLabel = asText(share.roastMode) === "congratu_roast" ?
+    "CongratuRoast" :
+    "Roast";
 
   return `<!doctype html>
 <html lang="en">
@@ -235,15 +258,15 @@ function renderSharePage(share, shareId) {
     <section class="dish-card">
       <div class="hero-frame">
         ${renderImage(primaryImageUrl, "hero-image", dishName)}
-        ${renderHeroCaption(headlineParts, share)}
+        ${renderHeroCaption(headlineParts, share, showNutrition)}
       </div>
       <div class="${escapeAttr(actionClass)}">
         ${renderAudioPlayer(audioUrl)}
         ${renderRoastBackButton("top-cta")}
       </div>
-      <div class="section-label">Roast</div>
+      <div class="section-label">${escapeHtml(sectionLabel)}</div>
       <div class="roast-bubble">${renderParagraphs(content)}</div>
-      ${renderNutrition(share)}
+      ${showNutrition ? renderNutrition(share) : ""}
     </section>
     <section class="download-card">
       <div>
@@ -257,10 +280,10 @@ function renderSharePage(share, shareId) {
 </html>`;
 }
 
-function renderHeroCaption(headlineParts, share) {
+function renderHeroCaption(headlineParts, share, showNutrition) {
   const headline = headlineParts.join(" | ");
   const restaurant = renderRestaurant(share.restaurant);
-  const meta = renderMetaPills(share);
+  const meta = renderMetaPills(share, showNutrition);
 
   if (!headline && !restaurant && !meta) {
     return "";
@@ -310,11 +333,13 @@ function renderRestaurant(value) {
   return text ? `<p class="restaurant">${escapeHtml(text)}</p>` : "";
 }
 
-function renderMetaPills(share) {
-  const pills = [
+function renderMetaPills(share, showNutrition) {
+  const pills = showNutrition ? [
     [share.badge, "danger"],
     [share.impact, ""],
     [share.calorieShare, ""],
+  ].filter(([value]) => asText(value)) : [
+    [share.occasionLabel, ""],
   ].filter(([value]) => asText(value));
 
   if (!pills.length) {
@@ -468,6 +493,46 @@ function asNumber(value) {
   return Number.isFinite(number) ? number : null;
 }
 
+function asBool(value) {
+  if (typeof value === "boolean") {
+    return value;
+  }
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    if (normalized === "true") {
+      return true;
+    }
+    if (normalized === "false") {
+      return false;
+    }
+  }
+  return null;
+}
+
+function shouldShowNutrition(share) {
+  const mode = asText(share.roastMode || share.roast_mode) || "roast";
+  const subjectType = asText(share.subjectType || share.subject_type);
+  if (mode === "congratu_roast") {
+    return false;
+  }
+  if (subjectType && subjectType !== "dish") {
+    return false;
+  }
+  const explicit = asBool(share.showNutrition ?? share.show_nutrition);
+  if (explicit !== null) {
+    return explicit;
+  }
+  return [
+    share.kcal,
+    share.proteins,
+    share.fats,
+    share.carbs,
+  ].some((value) => {
+    const number = Number(value);
+    return Number.isFinite(number) && number > 0;
+  });
+}
+
 function formatNumber(value) {
   const number = Number(value);
   if (!Number.isFinite(number)) {
@@ -498,6 +563,7 @@ module.exports = {
     buildStableShareId,
     extractShareId,
     renderSharePage,
+    shouldShowNutrition,
     summarize,
   },
 };

@@ -1,5 +1,7 @@
 import 'package:intl/intl.dart';
+import '/app_constants.dart';
 import '/backend/backend.dart';
+import '/services/roast_result_metadata.dart';
 
 int? sumKcal(List<AddedDishHistoryRecord>? dishes) {
   if (dishes == null || dishes.isEmpty) {
@@ -224,18 +226,40 @@ String? last7DaysDishesToString(List<AddedDishHistoryRecord>? dishes) {
     return "Записей о приемах пищи нет.";
   }
 
-  final DateFormat formatter =
-      DateFormat('dd.MM'); // Еще более короткий формат даты
   final StringBuffer buffer =
       StringBuffer(); // StringBuffer эффективен для сборки строк
 
   for (var dish in dishes) {
-    // Собираем строку вида "17.07:Овсянка(350);"
-    buffer.write(
-        "${formatter.format(dish.addedDate!)}:${dish.dishName}(${dish.kcal});");
+    final formatted = formatRecentDishForChat(
+      dishName: dish.dishName,
+      addedDate: dish.addedDate,
+      kcal: dish.kcal,
+      showNutrition: RoastResultMetadata.shouldShowNutrition(dish),
+    );
+    if (formatted != null) {
+      buffer.write(formatted);
+    }
   }
 
-  return buffer.toString();
+  return buffer.length == 0 ? "Записей о приемах пищи нет." : buffer.toString();
+}
+
+String? formatRecentDishForChat({
+  required String dishName,
+  required DateTime? addedDate,
+  required int kcal,
+  required bool showNutrition,
+}) {
+  if (!showNutrition || addedDate == null) {
+    return null;
+  }
+  final cleanedName = dishName.trim();
+  if (cleanedName.isEmpty) {
+    return null;
+  }
+
+  final formatter = DateFormat('dd.MM');
+  return "${formatter.format(addedDate)}:$cleanedName($kcal);";
 }
 
 DateTime oneMonthFromNow() {
@@ -415,25 +439,30 @@ String dishString(AddedDishHistoryRecord addedDishHistory) {
       addedDishHistory.hasAddedDate() && addedDishHistory.addedDate != null
           ? addedDishHistory.addedDate!.toUtc().toIso8601String()
           : '';
+  final showNutrition =
+      RoastResultMetadata.shouldShowNutrition(addedDishHistory);
 
   final resultParts = <String>[
     'name=$dishName',
     'restaurant=$restaurant',
     if (addedDateIso.isNotEmpty) 'added_date_utc=$addedDateIso',
-    'portion_g=$portionG',
-    'kcal=$kcal',
-    'p=$proteins',
-    'f=$fats',
-    'c=$carbs',
-    'sugar_g=$sugar',
-    'fiber_g=$fiber',
-    'sodium_mg=$sodium',
-    'badge=$badge',
-    'goal_impact=$impact',
-    'calorie_share=$calorieShare',
-    'ingredients=${ingredients.join('|')}',
-    'smart_tweaks=${tips.join(' || ')}',
-    'vitamins=$vitaminsLine',
+    'roast_mode=${addedDishHistory.roastMode}',
+    'occasion=${addedDishHistory.occasionLabel}',
+    'subject_type=${addedDishHistory.subjectType}',
+    if (showNutrition) 'portion_g=$portionG',
+    if (showNutrition) 'kcal=$kcal',
+    if (showNutrition) 'p=$proteins',
+    if (showNutrition) 'f=$fats',
+    if (showNutrition) 'c=$carbs',
+    if (showNutrition) 'sugar_g=$sugar',
+    if (showNutrition) 'fiber_g=$fiber',
+    if (showNutrition) 'sodium_mg=$sodium',
+    if (showNutrition) 'badge=$badge',
+    if (showNutrition) 'goal_impact=$impact',
+    if (showNutrition) 'calorie_share=$calorieShare',
+    if (showNutrition) 'ingredients=${ingredients.join('|')}',
+    if (showNutrition) 'smart_tweaks=${tips.join(' || ')}',
+    if (showNutrition) 'vitamins=$vitaminsLine',
     'roast_persona=$roastPersona',
     'roast_level=$roastLevel',
     'roast=$roastText',
@@ -464,9 +493,19 @@ String buildDishAgentInput(
   List<String> vitaminsAndMinerals,
   String primaryBadgeKey,
   String primaryBadgeText,
-  List<String> existingSmartTweaks,
-) {
-  const allowedCallTypes = {'analyze', 're_roast', 're_roast_harder'};
+  List<String> existingSmartTweaks, {
+  String roastMode = FFAppConstants.roastModeRoast,
+  String occasionKey = '',
+  String occasionLabel = '',
+  String subjectType = '',
+  bool? showNutrition,
+}) {
+  const allowedCallTypes = {
+    'analyze',
+    're_roast',
+    're_roast_harder',
+    'congratu_roast',
+  };
   final normalizedCallType =
       allowedCallTypes.contains(callType) ? callType : 'analyze';
 
@@ -483,7 +522,21 @@ String buildDishAgentInput(
       .where((e) => e.isNotEmpty)
       .toList();
 
+  final cleanedRoastPersona = roastPersona.trim();
+  final roastPersonaId = roastPersonaIdForValueOrNull(cleanedRoastPersona);
+  final roastPersonaFields = roastPersonaId == null
+      ? 'roast_persona=$cleanedRoastPersona; '
+      : 'roast_persona_id=$roastPersonaId; '
+          'roast_persona=${roastPersonaDisplayNameForId(roastPersonaId)}; ';
+  final showNutritionField =
+      showNutrition == null ? '' : 'show_nutrition=$showNutrition; ';
+
   return 'call_type=$normalizedCallType; '
+      'roast_mode=${roastMode.trim()}; '
+      'occasion_key=${occasionKey.trim()}; '
+      'occasion_label=${occasionLabel.trim()}; '
+      'subject_type=${subjectType.trim()}; '
+      '$showNutritionField'
       'dish_name=${dishName.trim()}; '
       'dish_weight=${dishWeight < 0 ? 0 : dishWeight}; '
       'dish_photo=${dishPhoto.trim()}; '
@@ -493,7 +546,7 @@ String buildDishAgentInput(
       'userActivityLevel=${userActivityLevel.trim()}; '
       'userGoal=${userGoal.trim()}; '
       'roast_level=${roastLevel.trim()}; '
-      'roast_persona=${roastPersona.trim()}; '
+      '$roastPersonaFields'
       'nutrition_snapshot=dish_weight:${dishWeight < 0 ? 0 : dishWeight},'
       'kcal:${kcal < 0 ? 0 : kcal},'
       'proteins:${proteins < 0 ? 0 : proteins},'

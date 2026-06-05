@@ -133,8 +133,12 @@ class _MessWidgetState extends State<MessWidget> {
                             ],
                           );
                         } else if (widget.mess?.isFirst == true) {
-                          final firstMessageText =
-                              'Got your ${widget.mess?.dish}: ${widget.mess?.kkal.toString()} kcal. Want damage control, goal check, or a smarter next move?';
+                          final hasNutritionContext =
+                              widget.mess?.hasKkal() == true &&
+                                  (widget.mess?.kkal ?? 0) > 0;
+                          final firstMessageText = hasNutritionContext
+                              ? 'Got your ${widget.mess?.dish}: ${widget.mess?.kkal.toString()} kcal. Want damage control, goal check, or a smarter next move?'
+                              : 'Got your ${widget.mess?.dish}. Want a sharper comeback, caption help, or another roast angle?';
                           return Column(
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.stretch,

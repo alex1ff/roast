@@ -10,6 +10,7 @@ import '/main_page/subscription_pop_up/subscription_pop_up_widget.dart';
 import '/main_page/subscription_pop_up_copy/subscription_pop_up_copy_widget.dart';
 import '/services/chat_controller.dart';
 import '/services/chat_history_view.dart';
+import '/services/roast_result_metadata.dart';
 import '/services/user_account_mutations.dart';
 import '/services/usage_limit_service.dart';
 import 'dart:async';
@@ -64,6 +65,8 @@ class _ChatCopyWidgetState extends State<ChatCopyWidget> {
         if (widget.dish != null) {
           _model.dish = widget.dish;
           _model.string = functions.dishString(widget.dish!);
+          final showNutrition =
+              RoastResultMetadata.shouldShowNutrition(widget.dish!);
           safeSetState(() {});
           if (!(FFAppState()
               .chathistory
@@ -74,7 +77,7 @@ class _ChatCopyWidgetState extends State<ChatCopyWidget> {
               role: 'assistant',
               isFirst: true,
               dish: widget.dish?.dishName,
-              kkal: widget.dish?.kcal,
+              kkal: showNutrition ? widget.dish?.kcal : null,
               date: getCurrentTimestamp,
             ));
             safeSetState(() {});
@@ -368,10 +371,19 @@ class _ChatCopyWidgetState extends State<ChatCopyWidget> {
                                           mainAxisSize: MainAxisSize.max,
                                           children: [
                                             Text(
-                                              '${valueOrDefault<String>(
-                                                _model.dish?.dishName,
-                                                '-',
-                                              )} • ${_model.dish?.kcal.toString()} kcal',
+                                              _model.dish == null
+                                                  ? '-'
+                                                  : RoastResultMetadata
+                                                          .shouldShowNutrition(
+                                                              _model.dish!)
+                                                      ? '${valueOrDefault<String>(
+                                                          _model.dish?.dishName,
+                                                          '-',
+                                                        )} • ${_model.dish?.kcal.toString()} kcal'
+                                                      : valueOrDefault<String>(
+                                                          _model.dish?.dishName,
+                                                          '-',
+                                                        ),
                                               style: FlutterFlowTheme.of(
                                                       context)
                                                   .bodyMedium
