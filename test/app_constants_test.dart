@@ -4,9 +4,12 @@ import 'package:roast_nutri_tracker/app_constants.dart';
 void main() {
   group('roast personas', () {
     test('contains the configured persona options', () {
-      expect(roastPersonaOptions, hasLength(29));
+      expect(roastPersonaOptions, hasLength(30));
       expect(roastPersonaOptions.first.id, defaultRoastPersonaId);
       expect(roastPersonaDisplayNames(), contains('Snack Shady'));
+      expect(roastPersonaDisplayNames(), contains('Iron Pan'));
+      expect(roastPersonaDisplayNames(), contains('Southie Beefcake'));
+      expect(roastPersonaDisplayNames(), contains('Tyler Sweets'));
     });
 
     test('resolves ids, display names, and legacy names', () {
@@ -19,6 +22,12 @@ void main() {
           isNot(defaultRoastPersonaId));
       expect(
           roastPersonaIdForValue('Snackye West'), isNot(defaultRoastPersonaId));
+      expect(roastPersonaIdForValue('Lil Green Roastmaster'),
+          'lil_green_roastmaster');
+      expect(roastPersonaIdForValue('Jo-Da, Lil Green Roastmaster'),
+          'lil_green_roastmaster');
+      expect(roastPersonaIdForValue('jo_da_lil_green_roastmaster'),
+          'lil_green_roastmaster');
       expect(roastPersonaDisplayNameForId('snack_shady'), 'Snack Shady');
     });
   });

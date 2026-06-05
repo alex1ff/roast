@@ -436,9 +436,14 @@ describe("Functions business logic", () => {
   });
 
   it("stores structured roast personas", () => {
-    assert.equal(Object.keys(ROAST_PERSONAS).length, 29);
+    assert.equal(Object.keys(ROAST_PERSONAS).length, 30);
     assert.equal(resolveRoastPersona("Snack Shady").id, "snack_shady");
     assert.equal(resolveRoastPersona("Breadpool").id, "breadfool");
+    assert.equal(resolveRoastPersona("Iron Pan").id, "iron_pan");
+    assert.equal(resolveRoastPersona("Southie Beefcake").id, "southie_beefcake");
+    assert.equal(resolveRoastPersona("Tyler Sweets").id, "tyler_sweets");
+    assert.equal(resolveRoastPersona("Lil Green Roastmaster").id, "lil_green_roastmaster");
+    assert.equal(resolveRoastPersona("Jo-Da, Lil Green Roastmaster").id, "lil_green_roastmaster");
     assert.notEqual(resolveRoastPersona("The Orange Deal Maker").id, "wolf_wrap_street");
     assert.notEqual(resolveRoastPersona("Gordon Rant-say").id, "wolf_wrap_street");
     assert.notEqual(resolveRoastPersona("Snackye West").id, "wolf_wrap_street");
