@@ -9,7 +9,8 @@ void main() {
       expect(roastPersonaDisplayNames(), contains('Snack Shady'));
       expect(roastPersonaDisplayNames(), contains('Iron Pan'));
       expect(roastPersonaDisplayNames(), contains('Southie Beefcake'));
-      expect(roastPersonaDisplayNames(), contains('Tyler Sweets'));
+      expect(roastPersonaDisplayNames(), contains('Bro Lebunski'));
+      expect(roastPersonaDisplayNames(), contains('Carbface'));
     });
 
     test('resolves ids, display names, and legacy names', () {
@@ -28,6 +29,8 @@ void main() {
           'lil_green_roastmaster');
       expect(roastPersonaIdForValue('jo_da_lil_green_roastmaster'),
           'lil_green_roastmaster');
+      expect(roastPersonaIdForValue('Ivan the Enforcer'), 'bro_lebunski');
+      expect(roastPersonaIdForValue('Tyler Sweets'), 'carbface');
       expect(roastPersonaDisplayNameForId('snack_shady'), 'Snack Shady');
     });
   });

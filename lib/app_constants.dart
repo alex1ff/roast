@@ -132,7 +132,7 @@ const roastPersonaOptions = <RoastPersonaOption>[
     displayName: 'Lil Green Roastmaster',
   ),
   RoastPersonaOption(id: 'connor_mc_roast', displayName: 'Connor McRoast'),
-  RoastPersonaOption(id: 'ivan_the_enforcer', displayName: 'Ivan the Enforcer'),
+  RoastPersonaOption(id: 'bro_lebunski', displayName: 'Bro Lebunski'),
   RoastPersonaOption(id: 'tony_pepperoni', displayName: 'Tony Pepperoni'),
   RoastPersonaOption(id: 'the_dough_knight', displayName: 'The Dough Knight'),
   RoastPersonaOption(
@@ -160,6 +160,7 @@ const roastPersonaOptions = <RoastPersonaOption>[
     id: 'bro_jogan_protein_philosopher',
     displayName: 'Bro Jogan, The Protein Philosopher',
   ),
+  RoastPersonaOption(id: 'carbface', displayName: 'Carbface'),
   RoastPersonaOption(
     id: 'yo_yo_carb_kid',
     displayName: 'Yo-Yo Carb Kid, B*tch!',
@@ -178,7 +179,6 @@ const roastPersonaOptions = <RoastPersonaOption>[
     displayName: 'No-privacy Algorithm Eater',
   ),
   RoastPersonaOption(id: 'mars_dinner_chef', displayName: 'Mars Dinner Chef'),
-  RoastPersonaOption(id: 'tyler_sweets', displayName: 'Tyler Sweets'),
 ];
 
 const _legacyRoastPersonaAliases = <String, String>{
@@ -194,6 +194,10 @@ const _legacyRoastPersonaAliases = <String, String>{
   'Snackye West': 'slim_carb_dashyan',
   'Jo-Da, Lil Green Roastmaster': 'lil_green_roastmaster',
   'jo_da_lil_green_roastmaster': 'lil_green_roastmaster',
+  'Ivan the Enforcer': 'bro_lebunski',
+  'ivan_the_enforcer': 'bro_lebunski',
+  'Tyler Sweets': 'carbface',
+  'tyler_sweets': 'carbface',
 };
 
 List<String> roastPersonaDisplayNames() =>

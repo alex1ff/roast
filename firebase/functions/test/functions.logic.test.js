@@ -441,7 +441,10 @@ describe("Functions business logic", () => {
     assert.equal(resolveRoastPersona("Breadpool").id, "breadfool");
     assert.equal(resolveRoastPersona("Iron Pan").id, "iron_pan");
     assert.equal(resolveRoastPersona("Southie Beefcake").id, "southie_beefcake");
-    assert.equal(resolveRoastPersona("Tyler Sweets").id, "tyler_sweets");
+    assert.equal(resolveRoastPersona("Bro Lebunski").id, "bro_lebunski");
+    assert.equal(resolveRoastPersona("Carbface").id, "carbface");
+    assert.equal(resolveRoastPersona("Ivan the Enforcer").id, "bro_lebunski");
+    assert.equal(resolveRoastPersona("Tyler Sweets").id, "carbface");
     assert.equal(resolveRoastPersona("Lil Green Roastmaster").id, "lil_green_roastmaster");
     assert.equal(resolveRoastPersona("Jo-Da, Lil Green Roastmaster").id, "lil_green_roastmaster");
     assert.notEqual(resolveRoastPersona("The Orange Deal Maker").id, "wolf_wrap_street");
