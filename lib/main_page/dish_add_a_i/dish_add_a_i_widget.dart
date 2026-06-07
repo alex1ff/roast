@@ -1020,56 +1020,6 @@ class _DishAddAIWidgetState extends State<DishAddAIWidget> {
                     ],
                   ),
                 ),
-              Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      FlutterFlowTheme.of(context).secondaryBackground,
-                      Color(0xEFF2F2F7),
-                      Color(0x00F2F2F7)
-                    ],
-                    stops: [0.0, 0.8, 1.0],
-                    begin: AlignmentDirectional(0.0, -1.0),
-                    end: AlignmentDirectional(0, 1.0),
-                  ),
-                ),
-                child: Padding(
-                  padding:
-                      EdgeInsetsDirectional.fromSTEB(12.0, 55.0, 12.0, 12.0),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.max,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Flexible(
-                        child: RichText(
-                          textScaler: MediaQuery.of(context).textScaler,
-                          textAlign: TextAlign.center,
-                          text: TextSpan(
-                            style: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .override(
-                                  fontFamily: 'SF Pro',
-                                  fontSize: 21.0,
-                                  letterSpacing: 0.0,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                            children: [
-                              const TextSpan(text: 'ADD A NEW DISH OR '),
-                              TextSpan(
-                                text: 'ROAST\nA FRIEND',
-                                style: TextStyle(
-                                  color: FlutterFlowTheme.of(context).primary,
-                                ),
-                              ),
-                              const TextSpan(text: ' or whatever you want'),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
             ],
           ),
         ),
