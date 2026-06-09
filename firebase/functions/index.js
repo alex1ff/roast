@@ -33,14 +33,21 @@ const SMART_CHAT_PERSONALITY_EXTENSION = [
 ].join("\n");
 const CONGRATUROAST_PROMPT_EXTENSION = [
   "CONGRATUROAST MODE EXTENSION:",
-  "- Supported call_type values now include: analyze, re_roast, re_roast_harder, congratu_roast.",
+  "- This extension overrides any base prompt routing that says unknown call_type values become analyze.",
+  "- Supported call_type values include: analyze, re_roast, re_roast_harder, congratu_roast.",
   "- Input may include roast_mode, occasion_key, occasion_label, subject_type, and show_nutrition.",
-  "- If call_type = congratu_roast or roast_mode = congratu_roast, generate a funny congratulation for occasion_key / occasion_label in the selected roast persona voice.",
-  "- CongratuRoast tone must be 90% congratulations and 10% friendly roast. It is not a sincere greeting card and not a full roast.",
-  "- CongratuRoast must not mention calories, kcal, macros, nutrition, diet, daily goals, goal impact, calorie share, meal tracking, or food analysis.",
-  "- For CongratuRoast, set roast_mode to congratu_roast, copy occasion_key and occasion_label, set subject_type to person unless the image clearly has no person, and show_nutrition must be false.",
+  "- If call_type = congratu_roast or roast_mode = congratu_roast, run CongratuRoast mode only. Do not run food_nutrition, mixed_visual_food, visual_nonfood, nutrition analysis, or missing-food jokes.",
+  "- CongratuRoast output is a funny congratulation for occasion_key / occasion_label in the selected roast persona voice.",
+  "- CongratuRoast must be celebration-first, but the roast energy can be sharp, savage, and woven throughout. It is not a sincere greeting card and not a fully serious greeting.",
+  "- CongratuRoast must be longer than a roast: 4-6 sentences, 70-110 words. At least 3 sentences must clearly congratulate, celebrate, praise progress, or wish them well for the occasion.",
+  "- Hard roast jabs may appear throughout the message, but the overall result must still clearly congratulate and celebrate the person/occasion.",
+  "- CongratuRoast must not mention or imply food, dishes, plates, meals, eating, restaurants, ingredients, calories, kcal, macros, nutrition, diet, daily goals, goal impact, calorie share, meal tracking, food analysis, no-food, missing-food, invisible-food, or phantom-meal jokes.",
+  "- Ignore dish_name, ingredients, restaurant, nutrition_snapshot, and any visible food when writing CongratuRoast. Use occasion_label as the main topic and the subject/person as the recipient.",
+  "- If the subject name is empty or a placeholder such as Dish, Friend, Roast result, or '-', address them generically without joking about the missing name or photo.",
+  "- For CongratuRoast, set roast_mode to congratu_roast, copy occasion_key and occasion_label, set subject_type to person unless the user explicitly provided another non-food subject, and show_nutrition must be false.",
   "- For regular roast analyze mode, set roast_mode to roast, subject_type to dish | person | other, and show_nutrition to true only when subject_type is dish with real positive nutrition.",
   "- For person/object/non-food roast results, show_nutrition must be false even if placeholder nutrition fields are present for schema compatibility.",
+  "- For CongratuRoast, smart_tweaks must not contain nutrition advice. If needed for schema compatibility, make them short celebratory non-food lines or return an empty array.",
   "- Output JSON must include roast_mode, occasion_key, occasion_label, subject_type, and show_nutrition along with the existing fields.",
 ].join("\n");
 const RELOAD_PACK_CREDITS = {

@@ -381,6 +381,7 @@ describe("Functions business logic", () => {
         content: "Happy birthday. Your scheduling skills remain on airplane mode.",
         dishName: "Sam",
         itemImageUrl: "https://example.com/sam.jpg",
+        audioUrl: "https://example.com/congrats.mp3",
         roastMode: "congratu_roast",
         occasionLabel: "Birthday",
         subjectType: "person",
@@ -401,6 +402,41 @@ describe("Functions business logic", () => {
     assert.doesNotMatch(html, /daily calories/);
     assert.doesNotMatch(html, /Impact on your goal/);
     assert.match(html, /Birthday/);
+    assert.match(html, /class="dish-card celebration-card"/);
+    assert.match(html, /class="celebration-header"/);
+    assert.match(html, /class="roast-bubble celebration-bubble"/);
+    assert.match(html, /Play Congratu&#39;Roast/);
+    assert.match(html, /Congratu&#39;Roast/);
+    assert.match(html, /Return the favor\. Roast them back\./);
+    assert.match(
+      html,
+      /Get Roast Them All &amp; start the chaos\. Roast friends, pets, dishes, congratulate them with roasts, or do both\./,
+    );
+    assert.doesNotMatch(html, /class="hero-caption"/);
+    assert.doesNotMatch(html, /class="meta-pill/);
+  });
+
+  it("renders legacy congraturoast share without dish placeholder", () => {
+    const html = shareTest.renderSharePage(
+      {
+        title: "Dish got congraturoasted",
+        excerpt: "shared",
+        content: "Happy birthday, chaos champion.",
+        dishName: "Dish",
+        dishWeight: 250,
+        itemImageUrl: "https://example.com/breadpool.jpg",
+        occasionLabel: "Birthday",
+        showNutrition: true,
+        kcal: 520,
+      },
+      "share-id",
+    );
+
+    assert.match(html, /class="dish-card celebration-card"/);
+    assert.match(html, /Birthday/);
+    assert.doesNotMatch(html, /Dish \| 250/);
+    assert.doesNotMatch(html, /class="nutrition-grid"/);
+    assert.doesNotMatch(html, /Kcal/);
   });
 
   it("runs the roast agent with a mocked OpenAI client", async () => {
@@ -482,8 +518,15 @@ describe("Functions business logic", () => {
 
     assert.match(systemMessage, /congratu_roast/);
     assert.match(systemMessage, /occasion_key/);
-    assert.match(systemMessage, /90% congratulations/i);
-    assert.match(systemMessage, /10% friendly roast/i);
+    assert.match(systemMessage, /celebration-first/i);
+    assert.match(systemMessage, /sharp, savage, and woven throughout/i);
+    assert.match(systemMessage, /Hard roast jabs may appear throughout/i);
+    assert.match(systemMessage, /4-6 sentences/i);
+    assert.match(systemMessage, /70-110 words/i);
+    assert.match(systemMessage, /At least 3 sentences/i);
+    assert.match(systemMessage, /must not mention or imply food/i);
+    assert.match(systemMessage, /dishes, plates, meals/i);
+    assert.match(systemMessage, /Ignore dish_name, ingredients, restaurant, nutrition_snapshot/i);
     assert.match(systemMessage, /show_nutrition/);
     assert.match(systemMessage, /must be false/);
     const personaBlock = systemMessage.split("SELECTED ROAST PERSONA:").at(-1);

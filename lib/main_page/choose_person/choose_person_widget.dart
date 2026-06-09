@@ -111,6 +111,42 @@ class _ChoosePersonWidgetState extends State<ChoosePersonWidget> {
     }());
   }
 
+  String _agentSubjectName(bool isCongratuRoast) {
+    final subjectName = widget.dishName?.trim() ?? '';
+    final normalizedSubjectName = subjectName.toLowerCase();
+    if (isCongratuRoast &&
+        (subjectName.isEmpty ||
+            subjectName == '-' ||
+            normalizedSubjectName == 'dish')) {
+      return 'Friend';
+    }
+    return valueOrDefault<String>(widget.dishName, '-');
+  }
+
+  String _recordSubjectName(
+    RoastAnalysis roastAnalysis,
+    bool isCongratuRoast,
+  ) {
+    final subjectName = widget.dishName?.trim() ?? '';
+    final normalizedSubjectName = subjectName.toLowerCase();
+    if (isCongratuRoast &&
+        subjectName.isNotEmpty &&
+        subjectName != '-' &&
+        normalizedSubjectName != 'dish') {
+      return subjectName;
+    }
+
+    final generatedName = roastAnalysis.dishName.trim();
+    final normalizedGeneratedName = generatedName.toLowerCase();
+    if (isCongratuRoast &&
+        (generatedName.isEmpty ||
+            generatedName == '-' ||
+            normalizedGeneratedName == 'dish')) {
+      return 'Friend';
+    }
+    return roastAnalysis.dishName;
+  }
+
   @override
   Widget build(BuildContext context) {
     context.watch<FFAppState>();
@@ -214,10 +250,7 @@ class _ChoosePersonWidgetState extends State<ChoosePersonWidget> {
                                 context: context,
                                 prompt: functions.buildDishAgentInput(
                                     callType,
-                                    valueOrDefault<String>(
-                                      widget.dishName,
-                                      '-',
-                                    ),
+                                    _agentSubjectName(isCongratuRoast),
                                     valueOrDefault<String>(
                                       widget.dishPhoto,
                                       '-',
@@ -308,7 +341,10 @@ class _ChoosePersonWidgetState extends State<ChoosePersonWidget> {
                                     AddedDishHistoryRecord.collection.doc();
                                 final roastData = {
                                   ...createAddedDishHistoryRecordData(
-                                    dishName: roastAnalysis.dishName,
+                                    dishName: _recordSubjectName(
+                                      roastAnalysis,
+                                      isCongratuRoast,
+                                    ),
                                     dishWeight: roastAnalysis.dishWeight,
                                     addedDate: getCurrentTimestamp,
                                     restaurant: widget.restaurant,
@@ -343,7 +379,9 @@ class _ChoosePersonWidgetState extends State<ChoosePersonWidget> {
                                       widget.occasionLabel,
                                       roastAnalysis.occasionLabel,
                                     ),
-                                    subjectType: roastAnalysis.subjectType,
+                                    subjectType: isCongratuRoast
+                                        ? FFAppConstants.subjectTypePerson
+                                        : roastAnalysis.subjectType,
                                     showNutrition: showNutrition,
                                   ),
                                   ...roastAnalysis.nestedFirestoreData(),

@@ -70,6 +70,7 @@ class ChoosePersonContent extends StatelessWidget {
                 optionLabels: persons.map((e) => e.name).toList(),
                 onChanged: onVoiceChanged,
                 height: 45.0,
+                maxHeight: 360.0,
                 textStyle: FlutterFlowTheme.of(context).bodyMedium.override(
                       fontFamily: 'SF Pro',
                       fontSize: 16.0,
@@ -86,6 +87,14 @@ class ChoosePersonContent extends StatelessWidget {
                 borderWidth: 1.0,
                 borderRadius: 8.0,
                 margin: EdgeInsetsDirectional.fromSTEB(12.0, 0.0, 12.0, 0.0),
+                scrollbarTheme: ScrollbarThemeData(
+                  radius: Radius.circular(40.0),
+                  thickness: WidgetStateProperty.all<double>(4.0),
+                  thumbVisibility: WidgetStateProperty.all<bool>(true),
+                  thumbColor: WidgetStateProperty.all<Color>(
+                    FlutterFlowTheme.of(context).primary,
+                  ),
+                ),
                 hidesUnderline: true,
                 isOverButton: false,
                 isSearchable: false,

@@ -30,6 +30,7 @@ class _DishAddAIWidgetState extends State<DishAddAIWidget> {
   late DishAddAIModel _model;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
+  final ScrollController _occasionScrollController = ScrollController();
   late StreamSubscription<bool> _keyboardVisibilitySubscription;
   bool _isKeyboardVisible = false;
 
@@ -67,6 +68,7 @@ class _DishAddAIWidgetState extends State<DishAddAIWidget> {
   @override
   void dispose() {
     _model.dispose();
+    _occasionScrollController.dispose();
 
     if (!isWeb) {
       _keyboardVisibilitySubscription.cancel();
@@ -78,46 +80,46 @@ class _DishAddAIWidgetState extends State<DishAddAIWidget> {
     final roastMode = await showDialog<String>(
       context: context,
       builder: (dialogContext) {
-        return SimpleDialog(
-          title: Text(
-            'What do you want to do?',
-            style: FlutterFlowTheme.of(context).bodyMedium.override(
-                  fontFamily: 'SF Pro',
-                  fontSize: 18.0,
-                  letterSpacing: 0.0,
-                  fontWeight: FontWeight.w600,
-                ),
+        return Dialog(
+          backgroundColor: FlutterFlowTheme.of(context).secondaryBackground,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.0),
           ),
-          children: [
-            SimpleDialogOption(
-              onPressed: () => Navigator.pop(
-                dialogContext,
-                FFAppConstants.roastModeRoast,
-              ),
-              child: Text(
-                'Roast',
-                style: FlutterFlowTheme.of(context).bodyMedium.override(
-                      fontFamily: 'SF Pro',
-                      fontSize: 16.0,
-                      letterSpacing: 0.0,
-                    ),
-              ),
+          child: Padding(
+            padding: EdgeInsetsDirectional.fromSTEB(20.0, 20.0, 20.0, 18.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'What do you want to do?',
+                  style: FlutterFlowTheme.of(context).bodyMedium.override(
+                        fontFamily: 'SF Pro',
+                        fontSize: 22.0,
+                        letterSpacing: 0.0,
+                        fontWeight: FontWeight.w700,
+                      ),
+                ),
+                SizedBox(height: 18.0),
+                _buildModeOptionButton(
+                  label: 'Roast a friend, dish, anything...',
+                  onTap: () => Navigator.pop(
+                    dialogContext,
+                    FFAppConstants.roastModeRoast,
+                  ),
+                ),
+                SizedBox(height: 10.0),
+                _buildModeOptionButton(
+                  label: 'Congratulate with a roast',
+                  accent: true,
+                  onTap: () => Navigator.pop(
+                    dialogContext,
+                    FFAppConstants.roastModeCongratuRoast,
+                  ),
+                ),
+              ],
             ),
-            SimpleDialogOption(
-              onPressed: () => Navigator.pop(
-                dialogContext,
-                FFAppConstants.roastModeCongratuRoast,
-              ),
-              child: Text(
-                'Congratulate',
-                style: FlutterFlowTheme.of(context).bodyMedium.override(
-                      fontFamily: 'SF Pro',
-                      fontSize: 16.0,
-                      letterSpacing: 0.0,
-                    ),
-              ),
-            ),
-          ],
+          ),
         );
       },
     );
@@ -140,6 +142,61 @@ class _DishAddAIWidgetState extends State<DishAddAIWidget> {
     }
 
     await _showChoosePersonDialog(roastMode: roastMode);
+  }
+
+  Widget _buildModeOptionButton({
+    required String label,
+    required VoidCallback onTap,
+    bool accent = false,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14.0),
+        onTap: onTap,
+        child: Ink(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: accent ? Color(0xFFFFF0E6) : Color(0xFFF9F9FB),
+            borderRadius: BorderRadius.circular(14.0),
+            border: Border.all(
+              color: accent
+                  ? FlutterFlowTheme.of(context).primary
+                  : FlutterFlowTheme.of(context).divider,
+              width: 1.0,
+            ),
+          ),
+          child: Padding(
+            padding: EdgeInsetsDirectional.fromSTEB(16.0, 15.0, 12.0, 15.0),
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                Expanded(
+                  child: Text(
+                    label,
+                    maxLines: 2,
+                    style: FlutterFlowTheme.of(context).bodyMedium.override(
+                          fontFamily: 'SF Pro',
+                          color: FlutterFlowTheme.of(context).primaryText,
+                          fontSize: 16.0,
+                          letterSpacing: 0.0,
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: accent
+                      ? FlutterFlowTheme.of(context).primary
+                      : FlutterFlowTheme.of(context).secondaryText,
+                  size: 24.0,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   Future<CongratuRoastOccasionOption?> _showOccasionSelectionDialog() async {
@@ -173,30 +230,39 @@ class _DishAddAIWidgetState extends State<DishAddAIWidget> {
                   ),
                   SizedBox(height: 12.0),
                   Flexible(
-                    child: ListView.separated(
-                      shrinkWrap: true,
-                      itemCount: congratuRoastOccasionOptions.length,
-                      separatorBuilder: (_, __) => Divider(
-                        height: 1.0,
-                        color: FlutterFlowTheme.of(context).divider,
+                    child: RawScrollbar(
+                      controller: _occasionScrollController,
+                      thumbVisibility: true,
+                      radius: Radius.circular(40.0),
+                      thickness: 4.0,
+                      thumbColor: FlutterFlowTheme.of(context).primary,
+                      child: ListView.separated(
+                        controller: _occasionScrollController,
+                        primary: false,
+                        shrinkWrap: true,
+                        itemCount: congratuRoastOccasionOptions.length,
+                        separatorBuilder: (_, __) => Divider(
+                          height: 1.0,
+                          color: FlutterFlowTheme.of(context).divider,
+                        ),
+                        itemBuilder: (context, index) {
+                          final occasion = congratuRoastOccasionOptions[index];
+                          return ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            title: Text(
+                              occasion.label,
+                              style: FlutterFlowTheme.of(context)
+                                  .bodyMedium
+                                  .override(
+                                    fontFamily: 'SF Pro',
+                                    fontSize: 16.0,
+                                    letterSpacing: 0.0,
+                                  ),
+                            ),
+                            onTap: () => Navigator.pop(dialogContext, occasion),
+                          );
+                        },
                       ),
-                      itemBuilder: (context, index) {
-                        final occasion = congratuRoastOccasionOptions[index];
-                        return ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          title: Text(
-                            occasion.label,
-                            style: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .override(
-                                  fontFamily: 'SF Pro',
-                                  fontSize: 16.0,
-                                  letterSpacing: 0.0,
-                                ),
-                          ),
-                          onTap: () => Navigator.pop(dialogContext, occasion),
-                        );
-                      },
                     ),
                   ),
                 ],

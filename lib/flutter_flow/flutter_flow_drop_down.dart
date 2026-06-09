@@ -34,6 +34,7 @@ class FlutterFlowDropDown<T> extends StatefulWidget {
     this.disabled = false,
     this.isOverButton = false,
     this.menuOffset,
+    this.scrollbarTheme,
     this.isSearchable = false,
     this.isMultiSelect = false,
     this.labelText,
@@ -78,6 +79,7 @@ class FlutterFlowDropDown<T> extends StatefulWidget {
   final bool disabled;
   final bool isOverButton;
   final Offset? menuOffset;
+  final ScrollbarThemeData? scrollbarTheme;
   final bool isSearchable;
   final bool isMultiSelect;
   final String? labelText;
@@ -317,6 +319,7 @@ class _FlutterFlowDropDownState<T> extends State<FlutterFlowDropDown<T>> {
         isOverButton: widget.isOverButton,
         offset: widget.menuOffset ?? Offset.zero,
         maxHeight: widget.maxHeight,
+        scrollbarTheme: widget.scrollbarTheme,
         padding: EdgeInsets.zero,
       ),
       onChanged: widget.disabled
