@@ -9,6 +9,7 @@ export 'package:purchases_flutter/purchases_flutter.dart'
 Offerings? _offerings;
 CustomerInfo? _customerInfo;
 String? _loggedInUid;
+String? _pendingLoginUid;
 bool _isConfigured = false;
 Future<void>? _initializationFuture;
 
@@ -96,6 +97,11 @@ Future<void> _initialize(
     Purchases.addCustomerInfoUpdateListener((info) {
       customerInfo = info;
     });
+
+    final pendingLoginUid = _pendingLoginUid;
+    if (pendingLoginUid != null) {
+      await login(pendingLoginUid);
+    }
   } on Exception catch (e) {
     debugPrint("RevenueCat initialization failed: $e");
   }
@@ -204,6 +210,10 @@ Future<bool?> isEntitled(String entitlementId) async {
 
 // https://docs.revenuecat.com/docs/user-ids
 Future login(String? uid) async {
+  _pendingLoginUid = uid;
+  if (!_isConfigured) {
+    await (_initializationFuture ?? Future.value());
+  }
   if (!_isConfigured) {
     return;
   }

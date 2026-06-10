@@ -608,6 +608,37 @@ class _SubscriptionPageWidgetState extends State<SubscriptionPageWidget> {
                                 child: FFButtonWidget(
                                   onPressed: () async {
                                     await revenue_cat.restorePurchases();
+                                    final subscriptionSync =
+                                        await UserAccountMutations
+                                            .syncRevenueCatSubscription();
+                                    if (!subscriptionSync.success) {
+                                      showPurchaseSyncFailedSnackBar(
+                                        context,
+                                        message:
+                                            'Purchase restored, but subscription sync failed. Please try again.',
+                                      );
+                                      return;
+                                    }
+                                    await showModalBottomSheet(
+                                      isScrollControlled: true,
+                                      backgroundColor: Colors.transparent,
+                                      enableDrag: false,
+                                      context: context,
+                                      builder: (context) {
+                                        return GestureDetector(
+                                          onTap: () {
+                                            FocusScope.of(context).unfocus();
+                                            FocusManager.instance.primaryFocus
+                                                ?.unfocus();
+                                          },
+                                          child: Padding(
+                                            padding: MediaQuery.viewInsetsOf(
+                                                context),
+                                            child: SubscribeCompletedWidget(),
+                                          ),
+                                        );
+                                      },
+                                    ).then((value) => safeSetState(() {}));
                                   },
                                   text: 'Restore purchases',
                                   options: FFButtonOptions(

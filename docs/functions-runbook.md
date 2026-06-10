@@ -178,7 +178,7 @@ required secrets:
 | Anthropic / Google GenAI | API keys if providers are enabled. |
 | ElevenLabs or TTS provider | `ELEVENLABS_API_KEY`, optional `TTS_BUCKET`, `TTS_MAX_TEXT_CHARS`, `TTS_ALLOWED_VOICE_IDS`, `TTS_DAILY_CALL_LIMIT`, `TTS_DAILY_CHAR_LIMIT`. |
 | Firebase Admin | Project service account or emulator credentials. |
-| RevenueCat | `REVENUECAT_SECRET_KEY`; optional `revenuecat.secret_key` / `revenuecat.api_key` runtime config fallback. |
+| RevenueCat | Secret Manager secret `REVENUECAT_SECRET_KEY`, bound to payment callables; optional legacy `revenuecat.secret_key` / `revenuecat.api_key` fallback only for old deployments. |
 | Billing/webhooks | Provider webhook secret and entitlement/product mapping. |
 
 Never commit secret values. Use Firebase Functions secrets or environment

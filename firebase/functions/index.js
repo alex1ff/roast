@@ -1,4 +1,5 @@
 const functions = require("firebase-functions/v1");
+const {defineSecret} = require("firebase-functions/params");
 const admin = require("firebase-admin");
 const axios = require("axios");
 const {OpenAI} = require("openai");
@@ -16,6 +17,7 @@ admin.initializeApp();
 
 const REGION = "us-central1";
 const OPENAI_SECRET = "OPENAI_API_KEY";
+const REVENUECAT_SECRET = defineSecret("REVENUECAT_SECRET_KEY");
 const PREMIUM_ENTITLEMENT = "Premium";
 const RELOAD_PACK_PRODUCT_ID = "Roast_Reload_Pack";
 const SMART_CHAT_PERSONALITY_EXTENSION = [
@@ -97,6 +99,7 @@ function firebaseRuntimeConfig() {
 function getRevenueCatSecret() {
   const runtimeConfig = firebaseRuntimeConfig();
   return process.env.REVENUECAT_SECRET_KEY ||
+    REVENUECAT_SECRET.value() ||
     runtimeConfig.revenuecat?.secret_key ||
     runtimeConfig.revenuecat?.api_key ||
     "";
@@ -618,6 +621,7 @@ exports.onUserDeleted = functions.auth.user().onDelete(async (user) => {
 
 exports.syncRevenueCatSubscription = functions
   .region(REGION)
+  .runWith({secrets: [REVENUECAT_SECRET]})
   .https.onCall(async (data, context) => {
     const requestId = clientRequestId(data);
     try {
@@ -691,6 +695,7 @@ exports.recordUsage = functions
 
 exports.syncReloadPackPurchase = functions
   .region(REGION)
+  .runWith({secrets: [REVENUECAT_SECRET]})
   .https.onCall(async (data, context) => {
     const requestId = clientRequestId(data);
     try {
