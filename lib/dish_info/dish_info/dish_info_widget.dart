@@ -1538,7 +1538,12 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
                                                                                   child: Container(
                                                                                     height: MediaQuery.sizeOf(context).height * 1.0,
                                                                                     width: MediaQuery.sizeOf(context).width * 1.0,
-                                                                                    child: LoadingAnimationWidget(),
+                                                                                    child: LoadingAnimationWidget(
+                                                                                      roastMode: RoastResultMetadata.normalizedMode(
+                                                                                        stackAddedDishHistoryRecord.roastMode,
+                                                                                      ),
+                                                                                      subjectType: stackAddedDishHistoryRecord.subjectType,
+                                                                                    ),
                                                                                   ),
                                                                                 ),
                                                                               );
@@ -2384,7 +2389,17 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
                                                                       .width *
                                                                   1.0,
                                                               child:
-                                                                  LoadingAnimationWidget(),
+                                                                  LoadingAnimationWidget(
+                                                                roastMode:
+                                                                    RoastResultMetadata
+                                                                        .normalizedMode(
+                                                                  stackAddedDishHistoryRecord
+                                                                      .roastMode,
+                                                                ),
+                                                                subjectType:
+                                                                    stackAddedDishHistoryRecord
+                                                                        .subjectType,
+                                                              ),
                                                             ),
                                                           ),
                                                         );

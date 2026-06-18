@@ -9,14 +9,64 @@ import 'loading_animation_model.dart';
 export 'loading_animation_model.dart';
 
 class LoadingAnimationWidget extends StatefulWidget {
-  const LoadingAnimationWidget({super.key});
+  const LoadingAnimationWidget({
+    super.key,
+    this.roastMode = FFAppConstants.roastModeRoast,
+    this.subjectType = FFAppConstants.subjectTypeDish,
+  });
+
+  final String roastMode;
+  final String subjectType;
 
   @override
   State<LoadingAnimationWidget> createState() => _LoadingAnimationWidgetState();
 }
 
+class _LoadingAnimationCopy {
+  const _LoadingAnimationCopy({
+    required this.title,
+    required this.subtitle,
+  });
+
+  final String title;
+  final String subtitle;
+}
+
 class _LoadingAnimationWidgetState extends State<LoadingAnimationWidget> {
   late LoadingAnimationModel _model;
+
+  _LoadingAnimationCopy get _copy {
+    final roastMode = widget.roastMode.trim().toLowerCase();
+    final subjectType = widget.subjectType.trim().toLowerCase();
+
+    if (roastMode == FFAppConstants.roastModeCongratuRoast) {
+      return const _LoadingAnimationCopy(
+        title: "We're figuring out what you've just unleashed upon us...",
+        subtitle:
+            'The parody character is searching for something nice to say. So far, no luck.',
+      );
+    }
+
+    if (subjectType == FFAppConstants.subjectTypePerson) {
+      return const _LoadingAnimationCopy(
+        title: "We're figuring out what you've just unleashed upon us...",
+        subtitle: 'The parody character is sharpening its tongue.',
+      );
+    }
+
+    if (subjectType == FFAppConstants.subjectTypeOther) {
+      return const _LoadingAnimationCopy(
+        title: "We're figuring out what you've just unleashed upon us...",
+        subtitle: 'The parody character is sizing up the target.',
+      );
+    }
+
+    return const _LoadingAnimationCopy(
+      title: '🍳 Decoding your dish...',
+      subtitle:
+          'We’re figuring out what’s on your plate and turning it into a full nutritional breakdown. Almost there!',
+    );
+  }
 
   @override
   void setState(VoidCallback callback) {
@@ -52,6 +102,8 @@ class _LoadingAnimationWidgetState extends State<LoadingAnimationWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final copy = _copy;
+
     return Container(
       width: MediaQuery.sizeOf(context).width * 1.0,
       height: MediaQuery.sizeOf(context).height * 1.0,
@@ -114,7 +166,7 @@ class _LoadingAnimationWidgetState extends State<LoadingAnimationWidget> {
                       text: TextSpan(
                         children: [
                           TextSpan(
-                            text: '🍳 Decoding your dish...',
+                            text: copy.title,
                             style: FlutterFlowTheme.of(context)
                                 .bodyMedium
                                 .override(
@@ -126,8 +178,7 @@ class _LoadingAnimationWidgetState extends State<LoadingAnimationWidget> {
                                 ),
                           ),
                           TextSpan(
-                            text:
-                                '\nWe’re figuring out what’s on your plate and turning it into a full nutritional breakdown. Almost there!',
+                            text: '\n${copy.subtitle}',
                             style: TextStyle(
                               fontSize: 17.0,
                             ),

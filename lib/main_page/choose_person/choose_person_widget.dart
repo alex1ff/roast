@@ -147,6 +147,25 @@ class _ChoosePersonWidgetState extends State<ChoosePersonWidget> {
     return roastAnalysis.dishName;
   }
 
+  String _loadingSubjectType(bool isCongratuRoast) {
+    if (isCongratuRoast) {
+      return FFAppConstants.subjectTypePerson;
+    }
+
+    final hasPhoto = (widget.dishPhoto ?? '').trim().isNotEmpty;
+    final hasName = (widget.dishName ?? '').trim().isNotEmpty;
+    final hasDishDetails = (widget.restaurant ?? '').trim().isNotEmpty ||
+        (widget.dishWeight ?? 0) > 0;
+
+    if (hasDishDetails || !hasPhoto) {
+      return FFAppConstants.subjectTypeDish;
+    }
+    if (hasName) {
+      return FFAppConstants.subjectTypePerson;
+    }
+    return FFAppConstants.subjectTypeOther;
+  }
+
   @override
   Widget build(BuildContext context) {
     context.watch<FFAppState>();
@@ -240,7 +259,11 @@ class _ChoosePersonWidgetState extends State<ChoosePersonWidget> {
                                               1.0,
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
-                                      child: LoadingAnimationWidget(),
+                                      child: LoadingAnimationWidget(
+                                        roastMode: widget.roastMode,
+                                        subjectType: _loadingSubjectType(
+                                            isCongratuRoast),
+                                      ),
                                     ),
                                   );
                                 },

@@ -98,7 +98,7 @@ class _OnboardingWidgetState extends State<OnboardingWidget> {
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
                                     AutoSizeText(
-                                      'ROAST YOUR FRIENDS or YOUR DISH',
+                                      'ROAST YOUR FRIENDS OR ANYTHING YOU WANT',
                                       textAlign: TextAlign.center,
                                       maxLines: 1,
                                       style: FlutterFlowTheme.of(context)
@@ -114,71 +114,7 @@ class _OnboardingWidgetState extends State<OnboardingWidget> {
                                       padding: EdgeInsetsDirectional.fromSTEB(
                                           0.0, 16.0, 0.0, 0.0),
                                       child: Text(
-                                        'Snap a photo of your friend, car, a random tree, the blue sky, whatever you feel like.\nHere for fun, laughs & roasting your friends? Get ready for over-the-top humor in celeb parody styles!\nHere for nutrition? Then swipe >>>',
-                                        textAlign: TextAlign.center,
-                                        style: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .override(
-                                              fontFamily: 'SF Pro',
-                                              color: Color(0x80000000),
-                                              fontSize: 16.0,
-                                              letterSpacing: 0.0,
-                                            ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Stack(
-                        children: [
-                          Image.asset(
-                            'assets/images/k1.webp',
-                            width: double.infinity,
-                            height: MediaQuery.sizeOf(context).height * 0.62,
-                            fit: BoxFit.cover,
-                          ),
-                          Align(
-                            alignment: AlignmentDirectional(0.0, 1.0),
-                            child: Container(
-                              width: double.infinity,
-                              height: MediaQuery.sizeOf(context).height * 0.42,
-                              decoration: BoxDecoration(
-                                color: Color(0xFFF2F2F7),
-                                borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(25.0),
-                                  topRight: Radius.circular(25.0),
-                                ),
-                              ),
-                              alignment: AlignmentDirectional(0.0, 1.0),
-                              child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
-                                    16.0, 50.0, 16.0, 0.0),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.max,
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    AutoSizeText(
-                                      'Snap. Roast. Know what’s going on',
-                                      textAlign: TextAlign.center,
-                                      maxLines: 1,
-                                      style: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .override(
-                                            fontFamily: 'SF Pro',
-                                            fontSize: 24.0,
-                                            letterSpacing: 0.0,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                    ),
-                                    Padding(
-                                      padding: EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 16.0, 0.0, 0.0),
-                                      child: Text(
-                                        'Point your camera & get that easy-to-get nutrition advice, wrapped in hilarious burns from cult icons & infamous celebs. Fast, useful & way more fun than tracking numbers all day.',
+                                        'Snap a photo of your friend, pet, outfit, car, gym selfie, a random tree, or whatever you feel like.\nGet over-the-top humor from bold celeb parodies & cult movie characters.\nHere to congratulate someone? Swipe >>>',
                                         textAlign: TextAlign.center,
                                         style: FlutterFlowTheme.of(context)
                                             .bodyMedium
@@ -224,11 +160,10 @@ class _OnboardingWidgetState extends State<OnboardingWidget> {
                                 child: Column(
                                   mainAxisSize: MainAxisSize.max,
                                   mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
                                     AutoSizeText(
-                                      'Snap a dish, get roasted insights',
-                                      textAlign: TextAlign.start,
+                                      'CONGRATULATE THEM WITH A ROAST',
+                                      textAlign: TextAlign.center,
                                       maxLines: 1,
                                       style: FlutterFlowTheme.of(context)
                                           .bodyMedium
@@ -243,7 +178,137 @@ class _OnboardingWidgetState extends State<OnboardingWidget> {
                                       padding: EdgeInsetsDirectional.fromSTEB(
                                           0.0, 16.0, 0.0, 0.0),
                                       child: Text(
+                                        'Birthdays, weddings, Christmas, promotions, breakups, retirement & more.\nBecause "Congrats!" is boring.\nHere for nutrition tracking? Swipe >>>',
+                                        textAlign: TextAlign.center,
+                                        style: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .override(
+                                              fontFamily: 'SF Pro',
+                                              color: Color(0x80000000),
+                                              fontSize: 16.0,
+                                              letterSpacing: 0.0,
+                                            ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Stack(
+                        children: [
+                          Image.asset(
+                            'assets/images/k1.webp',
+                            width: double.infinity,
+                            height: MediaQuery.sizeOf(context).height * 0.62,
+                            fit: BoxFit.cover,
+                          ),
+                          Align(
+                            alignment: AlignmentDirectional(0.0, 1.0),
+                            child: Container(
+                              width: double.infinity,
+                              height: MediaQuery.sizeOf(context).height * 0.42,
+                              decoration: BoxDecoration(
+                                color: Color(0xFFF2F2F7),
+                                borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(25.0),
+                                  topRight: Radius.circular(25.0),
+                                ),
+                              ),
+                              alignment: AlignmentDirectional(0.0, 1.0),
+                              child: Padding(
+                                padding: EdgeInsetsDirectional.fromSTEB(
+                                    16.0, 50.0, 16.0, 0.0),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.max,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    AutoSizeText(
+                                      'SNAP A DISH, GET ROASTED NUTRITION ADVICE',
+                                      textAlign: TextAlign.center,
+                                      maxLines: 2,
+                                      style: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .override(
+                                            fontFamily: 'SF Pro',
+                                            fontSize: 24.0,
+                                            letterSpacing: 0.0,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                    ),
+                                    Padding(
+                                      padding: EdgeInsetsDirectional.fromSTEB(
+                                          0.0, 16.0, 0.0, 0.0),
+                                      child: Text(
                                         'Take a photo to instantly estimate calories, carbs, proteins & fats, then get roasted by cult icons with advice that actually helps your goals.',
+                                        textAlign: TextAlign.center,
+                                        style: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .override(
+                                              fontFamily: 'SF Pro',
+                                              color: Color(0x80000000),
+                                              fontSize: 16.0,
+                                              letterSpacing: 0.0,
+                                            ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Stack(
+                        children: [
+                          Image.asset(
+                            'assets/images/5_YES.webp',
+                            width: double.infinity,
+                            height: MediaQuery.sizeOf(context).height * 0.62,
+                            fit: BoxFit.cover,
+                          ),
+                          Align(
+                            alignment: AlignmentDirectional(0.0, 1.0),
+                            child: Container(
+                              width: double.infinity,
+                              height: MediaQuery.sizeOf(context).height * 0.42,
+                              decoration: BoxDecoration(
+                                color: Color(0xFFF2F2F7),
+                                borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(25.0),
+                                  topRight: Radius.circular(25.0),
+                                ),
+                              ),
+                              alignment: AlignmentDirectional(0.0, 1.0),
+                              child: Padding(
+                                padding: EdgeInsetsDirectional.fromSTEB(
+                                    16.0, 50.0, 16.0, 0.0),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.max,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    AutoSizeText(
+                                      'Your Personal Nutrition Assistant',
+                                      textAlign: TextAlign.center,
+                                      maxLines: 1,
+                                      style: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .override(
+                                            fontFamily: 'SF Pro',
+                                            fontSize: 24.0,
+                                            letterSpacing: 0.0,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                    ),
+                                    Padding(
+                                      padding: EdgeInsetsDirectional.fromSTEB(
+                                          0.0, 16.0, 0.0, 0.0),
+                                      child: Text(
+                                        'Log meals, analyze your intake, and see your daily breakdown anytime, anywhere.\nSmart Chat remembers everything you eat, tracks your progress & answers any nutrition question instantly, like your own dietitian in your pocket.',
                                         textAlign: TextAlign.center,
                                         style: FlutterFlowTheme.of(context)
                                             .bodyMedium
@@ -326,136 +391,6 @@ class _OnboardingWidgetState extends State<OnboardingWidget> {
                           ),
                         ],
                       ),
-                      Stack(
-                        children: [
-                          Image.asset(
-                            'assets/images/4_YES.webp',
-                            width: double.infinity,
-                            height: MediaQuery.sizeOf(context).height * 0.62,
-                            fit: BoxFit.cover,
-                          ),
-                          Align(
-                            alignment: AlignmentDirectional(0.0, 1.0),
-                            child: Container(
-                              width: double.infinity,
-                              height: MediaQuery.sizeOf(context).height * 0.42,
-                              decoration: BoxDecoration(
-                                color: Color(0xFFF2F2F7),
-                                borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(25.0),
-                                  topRight: Radius.circular(25.0),
-                                ),
-                              ),
-                              alignment: AlignmentDirectional(0.0, 1.0),
-                              child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
-                                    16.0, 50.0, 16.0, 0.0),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.max,
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    AutoSizeText(
-                                      'Track your nutrition, dining in or out',
-                                      textAlign: TextAlign.center,
-                                      maxLines: 1,
-                                      style: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .override(
-                                            fontFamily: 'SF Pro',
-                                            fontSize: 24.0,
-                                            letterSpacing: 0.0,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                    ),
-                                    Padding(
-                                      padding: EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 16.0, 0.0, 0.0),
-                                      child: Text(
-                                        'Log meals, analyze your intake, and see your daily breakdown anytime, anywhere.',
-                                        textAlign: TextAlign.center,
-                                        style: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .override(
-                                              fontFamily: 'SF Pro',
-                                              color: Color(0x80000000),
-                                              fontSize: 16.0,
-                                              letterSpacing: 0.0,
-                                            ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Stack(
-                        children: [
-                          Image.asset(
-                            'assets/images/5_YES.webp',
-                            width: double.infinity,
-                            height: MediaQuery.sizeOf(context).height * 0.62,
-                            fit: BoxFit.cover,
-                          ),
-                          Align(
-                            alignment: AlignmentDirectional(0.0, 1.0),
-                            child: Container(
-                              width: double.infinity,
-                              height: MediaQuery.sizeOf(context).height * 0.42,
-                              decoration: BoxDecoration(
-                                color: Color(0xFFF2F2F7),
-                                borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(25.0),
-                                  topRight: Radius.circular(25.0),
-                                ),
-                              ),
-                              alignment: AlignmentDirectional(0.0, 1.0),
-                              child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
-                                    16.0, 50.0, 16.0, 0.0),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.max,
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    AutoSizeText(
-                                      'Your Personal Nutrition Assistant',
-                                      textAlign: TextAlign.center,
-                                      maxLines: 1,
-                                      style: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .override(
-                                            fontFamily: 'SF Pro',
-                                            fontSize: 24.0,
-                                            letterSpacing: 0.0,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                    ),
-                                    Padding(
-                                      padding: EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 16.0, 0.0, 0.0),
-                                      child: Text(
-                                        'Smart Chat remembers everything you eat, tracks your progress & answers any nutrition question instantly, like your own dietitian in your pocket.',
-                                        textAlign: TextAlign.center,
-                                        style: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .override(
-                                              fontFamily: 'SF Pro',
-                                              color: Color(0x80000000),
-                                              fontSize: 16.0,
-                                              letterSpacing: 0.0,
-                                            ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
                     ],
                   ),
                   Align(
@@ -466,7 +401,7 @@ class _OnboardingWidgetState extends State<OnboardingWidget> {
                       child: smooth_page_indicator.SmoothPageIndicator(
                         controller: _model.pageViewController ??=
                             PageController(initialPage: 0),
-                        count: 6,
+                        count: 5,
                         axisDirection: Axis.horizontal,
                         onDotClicked: (i) async {
                           await _model.pageViewController!.animateToPage(
@@ -497,7 +432,7 @@ class _OnboardingWidgetState extends State<OnboardingWidget> {
                 padding: EdgeInsetsDirectional.fromSTEB(8.0, 0.0, 8.0, 50.0),
                 child: FFButtonWidget(
                   onPressed: () async {
-                    if (_model.pageViewCurrentIndex == 5) {
+                    if (_model.pageViewCurrentIndex == 4) {
                       context.pushNamed(LogInWidget.routeName);
                     } else {
                       await _model.pageViewController?.nextPage(
