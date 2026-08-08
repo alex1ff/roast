@@ -284,7 +284,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                                             valueOrDefault<
                                                                 String>(
                                                           currentUserPhoto,
-                                                          'https://firebasestorage.googleapis.com/v0/b/roast-nutri-tracker-7c67ct.firebasestorage.app/o/AppImages%2Fuser.png?alt=media&token=removed',
+                                                          '',
                                                         ),
                                                         memCacheWidth: 150,
                                                         memCacheHeight: 150,

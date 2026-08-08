@@ -691,13 +691,17 @@ class _MessWidgetState extends State<MessWidget> {
                           fadeOutDuration: Duration(milliseconds: 0),
                           imageUrl: valueOrDefault<String>(
                             currentUserPhoto,
-                            'https://firebasestorage.googleapis.com/v0/b/roast-nutri-tracker-7c67ct.firebasestorage.app/o/AppImages%2Fuser.png?alt=media&token=removed',
+                            '',
                           ),
                           memCacheWidth: 50,
                           memCacheHeight: 50,
                           maxWidthDiskCache: 100,
                           maxHeightDiskCache: 100,
                           fit: BoxFit.cover,
+                          errorWidget: (context, url, error) => Image.asset(
+                            'assets/images/error_image.webp',
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       ),
                     ),

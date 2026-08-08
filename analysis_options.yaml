@@ -1,2 +1,5 @@
-# Intentionally no excludes: custom code and FlutterFlow custom functions are
-# analyzed by `flutter analyze`.
+analyzer:
+  exclude:
+    - node_modules/**
+
+# Application and FlutterFlow-derived custom code remain in analysis scope.

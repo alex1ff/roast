@@ -1,0 +1,14 @@
+{
+  "name": "roast-tooling",
+  "private": true,
+  "packageManager": "npm@10.8.2",
+  "engines": {
+    "node": "22.x"
+  },
+  "scripts": {
+    "backend:checks": "bash tooling/run_backend_checks.sh"
+  },
+  "devDependencies": {
+    "firebase-tools": "15.14.0"
+  }
+}

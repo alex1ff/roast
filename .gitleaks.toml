@@ -1,0 +1,10 @@
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Firebase client identifiers and dependency lockfile labels are public metadata"
+paths = [
+  '''android/app/google-services\.json''',
+  '''lib/backend/firebase/firebase_config\.dart''',
+  '''ios/Podfile\.lock''',
+]

@@ -5,6 +5,9 @@
 .pub-cache/
 .pub/
 build/
+output/
+.firebase/
+node_modules/
 
 android/.gradle/
 android/app/debug/
