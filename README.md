@@ -66,6 +66,12 @@ The backend command runs lint, function tests, and Firestore rule tests against 
 
 Local API values belong in untracked `dart_defines*.json` files or explicit `--dart-define` arguments. Firebase platform identifiers and RevenueCat public SDK keys are client configuration; server credentials and private provider keys must remain in Firebase secrets or the deployment environment.
 
-## CI quality gate
+## Local quality gate
 
-GitHub Actions runs pinned Flutter analysis/tests and an independent backend job. Both must pass before `main` is considered releasable.
+Run the complete release check from a clean checkout:
+
+```bash
+./scripts/local_ci.sh
+```
+
+It checks the asset budget and committed source for credentials, installs locked dependencies, runs Flutter analysis/tests, validates both Functions packages, and executes Firestore rule tests in a local emulator. The command must pass before `main` is considered releasable.
