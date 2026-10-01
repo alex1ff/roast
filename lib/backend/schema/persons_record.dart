@@ -30,10 +30,29 @@ class PersonsRecord extends FirestoreRecord {
   String get image => _image ?? '';
   bool hasImage() => _image != null;
 
+  // "images" field. When present, these URLs replace the legacy image.
+  List<String>? _images;
+  List<String> get images => _images ?? const [];
+  bool hasImages() => _images != null;
+
+  List<String> get photoUrls {
+    final urls = images
+        .map((url) => url.trim())
+        .where((url) => url.isNotEmpty)
+        .take(3)
+        .toList();
+    if (urls.isNotEmpty) {
+      return urls;
+    }
+    final legacyUrl = image.trim();
+    return legacyUrl.isEmpty ? const [] : [legacyUrl];
+  }
+
   void _initializeFields() {
     _name = snapshotData['name'] as String?;
     _voiceId = snapshotData['voice_id'] as String?;
     _image = snapshotData['image'] as String?;
+    _images = getDataList(snapshotData['images']);
   }
 
   static CollectionReference get collection =>
@@ -74,12 +93,14 @@ Map<String, dynamic> createPersonsRecordData({
   String? name,
   String? voiceId,
   String? image,
+  List<String>? images,
 }) {
   final firestoreData = mapToFirestore(
     <String, dynamic>{
       'name': name,
       'voice_id': voiceId,
       'image': image,
+      'images': images,
     }.withoutNulls,
   );
 
@@ -93,12 +114,13 @@ class PersonsRecordDocumentEquality implements Equality<PersonsRecord> {
   bool equals(PersonsRecord? e1, PersonsRecord? e2) {
     return e1?.name == e2?.name &&
         e1?.voiceId == e2?.voiceId &&
-        e1?.image == e2?.image;
+        e1?.image == e2?.image &&
+        const ListEquality<String>().equals(e1?.images, e2?.images);
   }
 
   @override
   int hash(PersonsRecord? e) =>
-      const ListEquality().hash([e?.name, e?.voiceId, e?.image]);
+      const ListEquality().hash([e?.name, e?.voiceId, e?.image, e?.images]);
 
   @override
   bool isValidKey(Object? o) => o is PersonsRecord;

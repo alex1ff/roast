@@ -1,8 +1,92 @@
 import '/backend/schema/structs/dish_page_vitamins_data_struct.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
+import 'package:collection/collection.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+
+class RoastPhotoCarousel extends StatefulWidget {
+  const RoastPhotoCarousel({
+    super.key,
+    required this.imageUrls,
+    required this.onTap,
+    required this.cacheWidth,
+    required this.cacheHeight,
+  });
+
+  final List<String> imageUrls;
+  final ValueChanged<String> onTap;
+  final int cacheWidth;
+  final int cacheHeight;
+
+  @override
+  State<RoastPhotoCarousel> createState() => _RoastPhotoCarouselState();
+}
+
+class _RoastPhotoCarouselState extends State<RoastPhotoCarousel> {
+  int _page = 0;
+
+  @override
+  void didUpdateWidget(covariant RoastPhotoCarousel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!const ListEquality<String>()
+        .equals(oldWidget.imageUrls, widget.imageUrls)) {
+      _page = 0;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        PageView.builder(
+          key: ValueKey(widget.imageUrls.join('|')),
+          itemCount: widget.imageUrls.length,
+          onPageChanged: (page) => setState(() => _page = page),
+          itemBuilder: (context, index) {
+            final imageUrl = widget.imageUrls[index];
+            return InkWell(
+              onTap: () => widget.onTap(imageUrl),
+              child: CachedNetworkImage(
+                imageUrl: imageUrl,
+                fadeInDuration: Duration.zero,
+                fadeOutDuration: Duration.zero,
+                memCacheWidth: widget.cacheWidth,
+                memCacheHeight: widget.cacheHeight,
+                fit: BoxFit.cover,
+              ),
+            );
+          },
+        ),
+        Positioned(
+          bottom: 7,
+          left: 0,
+          right: 0,
+          child: IgnorePointer(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(widget.imageUrls.length, (index) {
+                return Container(
+                  width: index == _page ? 7 : 5,
+                  height: index == _page ? 7 : 5,
+                  margin: const EdgeInsets.symmetric(horizontal: 3),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: index == _page ? Colors.white : Colors.white54,
+                    boxShadow: const [
+                      BoxShadow(color: Colors.black54, blurRadius: 3),
+                    ],
+                  ),
+                );
+              }),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
 
 class DishInfoThumbnail extends StatelessWidget {
   const DishInfoThumbnail({

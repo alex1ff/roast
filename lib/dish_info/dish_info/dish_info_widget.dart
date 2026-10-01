@@ -274,9 +274,9 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
   }
 
   Widget _buildCongratuHeroImage(AddedDishHistoryRecord record) {
-    final imageUrl = record.roastImage.trim().isNotEmpty
-        ? record.roastImage.trim()
-        : record.image.trim();
+    final photoUrls = record.roastPhotoUrls;
+    final imageUrl =
+        photoUrls.isNotEmpty ? photoUrls.first : record.image.trim();
 
     if (imageUrl.isEmpty) {
       return const SizedBox.shrink();
@@ -286,6 +286,50 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
         .clamp(220.0, 360.0)
         .toDouble();
     final heroTag = 'congratuHero-$imageUrl';
+
+    final imageCard = Container(
+      width: double.infinity,
+      height: imageHeight,
+      decoration: BoxDecoration(
+        color: Colors.black,
+        borderRadius: BorderRadius.circular(20.0),
+        border: Border.all(color: Color(0xFFFFB84D), width: 2.0),
+        boxShadow: [
+          BoxShadow(
+            blurRadius: 18.0,
+            color: Color(0x26FF8A1F),
+            offset: Offset(0.0, 8.0),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(18.0),
+        child: photoUrls.length > 1
+            ? RoastPhotoCarousel(
+                key: ValueKey(record.reference.path),
+                imageUrls: photoUrls,
+                cacheWidth: 900,
+                cacheHeight: 900,
+                onTap: _openRoastPhoto,
+              )
+            : CachedNetworkImage(
+                fadeInDuration: Duration.zero,
+                fadeOutDuration: Duration.zero,
+                imageUrl: imageUrl,
+                memCacheWidth: 900,
+                memCacheHeight: 900,
+                maxWidthDiskCache: 1400,
+                maxHeightDiskCache: 1400,
+                width: double.infinity,
+                height: imageHeight,
+                fit: BoxFit.cover,
+              ),
+      ),
+    );
+
+    if (photoUrls.length > 1) {
+      return imageCard;
+    }
 
     return InkWell(
       splashColor: Colors.transparent,
@@ -314,38 +358,95 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
       child: Hero(
         tag: heroTag,
         transitionOnUserGestures: true,
-        child: Container(
-          width: double.infinity,
-          height: imageHeight,
-          decoration: BoxDecoration(
-            color: Colors.black,
-            borderRadius: BorderRadius.circular(20.0),
-            border: Border.all(
-              color: Color(0xFFFFB84D),
-              width: 2.0,
-            ),
-            boxShadow: [
-              BoxShadow(
-                blurRadius: 18.0,
-                color: Color(0x26FF8A1F),
-                offset: Offset(0.0, 8.0),
-              )
-            ],
+        child: imageCard,
+      ),
+    );
+  }
+
+  Future<void> _openRoastPhoto(String imageUrl) async {
+    await Navigator.push(
+      context,
+      PageTransition(
+        type: PageTransitionType.fade,
+        child: FlutterFlowExpandedImageView(
+          image: CachedNetworkImage(
+            fadeInDuration: Duration.zero,
+            fadeOutDuration: Duration.zero,
+            imageUrl: imageUrl,
+            fit: BoxFit.contain,
           ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(18.0),
-            child: CachedNetworkImage(
-              fadeInDuration: Duration(milliseconds: 0),
-              fadeOutDuration: Duration(milliseconds: 0),
-              imageUrl: imageUrl,
-              memCacheWidth: 900,
-              memCacheHeight: 900,
-              maxWidthDiskCache: 1400,
-              maxHeightDiskCache: 1400,
-              width: double.infinity,
-              height: imageHeight,
-              fit: BoxFit.cover,
+          allowRotation: false,
+          useHeroAnimation: false,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRoastCharacterPhoto(AddedDishHistoryRecord record) {
+    final photoUrls = record.roastPhotoUrls;
+    if (photoUrls.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final photoWidth = MediaQuery.sizeOf(context).width * 0.15;
+    if (photoUrls.length > 1) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(14.0),
+        child: SizedBox(
+          width: photoWidth,
+          height: 60.0,
+          child: RoastPhotoCarousel(
+            key: ValueKey(record.reference.path),
+            imageUrls: photoUrls,
+            cacheWidth: 180,
+            cacheHeight: 180,
+            onTap: _openRoastPhoto,
+          ),
+        ),
+      );
+    }
+
+    final imageUrl = photoUrls.first;
+    return InkWell(
+      splashColor: Colors.transparent,
+      focusColor: Colors.transparent,
+      hoverColor: Colors.transparent,
+      highlightColor: Colors.transparent,
+      onTap: () async {
+        await Navigator.push(
+          context,
+          PageTransition(
+            type: PageTransitionType.fade,
+            child: FlutterFlowExpandedImageView(
+              image: CachedNetworkImage(
+                fadeInDuration: Duration.zero,
+                fadeOutDuration: Duration.zero,
+                imageUrl: imageUrl,
+                fit: BoxFit.contain,
+              ),
+              allowRotation: false,
+              tag: imageUrl,
+              useHeroAnimation: true,
             ),
+          ),
+        );
+      },
+      child: Hero(
+        tag: imageUrl,
+        transitionOnUserGestures: true,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(14.0),
+          child: CachedNetworkImage(
+            fadeInDuration: Duration.zero,
+            fadeOutDuration: Duration.zero,
+            imageUrl: imageUrl,
+            memCacheWidth: 180,
+            memCacheHeight: 180,
+            maxWidthDiskCache: 360,
+            maxHeightDiskCache: 360,
+            width: photoWidth,
+            height: 60.0,
+            fit: BoxFit.cover,
           ),
         ),
       ),
@@ -1255,80 +1356,8 @@ class _DishInfoWidgetState extends State<DishInfoWidget> {
                                                                       .start,
                                                               children: [
                                                                 if (!isCongratuRoast)
-                                                                  InkWell(
-                                                                    splashColor:
-                                                                        Colors
-                                                                            .transparent,
-                                                                    focusColor:
-                                                                        Colors
-                                                                            .transparent,
-                                                                    hoverColor:
-                                                                        Colors
-                                                                            .transparent,
-                                                                    highlightColor:
-                                                                        Colors
-                                                                            .transparent,
-                                                                    onTap:
-                                                                        () async {
-                                                                      await Navigator
-                                                                          .push(
-                                                                        context,
-                                                                        PageTransition(
-                                                                          type:
-                                                                              PageTransitionType.fade,
-                                                                          child:
-                                                                              FlutterFlowExpandedImageView(
-                                                                            image:
-                                                                                CachedNetworkImage(
-                                                                              fadeInDuration: Duration(milliseconds: 0),
-                                                                              fadeOutDuration: Duration(milliseconds: 0),
-                                                                              imageUrl: stackAddedDishHistoryRecord.roastImage,
-                                                                              fit: BoxFit.contain,
-                                                                            ),
-                                                                            allowRotation:
-                                                                                false,
-                                                                            tag:
-                                                                                stackAddedDishHistoryRecord.roastImage,
-                                                                            useHeroAnimation:
-                                                                                true,
-                                                                          ),
-                                                                        ),
-                                                                      );
-                                                                    },
-                                                                    child: Hero(
-                                                                      tag: stackAddedDishHistoryRecord
-                                                                          .roastImage,
-                                                                      transitionOnUserGestures:
-                                                                          true,
-                                                                      child:
-                                                                          ClipRRect(
-                                                                        borderRadius:
-                                                                            BorderRadius.circular(14.0),
-                                                                        child:
-                                                                            CachedNetworkImage(
-                                                                          fadeInDuration:
-                                                                              Duration(milliseconds: 0),
-                                                                          fadeOutDuration:
-                                                                              Duration(milliseconds: 0),
-                                                                          imageUrl:
-                                                                              stackAddedDishHistoryRecord.roastImage,
-                                                                          memCacheWidth:
-                                                                              180,
-                                                                          memCacheHeight:
-                                                                              180,
-                                                                          maxWidthDiskCache:
-                                                                              360,
-                                                                          maxHeightDiskCache:
-                                                                              360,
-                                                                          width:
-                                                                              MediaQuery.sizeOf(context).width * 0.15,
-                                                                          height:
-                                                                              60.0,
-                                                                          fit: BoxFit
-                                                                              .cover,
-                                                                        ),
-                                                                      ),
-                                                                    ),
+                                                                  _buildRoastCharacterPhoto(
+                                                                    stackAddedDishHistoryRecord,
                                                                   ),
                                                                 Expanded(
                                                                   child:

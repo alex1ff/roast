@@ -105,6 +105,24 @@ class AddedDishHistoryRecord extends FirestoreRecord {
   String get roastImage => _roastImage ?? '';
   bool hasRoastImage() => _roastImage != null;
 
+  // "roast_images" field. Older records only have roast_image.
+  List<String>? _roastImages;
+  List<String> get roastImages => _roastImages ?? const [];
+  bool hasRoastImages() => _roastImages != null;
+
+  List<String> get roastPhotoUrls {
+    final urls = roastImages
+        .map((url) => url.trim())
+        .where((url) => url.isNotEmpty)
+        .take(3)
+        .toList();
+    if (urls.isNotEmpty) {
+      return urls;
+    }
+    final legacyUrl = roastImage.trim();
+    return legacyUrl.isEmpty ? const [] : [legacyUrl];
+  }
+
   // "roastLevel" field.
   String? _roastLevel;
   String get roastLevel => _roastLevel ?? '';
@@ -172,6 +190,7 @@ class AddedDishHistoryRecord extends FirestoreRecord {
     _roastPerson = snapshotData['roast_person'] as String?;
     _roastVoiceId = snapshotData['roast_voice_id'] as String?;
     _roastImage = snapshotData['roast_image'] as String?;
+    _roastImages = getDataList(snapshotData['roast_images']);
     _roastLevel = snapshotData['roastLevel'] as String?;
     _badge = snapshotData['badge'] as String?;
     _impact = snapshotData['impact'] as String?;
@@ -234,6 +253,7 @@ Map<String, dynamic> createAddedDishHistoryRecordData({
   String? roastPerson,
   String? roastVoiceId,
   String? roastImage,
+  List<String>? roastImages,
   String? roastLevel,
   String? badge,
   String? impact,
@@ -261,6 +281,7 @@ Map<String, dynamic> createAddedDishHistoryRecordData({
       'roast_person': roastPerson,
       'roast_voice_id': roastVoiceId,
       'roast_image': roastImage,
+      'roast_images': roastImages,
       'roastLevel': roastLevel,
       'badge': badge,
       'impact': impact,
@@ -301,6 +322,7 @@ class AddedDishHistoryRecordDocumentEquality
         e1?.roastPerson == e2?.roastPerson &&
         e1?.roastVoiceId == e2?.roastVoiceId &&
         e1?.roastImage == e2?.roastImage &&
+        listEquality.equals(e1?.roastImages, e2?.roastImages) &&
         e1?.roastLevel == e2?.roastLevel &&
         e1?.badge == e2?.badge &&
         e1?.impact == e2?.impact &&
@@ -332,6 +354,7 @@ class AddedDishHistoryRecordDocumentEquality
         e?.roastPerson,
         e?.roastVoiceId,
         e?.roastImage,
+        e?.roastImages,
         e?.roastLevel,
         e?.badge,
         e?.impact,

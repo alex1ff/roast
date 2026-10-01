@@ -225,6 +225,8 @@ class _ChoosePersonWidgetState extends State<ChoosePersonWidget> {
                         final selectedPerson = containerPersonsRecordList
                             .where((e) => e.voiceId == _model.dropDownValue)
                             .firstOrNull;
+                        final characterPhotos =
+                            selectedPerson?.photoUrls ?? const <String>[];
                         final selectedRoastPersona =
                             selectedPerson?.name ?? _model.dropDownValue!;
                         final isCongratuRoast = widget.roastMode ==
@@ -381,7 +383,10 @@ class _ChoosePersonWidgetState extends State<ChoosePersonWidget> {
                                     roastAudio: '',
                                     roastPerson: selectedPerson?.name,
                                     roastVoiceId: _model.dropDownValue,
-                                    roastImage: selectedPerson?.image,
+                                    roastImage: characterPhotos.isNotEmpty
+                                        ? characterPhotos.first
+                                        : '',
+                                    roastImages: characterPhotos,
                                     roastLevel: valueOrDefault(
                                         currentUserDocument?.roastLevel, ''),
                                     badge: showNutrition
