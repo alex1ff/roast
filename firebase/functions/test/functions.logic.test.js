@@ -11,6 +11,74 @@ const {
   resolveRoastPersona,
 } = require("../roast_personas.js");
 const {_test: shareTest} = require("../share_roast.js");
+const {checkEmailDomain} = require("../email_validation.js");
+
+describe("Signup email domain validation", () => {
+  const noData = () => Promise.reject(Object.assign(new Error(), {code: "ENODATA"}));
+
+  it("allows real providers including Proton and Apple private relay", async () => {
+    for (const domain of ["gmail.com", "proton.me", "protonmail.com", "pm.me", "privaterelay.appleid.com"]) {
+      assert.deepEqual(await checkEmailDomain(domain, {
+        resolveMx: async () => [{exchange: "mx.provider.example"}],
+      }), {valid: true});
+    }
+  });
+
+  it("blocks disposable domains and their subdomains without a DNS call", async () => {
+    const resolver = {resolveMx: async () => assert.fail("Disposable domains must not reach DNS")};
+    for (const domain of ["mailinator.com", "inbox.mailinator.com", "MAILINATOR.COM"]) {
+      assert.deepEqual(await checkEmailDomain(domain, resolver), {
+        valid: false, reason: "disposable",
+      });
+    }
+    assert.deepEqual(await checkEmailDomain("mailinator.com.example", {
+      resolveMx: async () => [{exchange: "mx.example"}],
+    }), {valid: true});
+  });
+
+  it("rejects invalid domains before querying DNS", async () => {
+    for (const domain of ["", "gmail", "gmail..com", "-gmail.com", "gmail.com/path", "user@gmail.com"]) {
+      await assert.rejects(checkEmailDomain(domain, {}), {code: "invalid-argument"});
+    }
+  });
+
+  it("rejects nonexistent domains", async () => {
+    assert.deepEqual(await checkEmailDomain("not-real.example", {
+      resolveMx: () => Promise.reject(Object.assign(new Error(), {code: "ENOTFOUND"})),
+    }), {valid: false});
+  });
+
+  it("rejects null MX in both Node representations without address fallback", async () => {
+    for (const exchange of ["", "."]) {
+      assert.deepEqual(await checkEmailDomain("no-mail.example", {
+        resolveMx: async () => [{priority: 0, exchange}],
+        resolve4: async () => assert.fail("Null MX explicitly refuses email"),
+      }), {valid: false});
+    }
+  });
+
+  it("accepts IPv6-only SMTP fallback when MX is absent", async () => {
+    assert.deepEqual(await checkEmailDomain("mail.example", {
+      resolveMx: noData,
+      resolve4: noData,
+      resolve6: async () => ["2001:db8::1"],
+    }), {valid: true});
+  });
+
+  it("rejects domains with neither mail nor address records", async () => {
+    assert.deepEqual(await checkEmailDomain("empty.example", {
+      resolveMx: noData, resolve4: noData, resolve6: noData,
+    }), {valid: false});
+  });
+
+  it("keeps transient DNS errors distinct from an invalid domain", async () => {
+    const timeout = () => Promise.reject(Object.assign(new Error(), {code: "ETIMEOUT"}));
+    await assert.rejects(checkEmailDomain("mail.example", {resolveMx: timeout}), {code: "ETIMEOUT"});
+    await assert.rejects(checkEmailDomain("mail.example", {
+      resolveMx: noData, resolve4: noData, resolve6: timeout,
+    }), {code: "ETIMEOUT"});
+  });
+});
 
 const fieldValue = {
   delete: () => ({op: "delete"}),

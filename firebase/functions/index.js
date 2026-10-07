@@ -4,6 +4,7 @@ const admin = require("firebase-admin");
 const axios = require("axios");
 const {OpenAI} = require("openai");
 const {AGENT_CONFIGS} = require("./agent_configs");
+const {checkEmailDomain} = require("./email_validation");
 const {
   buildSelectedRoastPersonaPrompt,
   extractRoastPersonaValue,
@@ -599,6 +600,24 @@ function aiCallable(agentName) {
 
 exports.aIAssistent = aiCallable("aIAssistent");
 exports.roast = aiCallable("roast");
+// Public preflight: signup happens before Firebase Auth issues a user token.
+// Only the domain is sent; the mailbox address is not logged or stored.
+exports.validateEmailDomain = functions
+  .region(REGION)
+  .runWith({timeoutSeconds: 15, memory: "128MB", maxInstances: 5})
+  .https.onCall(async (data) => {
+    try {
+      return await checkEmailDomain(data?.domain);
+    } catch (error) {
+      if (error.code === "invalid-argument") {
+        throw new functions.https.HttpsError(error.code, error.message);
+      }
+      throw new functions.https.HttpsError(
+        "unavailable",
+        "Couldn't check the email domain. Please try again.",
+      );
+    }
+  });
 exports.createRoastShare = functions
   .region(REGION)
   .https.onCall(async (data, context) => {

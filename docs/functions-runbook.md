@@ -11,6 +11,7 @@ Functions source in this repository currently exports:
 | `onUserDeleted` | Auth `onDelete` | Deletes `users/{uid}`. |
 | `aIAssistent` | callable | Requires auth; OpenAI Responses API, plaintext response, safe request-id logging, API key from env/runtime config only. |
 | `roast` | callable | Requires auth; OpenAI Responses API, JSON response contract for dish/roast analysis, API key from env/runtime config only. |
+| `validateEmailDomain` | callable | Public signup preflight; accepts only `domain`, blocks known disposable domains using the checked-in CC0 list, checks MX/A/AAAA DNS records, rejects null MX, reports temporary DNS failures as `unavailable`. No email addresses are stored. |
 | `createRoastShare` | callable | Requires auth; validates `AddedDishHistory/{id}` ownership, writes stable `shared_roasts/{shareId}`, returns `shareUrl`. |
 | `renderRoastShare` | HTTP | Renders `/r/{shareId}` HTML/OG preview from `shared_roasts`; no payload logging. |
 | `syncRevenueCatSubscription` | callable | Requires auth and RevenueCat secret; verifies active `Premium` entitlement before writing subscription fields and resetting usage counters. |

@@ -1,5 +1,6 @@
 import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
+import '/services/email_validation.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -31,6 +32,8 @@ class _SignUpWidgetState extends State<SignUpWidget> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
   late StreamSubscription<bool> _keyboardVisibilitySubscription;
   bool _isKeyboardVisible = false;
+  final _emailFieldKey = GlobalKey<FormFieldState<String>>();
+  String? _emailDomainError;
 
   @override
   void initState() {
@@ -262,13 +265,22 @@ class _SignUpWidgetState extends State<SignUpWidget> {
                                   padding: EdgeInsetsDirectional.fromSTEB(
                                       0.0, 2.0, 0.0, 0.0),
                                   child: TextFormField(
+                                    key: _emailFieldKey,
                                     controller: _model.emailTextController,
                                     focusNode: _model.textFieldFocusNode1,
-                                    onChanged: (_) => EasyDebounce.debounce(
-                                      '_model.emailTextController',
-                                      Duration(milliseconds: 500),
-                                      () => safeSetState(() {}),
-                                    ),
+                                    onChanged: (_) {
+                                      _emailDomainError = null;
+                                      EasyDebounce.debounce(
+                                        '_model.emailTextController',
+                                        Duration(milliseconds: 500),
+                                        () => safeSetState(() {}),
+                                      );
+                                    },
+                                    keyboardType: TextInputType.emailAddress,
+                                    autocorrect: false,
+                                    enableSuggestions: false,
+                                    autovalidateMode:
+                                        AutovalidateMode.onUserInteraction,
                                     autofocus: false,
                                     autofillHints: [AutofillHints.email],
                                     obscureText: false,
@@ -276,6 +288,7 @@ class _SignUpWidgetState extends State<SignUpWidget> {
                                       isDense: false,
                                       alignLabelWithHint: false,
                                       hintText: 'Your Email',
+                                      errorMaxLines: 3,
                                       hintStyle: FlutterFlowTheme.of(context)
                                           .bodyLarge
                                           .override(
@@ -298,9 +311,9 @@ class _SignUpWidgetState extends State<SignUpWidget> {
                                         ),
                                     cursorColor: FlutterFlowTheme.of(context)
                                         .primaryText,
-                                    validator: _model
-                                        .emailTextControllerValidator
-                                        .asValidator(context),
+                                    validator: (value) =>
+                                        EmailValidation.formatError(value) ??
+                                        _emailDomainError,
                                   ),
                                 ),
                               ),
@@ -693,7 +706,18 @@ class _SignUpWidgetState extends State<SignUpWidget> {
                                   0.0, 32.0, 0.0, 0.0),
                               child: FFButtonWidget(
                                 onPressed: () async {
-                                  GoRouter.of(context).prepareAuthEvent();
+                                  _emailDomainError = null;
+                                  if (!(_emailFieldKey.currentState
+                                          ?.validate() ??
+                                      false)) {
+                                    _model.textFieldFocusNode1?.requestFocus();
+                                    return;
+                                  }
+                                  final email = EmailValidation.normalize(
+                                    _model.emailTextController.text,
+                                  );
+                                  final password =
+                                      _model.passwordTextController.text;
                                   if (_model.passwordTextController.text !=
                                       _model
                                           .confirmPasswordTextController.text) {
@@ -707,20 +731,45 @@ class _SignUpWidgetState extends State<SignUpWidget> {
                                     return;
                                   }
 
+                                  final emailError =
+                                      await EmailValidation.domainError(email);
+                                  if (!mounted) {
+                                    return;
+                                  }
+                                  // Revalidate a changed address on the next submit.
+                                  if (EmailValidation.normalize(
+                                          _model.emailTextController.text) !=
+                                      email) {
+                                    return;
+                                  }
+                                  if (_model.passwordTextController.text !=
+                                          password ||
+                                      _model.confirmPasswordTextController
+                                              .text !=
+                                          password) {
+                                    return;
+                                  }
+                                  if (emailError != null) {
+                                    _emailDomainError = emailError;
+                                    _emailFieldKey.currentState?.validate();
+                                    _model.textFieldFocusNode1?.requestFocus();
+                                    return;
+                                  }
+                                  GoRouter.of(context).prepareAuthEvent();
                                   final user =
                                       await authManager.createAccountWithEmail(
                                     context,
-                                    _model.emailTextController.text,
-                                    _model.passwordTextController.text,
+                                    email,
+                                    password,
                                   );
-                                  if (user == null) {
+                                  if (!mounted || user == null) {
                                     return;
                                   }
 
                                   await UsersRecord.collection
                                       .doc(user.uid)
                                       .update(createUsersRecordData(
-                                        email: _model.emailTextController.text,
+                                        email: email,
                                         createdTime: getCurrentTimestamp,
                                         measurementOz: false,
                                         highMeasurementFt: false,
