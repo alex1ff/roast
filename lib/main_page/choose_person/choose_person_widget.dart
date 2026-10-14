@@ -209,8 +209,8 @@ class _ChoosePersonWidgetState extends State<ChoosePersonWidget> {
                 onCheckboxChanged: (newValue) {
                   safeSetState(() => _model.checkboxValue = newValue!);
                 },
-                onStartPressed: (_model.dropDownValue == null ||
-                        _model.dropDownValue == '')
+                onStartPressed: ((widget.dishName ?? '').trim().isEmpty ||
+                        (_model.dropDownValue ?? '').trim().isEmpty)
                     ? null
                     : () async {
                         // Require accepting the app rules before any

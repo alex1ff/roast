@@ -461,11 +461,7 @@ class _DishAddAIWidgetState extends State<DishAddAIWidget> {
                                         controller:
                                             _model.dishNameTextController,
                                         focusNode: _model.dishNameFocusNode,
-                                        onChanged: (_) => EasyDebounce.debounce(
-                                          '_model.dishNameTextController',
-                                          Duration(milliseconds: 200),
-                                          () => safeSetState(() {}),
-                                        ),
+                                        onChanged: (_) => safeSetState(() {}),
                                         autofocus: false,
                                         textCapitalization:
                                             TextCapitalization.sentences,
@@ -1038,10 +1034,9 @@ class _DishAddAIWidgetState extends State<DishAddAIWidget> {
                         builder: (context) => Padding(
                           padding: EdgeInsets.all(6.0),
                           child: FFButtonWidget(
-                            onPressed: ((_model.dishNameTextController.text ==
-                                        '') &&
-                                    (_model.uploadedFileUrl_uploadedPhoto2 ==
-                                        ''))
+                            onPressed: _model.dishNameTextController.text
+                                    .trim()
+                                    .isEmpty
                                 ? null
                                 : _showModeSelectionDialog,
                             text: 'Start AI Analysis',
