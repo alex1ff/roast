@@ -64,6 +64,7 @@ dependencies:
   firebase_storage: 12.4.7
   firebase_storage_platform_interface: 5.2.7
   firebase_storage_web: 3.10.14
+  
   flutter_animate: 4.5.2
   flutter_cache_manager: 3.4.1
   flutter_keyboard_visibility: 
@@ -182,7 +183,8 @@ flutter_launcher_icons:
 
 # The following section is specific to Flutter.
 flutter:
-
+  config:
+    enable-swift-package-manager: false
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
